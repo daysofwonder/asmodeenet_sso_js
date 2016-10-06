@@ -2,13 +2,13 @@
   window.GamifyDigital = (function() {
     var access_hash, access_token, authorized, checkTokens, disconnect, discovery_obj, id_token, identity_obj, jwks, oauthpopup, settings;
     settings = {
-      base_is_host: 'https://account.playreal.live',
+      base_is_host: 'https://account.gamify-digital.com',
       base_is_path: '/main/v2/oauth',
-      base_url: 'https://api.playreal.live/main/v1',
+      base_url: 'https://api.gamify-digital.com/main/v1',
       client_id: null,
       redirect_uri: null,
       scope: 'openid+profile',
-      response_type: 'token'
+      response_type: 'id_token token'
     };
     access_token = id_token = access_hash = identity_obj = discovery_obj = jwks = null;
     disconnect = function(callback) {
@@ -52,14 +52,14 @@
         }, 500);
       }
       return that._oauthInterval = window.setInterval(function() {
-        if (that._oauthWindow && that._oauthWindow.closed) {
+        if (that._oauthWindow.closed) {
           if (that._oauthInterval) {
             window.clearInterval(that._oauthInterval);
           }
-          options.callback();
           if (that._oauthAutoCloseInterval) {
-            return window.clearInterval(that._oauthAutoCloseInterval);
+            window.clearInterval(that._oauthAutoCloseInterval);
           }
+          return options.callback();
         }
       }, 1000);
     };
@@ -256,6 +256,8 @@
                 return error_cb(hash.error + ' : ' + hash.error_description.replace(/\+/g, ' '));
               }
             }
+          } else {
+            return error_cb("popup closed without signin");
           }
         };
         options.callback = pr_callback;

@@ -9,10 +9,10 @@
         <div id="profile" style="display:none;">
             <button id="disconnect_bt">Sign Out</button> -
             <button id="my_identity">My identity</button>
-            <br / />
-            <div id="output">
+        </div>
+        <br/>
+        <div id="output">
 
-            </div>
         </div>
         <script>
         function echo() {
@@ -60,11 +60,10 @@
             });
         });
         GamifyDigital.init({
-            base_is_host: 'http://localhost:8009',
-            client_id: 'test_direct',
-            scope: 'openid+email+address+profile+private+public', //id_token
             redirect_uri: 'http://localhost:8080/cbpop.html',
-            response_type: 'id_token token'
+            client_id: 'test_direct',
+            base_is_host: 'https://account.staging.gamify-digital.com',
+            scope: 'openid+email+address+profile+public',
         }).discover();
         </script>
     </body>

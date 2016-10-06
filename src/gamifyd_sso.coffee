@@ -1,13 +1,13 @@
 window.GamifyDigital = (->
 
     settings =
-        base_is_host: 'https://account.playreal.live'
+        base_is_host: 'https://account.gamify-digital.com'
         base_is_path: '/main/v2/oauth'
-        base_url: 'https://api.playreal.live/main/v1'
+        base_url: 'https://api.gamify-digital.com/main/v1'
         client_id: null
         redirect_uri: null
         scope: 'openid+profile'
-        response_type: 'token'
+        response_type: 'id_token token'
 
     access_token = id_token = access_hash = identity_obj = discovery_obj = jwks = null
 
@@ -36,10 +36,10 @@ window.GamifyDigital = (->
             , 500
 
         that._oauthInterval = window.setInterval () ->
-            if that._oauthWindow && that._oauthWindow.closed
+            if that._oauthWindow.closed
                 window.clearInterval(that._oauthInterval) if that._oauthInterval
-                options.callback()
                 window.clearInterval(that._oauthAutoCloseInterval) if that._oauthAutoCloseInterval
+                options.callback()
         , 1000
 
     authorized = (access_hash_clt) ->
@@ -165,6 +165,8 @@ window.GamifyDigital = (->
                         hash[t[0]] = t[1]
                     if hash.state && hash.state == state
                         error_cb(hash.error + ' : ' + hash.error_description.replace(/\+/g, ' '))
+            else
+                error_cb("popup closed without signin")
 
         options.callback = pr_callback
         oauthpopup(options)

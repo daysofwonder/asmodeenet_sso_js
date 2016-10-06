@@ -1,0 +1,71 @@
+<html>
+    <head>
+        <script src="gamifyd_sso.min.0.0.6.js"></script>
+
+    </head>
+    <body>
+        <script>GamifyDigital.trackCb();</script>
+        <button id="connect_bt">Sign In</button>
+        <div id="profile" style="display:none;">
+            <button id="disconnect_bt">Sign Out</button> -
+            <button id="my_identity">My identity</button>
+            <br / />
+            <div id="output">
+
+            </div>
+        </div>
+        <script>
+        function echo() {
+            var output = '';
+            for(var i = 0; i < arguments.length; i++) {
+                output += JSON.stringify(arguments[i], null, "\t") + "\n";
+            }
+            findMe('output').innerHTML = '<pre>'+output+'</pre>';
+        }
+        function findMe(id) {
+            return document.getElementById(id);
+        }
+        function signed(identity) {
+            console.log(identity, GamifyDigital.getAccessHash());
+            echo(identity, GamifyDigital.getAccessHash());
+            // console.log(jwt_decode(GamifyDigital.getAccessToken()));
+            findMe('connect_bt').style.display = 'none';
+            findMe('profile').style.display = 'block';
+        }
+        function unsigned() {
+            findMe('profile').style.display = 'none';
+            findMe('connect_bt').style.display = 'block';
+        }
+        findMe('connect_bt').addEventListener('click', function() {
+            GamifyDigital.signIn({
+                success: signed,
+                error: function() {
+                    echo("SIGNIN ERROR", arguments);
+                }
+            });
+        });
+        findMe('disconnect_bt').addEventListener('click', function() {
+            GamifyDigital.signOut({
+                success: unsigned,
+                error: function() {
+                    echo("SIGNOUT ERROR", arguments);
+                }
+            });
+        });
+        findMe('my_identity').addEventListener('click', function() {
+            GamifyDigital.identity({
+                success: function(data) {
+                    echo("My Identity", arguments);
+                }
+            });
+        });
+        GamifyDigital.init({
+            base_is_host: 'http://localhost:8009',
+            client_id: 'test_direct',
+            scope: 'openid+email+address+profile+private+public', //id_token
+            redirect_uri: 'http://localhost:8080/cbpop.html',
+            response_type: 'id_token token'
+        }).discover();
+        </script>
+    </body>
+</html>

@@ -1,6 +1,6 @@
 <html>
     <head>
-        <script src="gamifyd_sso.min.0.0.6.js"></script>
+        <script src="gamifyd_sso.min.0.0.8.js"></script>
 
     </head>
     <body>
@@ -25,8 +25,8 @@
         function findMe(id) {
             return document.getElementById(id);
         }
+
         function signed(identity) {
-            console.log(identity, GamifyDigital.getAccessHash());
             echo(identity, GamifyDigital.getAccessHash());
             // console.log(jwt_decode(GamifyDigital.getAccessToken()));
             findMe('connect_bt').style.display = 'none';
@@ -35,6 +35,7 @@
         function unsigned() {
             findMe('profile').style.display = 'none';
             findMe('connect_bt').style.display = 'block';
+            echo("You're logged out");
         }
         findMe('connect_bt').addEventListener('click', function() {
             GamifyDigital.signIn({
@@ -60,9 +61,12 @@
             });
         });
         GamifyDigital.init({
-            redirect_uri: 'http://localhost:8080/cbpop.html',
+            // Required parameters
             client_id: 'test_direct',
-            base_is_host: 'https://account.staging.gamify-digital.com',
+            redirect_uri: 'http://localhost:8080/cbpop.html',
+
+            // Example of optional parameters
+            base_is_host: 'http://localhost:8009', //https://account.staging.gamify-digital.com',
             scope: 'openid+email+address+profile+public',
         }).discover();
         </script>

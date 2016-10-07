@@ -186,7 +186,7 @@
             return gameThis.getJwks();
           },
           error: function() {
-            return console.log("error Discovery ", arguments);
+            return console.error("error Discovery ", arguments);
           }
         });
       },
@@ -198,7 +198,7 @@
             return jwks = data.keys;
           },
           error: function() {
-            return console.log("error JWKS", arguments);
+            return console.error("error JWKS", arguments);
           }
         });
       },
@@ -210,7 +210,7 @@
           return console.log(arguments);
         };
         error_cb = options.error || function() {
-          return console.log('error', arguments);
+          return console.error('error', arguments);
         };
         options.path = this.auth_endpoint() + '?response_type=' + encodeURI(settings.response_type) + '&state=' + state + '&client_id=' + settings.client_id + '&redirect_uri=' + encodeURI(settings.redirect_uri) + '&scope=' + settings.scope;
         if (settings.response_type.search('id_token') >= 0) {
@@ -278,7 +278,7 @@
               }
             },
             error: function(context, xhr, type, error) {
-              console.log('identity error', context, xhr, type, error);
+              console.error('identity error', context, xhr, type, error);
               if (options.error) {
                 return options.error(context, xhr, type, error);
               }
@@ -300,14 +300,19 @@
           });
         }
       },
-      trackCb: function() {
+      trackCb: function(closeit) {
+        if (closeit == null) {
+          closeit = true;
+        }
         if (window.name === 'GamifyConnectWithOAuth') {
           if (window.location.hash !== "") {
             window.localStorage.setItem('gd_connect_hash', window.location.hash);
           } else if (window.location.search !== "") {
             window.localStorage.setItem('gd_connect_hash', window.location.search);
           }
-          return window.close();
+          if (closeit) {
+            return window.close();
+          }
         }
       }
     };

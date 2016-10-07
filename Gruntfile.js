@@ -15,9 +15,19 @@ module.exports = function (grunt) {
   require('load-grunt-tasks')(grunt);
   grunt.loadNpmTasks('grunt-rev-package');
   grunt.loadNpmTasks('grunt-contrib-coffee');
+  grunt.loadNpmTasks('grunt-contrib-connect');
 
   // Define the configuration for all the tasks
   grunt.initConfig({
+        connect: {
+            server: {
+                options: {
+                    base: './examples/',
+                    port: 8080,
+                    keepalive: true
+                }
+            }
+        },
         uglify: {
             options: {
                 compress: {
@@ -57,7 +67,8 @@ module.exports = function (grunt) {
              }
         }
   });
-
+  grunt.registerTask('serve', ['connect']);
+  
   grunt.registerTask('build', [
     'coffee',
     'concat:dist',

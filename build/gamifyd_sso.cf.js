@@ -2,13 +2,13 @@
   window.GamifyDigital = (function() {
     var access_hash, access_token, authorized, checkTokens, disconnect, discovery_obj, id_token, identity_obj, jwks, oauthpopup, settings;
     settings = {
-      base_is_host: 'https://account.playreal.live',
+      base_is_host: 'https://account.gamify-digital.com',
       base_is_path: '/main/v2/oauth',
-      base_url: 'https://api.playreal.live/main/v1',
+      base_url: 'https://api.gamify-digital.com/main/v1',
       client_id: null,
       redirect_uri: null,
       scope: 'openid+profile',
-      response_type: 'token'
+      response_type: 'id_token token'
     };
     access_token = id_token = access_hash = identity_obj = discovery_obj = jwks = null;
     disconnect = function(callback) {
@@ -52,14 +52,14 @@
         }, 500);
       }
       return that._oauthInterval = window.setInterval(function() {
-        if (that._oauthWindow && that._oauthWindow.closed) {
+        if (that._oauthWindow.closed) {
           if (that._oauthInterval) {
             window.clearInterval(that._oauthInterval);
           }
-          options.callback();
           if (that._oauthAutoCloseInterval) {
-            return window.clearInterval(that._oauthAutoCloseInterval);
+            window.clearInterval(that._oauthAutoCloseInterval);
           }
+          return options.callback();
         }
       }, 1000);
     };
@@ -186,7 +186,7 @@
             return gameThis.getJwks();
           },
           error: function() {
-            return console.log("error Discovery ", arguments);
+            return console.error("error Discovery ", arguments);
           }
         });
       },
@@ -198,7 +198,7 @@
             return jwks = data.keys;
           },
           error: function() {
-            return console.log("error JWKS", arguments);
+            return console.error("error JWKS", arguments);
           }
         });
       },
@@ -210,7 +210,7 @@
           return console.log(arguments);
         };
         error_cb = options.error || function() {
-          return console.log('error', arguments);
+          return console.error('error', arguments);
         };
         options.path = this.auth_endpoint() + '?response_type=' + encodeURI(settings.response_type) + '&state=' + state + '&client_id=' + settings.client_id + '&redirect_uri=' + encodeURI(settings.redirect_uri) + '&scope=' + settings.scope;
         if (settings.response_type.search('id_token') >= 0) {
@@ -256,6 +256,8 @@
                 return error_cb(hash.error + ' : ' + hash.error_description.replace(/\+/g, ' '));
               }
             }
+          } else {
+            return error_cb("popup closed without signin");
           }
         };
         options.callback = pr_callback;
@@ -276,7 +278,7 @@
               }
             },
             error: function(context, xhr, type, error) {
-              console.log('identity error', context, xhr, type, error);
+              console.error('identity error', context, xhr, type, error);
               if (options.error) {
                 return options.error(context, xhr, type, error);
               }
@@ -298,14 +300,19 @@
           });
         }
       },
-      trackCb: function() {
+      trackCb: function(closeit) {
+        if (closeit == null) {
+          closeit = true;
+        }
         if (window.name === 'GamifyConnectWithOAuth') {
           if (window.location.hash !== "") {
             window.localStorage.setItem('gd_connect_hash', window.location.hash);
           } else if (window.location.search !== "") {
             window.localStorage.setItem('gd_connect_hash', window.location.search);
           }
-          return window.close();
+          if (closeit) {
+            return window.close();
+          }
         }
       }
     };

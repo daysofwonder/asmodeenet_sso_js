@@ -1,13 +1,13 @@
 window.GamifyDigital = (->
 
     settings =
-        base_is_host: 'https://account.playreal.live'
+        base_is_host: 'https://account.gamify-digital.com'
         base_is_path: '/main/v2/oauth'
-        base_url: 'https://api.playreal.live/main/v1'
+        base_url: 'https://api.gamify-digital.com/main/v1'
         client_id: null
         redirect_uri: null
         scope: 'openid+profile'
-        response_type: 'token'
+        response_type: 'id_token token'
 
     access_token = id_token = access_hash = identity_obj = discovery_obj = jwks = null
 
@@ -36,10 +36,10 @@ window.GamifyDigital = (->
             , 500
 
         that._oauthInterval = window.setInterval () ->
-            if that._oauthWindow && that._oauthWindow.closed
+            if that._oauthWindow.closed
                 window.clearInterval(that._oauthInterval) if that._oauthInterval
-                options.callback()
                 window.clearInterval(that._oauthAutoCloseInterval) if that._oauthAutoCloseInterval
+                options.callback()
         , 1000
 
     authorized = (access_hash_clt) ->
@@ -115,7 +115,7 @@ window.GamifyDigital = (->
                 settings.base_is_host = discovery_obj.issuer
                 gameThis.getJwks()
             error: () ->
-                console.log "error Discovery ", arguments
+                console.error "error Discovery ", arguments
 
     getJwks: () ->
         this.get '',
@@ -124,13 +124,13 @@ window.GamifyDigital = (->
             success: (data) ->
                 jwks = data.keys
             error: () ->
-                console.log "error JWKS", arguments
+                console.error "error JWKS", arguments
 
     signIn: (options) ->
         state = (Math.random().toString(36)+'00000000000000000').slice(2, 16+2)
         nonce = (Math.random().toString(36)+'00000000000000000').slice(2, 16+2)
         main_cb = options.success || () -> console.log arguments
-        error_cb = options.error || () -> console.log 'error', arguments
+        error_cb = options.error || () -> console.error 'error', arguments
         options.path = this.auth_endpoint() + '?response_type='+encodeURI(settings.response_type)+
             '&state='+state+'&client_id='+
             settings.client_id+'&redirect_uri='+
@@ -165,6 +165,8 @@ window.GamifyDigital = (->
                         hash[t[0]] = t[1]
                     if hash.state && hash.state == state
                         error_cb(hash.error + ' : ' + hash.error_description.replace(/\+/g, ' '))
+            else
+                error_cb("popup closed without signin")
 
         options.callback = pr_callback
         oauthpopup(options)
@@ -179,7 +181,7 @@ window.GamifyDigital = (->
                     identity_obj = data
                     options.success(identity_obj) if options.success
                 error: (context, xhr, type, error) ->
-                    console.log 'identity error', context, xhr, type, error
+                    console.error  'identity error', context, xhr, type, error
                     options.error(context, xhr, type, error) if options.error
 
     signOut: (options) ->
@@ -188,11 +190,12 @@ window.GamifyDigital = (->
             cb = options.success || false
             oauthpopup path: so_path, autoclose: true, callback: () -> disconnect(cb)
 
-    trackCb: () ->
+    trackCb: (closeit) ->
+        closeit ?= true
         if window.name == 'GamifyConnectWithOAuth'
             if window.location.hash != ""
                 window.localStorage.setItem('gd_connect_hash', window.location.hash)
             else if window.location.search != ""
                 window.localStorage.setItem('gd_connect_hash', window.location.search)
-            window.close()
+            window.close() if closeit
 )()

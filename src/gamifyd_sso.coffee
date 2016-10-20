@@ -148,10 +148,12 @@ window.GamifyDigital = (->
                     for t in splitted
                         t = t.split('=')
                         hash[t[0]] = t[1]
-
-                    if hash.token_type && hash.token_type == 'bearer'
+                    # fix until the server return token_type
+                    if true || hash.token_type && hash.token_type == 'bearer'
                         if hash.state && hash.state == state
-                            hash.scope = hash.scope.split('+')
+                            # hybrid flow doesn't require the scope
+                            if hash.scope
+                                hash.scope = hash.scope.split('+')
                             if checkTokens(nonce, hash)
                                 authorized(hash)
                                 gameThis.identity {success: main_cb, error: error_cb}

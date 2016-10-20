@@ -9,12 +9,12 @@ window.GamifyDigital = (->
         scope: 'openid+profile'
         response_type: 'id_token token'
 
-    access_token = id_token = access_hash = identity_obj = discovery_obj = jwks = null
+    access_token = id_token = access_hash = identity_obj = discovery_obj = jwks = code = null
 
     disconnect = (callback) ->
         callback ?= false
         window.localStorage.clear()
-        access_token = id_token = access_hash = identity_obj = null
+        access_token = id_token = access_hash = identity_obj = code = null
         if callback
             callback()
         else
@@ -46,6 +46,8 @@ window.GamifyDigital = (->
         access_hash = access_hash_clt
         access_token = access_hash.access_token
         id_token = access_hash.id_token
+        if access_hash.code
+            code = access_hash.code
 
     checkTokens = (nonce, hash) ->
         if hash.access_token
@@ -85,6 +87,7 @@ window.GamifyDigital = (->
     getIdToken: () -> id_token
     getAccessHash: () -> access_hash
     getDiscovery: () -> discovery_obj
+    getCode: () -> code
 
     auth_endpoint: () ->
         return discovery_obj.authorization_endpoint if discovery_obj

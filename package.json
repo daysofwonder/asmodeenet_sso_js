@@ -1,6 +1,6 @@
 {
   "name": "gamifyd_sso.js",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "dependencies": {},
   "repository": {},
   "devDependencies": {
@@ -12,6 +12,7 @@
     "grunt-contrib-connect": "^1.0.2",
     "grunt-contrib-jshint": "^0.11.0",
     "grunt-contrib-uglify": "^0.7.0",
+    "grunt-contrib-watch": "^1.0.0",
     "grunt-rev": "^0.1.0",
     "grunt-rev-package": "0.0.6",
     "grunt-serve": "^0.1.6",

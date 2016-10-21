@@ -1,6 +1,6 @@
 (function() {
   window.GamifyDigital = (function() {
-    var access_hash, access_token, authorized, checkTokens, disconnect, discovery_obj, id_token, identity_obj, jwks, oauthpopup, settings;
+    var access_hash, access_token, authorized, catHashCheck, checkErrors, checkTokens, code, disconnect, discovery_obj, id_token, identity_obj, jwks, oauthpopup, settings;
     settings = {
       base_is_host: 'https://account.gamify-digital.com',
       base_is_path: '/main/v2/oauth',
@@ -10,13 +10,14 @@
       scope: 'openid+profile',
       response_type: 'id_token token'
     };
-    access_token = id_token = access_hash = identity_obj = discovery_obj = jwks = null;
+    access_token = id_token = access_hash = identity_obj = discovery_obj = jwks = code = null;
+    checkErrors = [];
     disconnect = function(callback) {
       if (callback == null) {
         callback = false;
       }
       window.localStorage.clear();
-      access_token = id_token = access_hash = identity_obj = null;
+      access_token = id_token = access_hash = identity_obj = code = null;
       if (callback) {
         return callback();
       } else {
@@ -29,7 +30,7 @@
         options.windowName = 'GamifyConnectWithOAuth';
       }
       if (options.windowOptions == null) {
-        options.windowOptions = 'location=0,status=0,width=400,height=800';
+        options.windowOptions = 'location=0,status=0,width=400,height=585';
       }
       if (options.callback == null) {
         options.callback = function() {
@@ -66,7 +67,19 @@
     authorized = function(access_hash_clt) {
       access_hash = access_hash_clt;
       access_token = access_hash.access_token;
-      return id_token = access_hash.id_token;
+      id_token = access_hash.id_token;
+      if (access_hash.code) {
+        return code = access_hash.code;
+      }
+    };
+    catHashCheck = function(b_hash, bcode) {
+      var mdHex;
+      mdHex = KJUR.crypto.Util.sha256(bcode);
+      mdHex = mdHex.substr(0, mdHex.length / 2);
+      while (!(b_hash.length % 4 === 0)) {
+        b_hash += '=';
+      }
+      return b_hash === btoa(mdHex);
     };
     checkTokens = function(nonce, hash) {
       var alg, at_dec, at_head, i, it_dec, it_head, key, len;
@@ -85,21 +98,35 @@
           header: true
         });
         if (it_head.typ !== 'JWT') {
+          checkErrors.push('Invalid type');
           return false;
         }
         if (it_head.alg !== 'RS256') {
+          checkErrors.push('Invalid alg');
           return false;
         }
         if (it_dec.nonce !== nonce) {
+          checkErrors.push('Invalid nonce');
           return false;
         }
         if (it_dec.iss !== settings.base_is_host) {
+          checkErrors.push('Invalid issuer');
           return false;
         }
         if (it_dec.aud !== settings.client_id) {
+          checkErrors.push('Invalid auditor');
           return false;
         }
         if (it_dec.exp < (Date.now() / 1000).toPrecision(10)) {
+          checkErrors.push('Invalid expiration date');
+          return false;
+        }
+        if (typeof it_dec.at_hash === 'string' && !catHashCheck(it_dec.at_hash, hash.access_token)) {
+          checkErrors.push('Invalid at_hash');
+          return false;
+        }
+        if (typeof it_dec.c_hash === 'string' && !catHashCheck(it_dec.c_hash, hash.code)) {
+          checkErrors.push('Invalid c_hash');
           return false;
         }
         alg = [it_head.alg];
@@ -109,6 +136,7 @@
             return true;
           }
         }
+        checkErrors.push('Invalid JWS key');
         return false;
       }
       return true;
@@ -142,6 +170,12 @@
       },
       getDiscovery: function() {
         return discovery_obj;
+      },
+      getCode: function() {
+        return code;
+      },
+      getCheckErrors: function() {
+        return checkErrors;
       },
       auth_endpoint: function() {
         if (discovery_obj) {
@@ -234,6 +268,7 @@
               if (hash.token_type && hash.token_type === 'bearer') {
                 if (hash.state && hash.state === state) {
                   hash.scope = hash.scope.split('+');
+                  checkErrors = [];
                   if (checkTokens(nonce, hash)) {
                     authorized(hash);
                     return gameThis.identity({
@@ -266,7 +301,7 @@
       identity: function(options) {
         if (this.isConnected() && identity_obj) {
           if (options.success) {
-            return options.success(identity_obj);
+            return options.success(identity_obj, GamifyDigital.getCode());
           }
         } else {
           return this.get('', {
@@ -274,7 +309,7 @@
             success: function(data) {
               identity_obj = data;
               if (options.success) {
-                return options.success(identity_obj);
+                return options.success(identity_obj, GamifyDigital.getCode());
               }
             },
             error: function(context, xhr, type, error) {
@@ -317,6 +352,10 @@
       }
     };
   })();
+
+  if (typeof window.GD === 'undefined') {
+    window.GD = window.GamifyDigital;
+  }
 
 }).call(this);
 

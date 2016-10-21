@@ -10,6 +10,7 @@ window.GamifyDigital = (->
         response_type: 'id_token token'
 
     access_token = id_token = access_hash = identity_obj = discovery_obj = jwks = code = null
+    checkErrors = []
 
     disconnect = (callback) ->
         callback ?= false
@@ -22,7 +23,7 @@ window.GamifyDigital = (->
 
     oauthpopup = (options) ->
         options.windowName ?= 'GamifyConnectWithOAuth'
-        options.windowOptions ?= 'location=0,status=0,width=400,height=800'
+        options.windowOptions ?= 'location=0,status=0,width=400,height=585'
         options.callback ?= () -> window.location.reload()
         that = this
         that._oauthWindow = window.open(options.path, options.windowName, options.windowOptions)
@@ -49,24 +50,51 @@ window.GamifyDigital = (->
         if access_hash.code
             code = access_hash.code
 
+    catHashCheck = (b_hash, bcode) ->
+        mdHex = KJUR.crypto.Util.sha256(bcode)
+        mdHex = mdHex.substr(0, mdHex.length/2)
+        while !(b_hash.length % 4 == 0)
+            b_hash += '='
+        return b_hash == btoa(mdHex)
+
     checkTokens = (nonce, hash) ->
         if hash.access_token
             at_dec = jwt_decode(hash.access_token)
             at_head = jwt_decode(hash.access_token, { header: true })
+
         if settings.response_type.search('id_token') >= 0
             if typeof hash.id_token == undefined
                 return false
             it_dec = jwt_decode(hash.id_token)
             it_head = jwt_decode(hash.id_token, { header: true })
-            return false if it_head.typ != 'JWT'
-            return false if it_head.alg != 'RS256'
-            return false if it_dec.nonce != nonce
-            return false if it_dec.iss != settings.base_is_host
-            return false if it_dec.aud != settings.client_id
-            return false if it_dec.exp < (Date.now()/1000).toPrecision(10)
+            if it_head.typ != 'JWT'
+                checkErrors.push 'Invalid type'
+                return false
+            if it_head.alg != 'RS256'
+                checkErrors.push 'Invalid alg'
+                return false
+            if it_dec.nonce != nonce
+                checkErrors.push 'Invalid nonce'
+                return false
+            if it_dec.iss != settings.base_is_host
+                checkErrors.push 'Invalid issuer'
+                return false
+            if it_dec.aud != settings.client_id
+                checkErrors.push 'Invalid auditor'
+                return false
+            if it_dec.exp < (Date.now()/1000).toPrecision(10)
+                checkErrors.push 'Invalid expiration date'
+                return false
+            if typeof it_dec.at_hash == 'string' && !catHashCheck it_dec.at_hash, hash.access_token
+                checkErrors.push 'Invalid at_hash'
+                return false
+            if typeof it_dec.c_hash == 'string' && !catHashCheck it_dec.c_hash, hash.code
+                checkErrors.push 'Invalid c_hash'
+                return false
             alg = [it_head.alg]
             for key in jwks
                 return true if KJUR.jws.JWS.verify(hash.id_token, KEYUTIL.getKey(key), alg)
+            checkErrors.push 'Invalid JWS key'
             return false
         return true
 
@@ -88,6 +116,7 @@ window.GamifyDigital = (->
     getAccessHash: () -> access_hash
     getDiscovery: () -> discovery_obj
     getCode: () -> code
+    getCheckErrors: () -> checkErrors
 
     auth_endpoint: () ->
         return discovery_obj.authorization_endpoint if discovery_obj
@@ -151,10 +180,10 @@ window.GamifyDigital = (->
                     for t in splitted
                         t = t.split('=')
                         hash[t[0]] = t[1]
-
                     if hash.token_type && hash.token_type == 'bearer'
                         if hash.state && hash.state == state
                             hash.scope = hash.scope.split('+')
+                            checkErrors = []
                             if checkTokens(nonce, hash)
                                 authorized(hash)
                                 gameThis.identity {success: main_cb, error: error_cb}
@@ -176,13 +205,13 @@ window.GamifyDigital = (->
 
     identity: (options) ->
         if this.isConnected() && identity_obj
-            options.success(identity_obj) if options.success
+            options.success(identity_obj, GamifyDigital.getCode()) if options.success
         else
             this.get '',
                 base_url: this.ident_endpoint()
                 success: (data) ->
                     identity_obj = data
-                    options.success(identity_obj) if options.success
+                    options.success(identity_obj, GamifyDigital.getCode()) if options.success
                 error: (context, xhr, type, error) ->
                     console.error  'identity error', context, xhr, type, error
                     options.error(context, xhr, type, error) if options.error
@@ -202,3 +231,6 @@ window.GamifyDigital = (->
                 window.localStorage.setItem('gd_connect_hash', window.location.search)
             window.close() if closeit
 )()
+
+if typeof window.GD == 'undefined'
+    window.GD = window.GamifyDigital

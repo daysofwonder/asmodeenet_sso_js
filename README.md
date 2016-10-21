@@ -70,6 +70,7 @@ console.log(decoded);
 
 #### OpenID Connect
 
+The library provids the global object GamifyDigital (and the alias GD if it's not already used by something else) that is the central point of communication with the Identity Server.
 
 ##### Init
 
@@ -110,9 +111,9 @@ After this moment you could try to Sign in with the method signIn which take 1 p
 
 ```javascript
 GamifyDigital.signIn({
-    success: function(identity) {
+    success: function(identity, code) {
         /**
-         * The passed parameter is a Standard JS Object
+         * The first parameter is a Standard JS Object
          * with value from the identity endpoint of
          * the identity server.
          *
@@ -121,6 +122,8 @@ GamifyDigital.signIn({
          *   nickname: "USernick"
          *   ....
          * }
+         *
+         * The second parameter it's the code returned by IdentityServer. (same as GamifyDigital.getCode() )
         */
     },
     error: function() {
@@ -177,6 +180,8 @@ The object GamifyDigital provides the following methods too:
 * **getAccessHash**: get the all JSON object from the authorize endpoint (included access_token, id_token, ....)
 * **getIdToken**: get the ID token of the current user
 * **getDiscovery**: get the discovery object return from the openid-configuration endpoint.
+* **getCode**: get the code returned by IS. (useful in hybrid flow)
+* **getCheckErrors**: get list of errors during token check if it's a fail
 * **trackCb**: Taking an optional parameter, boolean, default at true, which close the popup. If it's false, the popup will not be close (see [#Backend dialog](#backend-dialog)). This method should be call in the callback "page" called by the IS (the ones configured in **redirect_uri** init's field). You can see the file [examples/cbpop.html](examples/cbpop.html) in examples directory to see how to use it. This page could be only the same content that the cbpop file or could be a dynamic file (in PHP, Node, Ruby,...) that intercept IS error message (passed in query get during callback) from IS before your Web client, but can't catch tokens if authorization is ok, because there are passed in anchor only. You should use this method. If not, your client part can't found tokens. but if you don't want include the JS gamifyd_sso lib in your callback page, you can copy the content of the trackCB method itself in the returned html page.
 
 ##### Backend dialog

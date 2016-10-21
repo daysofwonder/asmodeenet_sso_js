@@ -16,16 +16,24 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-rev-package');
   grunt.loadNpmTasks('grunt-contrib-coffee');
   grunt.loadNpmTasks('grunt-contrib-connect');
+  grunt.loadNpmTasks('grunt-contrib-watch');
 
   // Define the configuration for all the tasks
   grunt.initConfig({
         connect: {
             server: {
                 options: {
-                    base: './examples/',
-                    port: 8080,
                     keepalive: true
                 }
+            },
+            server_dev: {
+                options: {
+                    keepalive: false
+                }
+            },
+            options: {
+                base: './examples/',
+                port: 8080,
             }
         },
         uglify: {
@@ -65,16 +73,28 @@ module.exports = function (grunt) {
                     'build/utils.cf.js': 'src/utils.coffee'
                  }
              }
+        },
+        watch: {
+          all: {
+            files: ['src/*.coffee'],
+            tasks: ['build']
+          }
         }
   });
-  grunt.registerTask('serve', ['connect']);
-  
+  grunt.registerTask('serve', ['connect:server']);
+
   grunt.registerTask('build', [
     'coffee',
     'concat:dist',
     'uglify',
     'concat:jwt',
     'revPackage'
+  ]);
+
+  grunt.registerTask('serve-dev', [
+      'build',
+      'connect:server_dev',
+      'watch'
   ]);
 
   grunt.registerTask('default', [

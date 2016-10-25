@@ -107,7 +107,15 @@ This method will query the Identity Server to get the openid-configuration file,
 
 ##### Sign in
 
-After this moment you could try to Sign in with the method signIn which take 1 parmeter, an object with 2 entries success and error callbacks. Both are optionals
+After this moment you could try to Sign in with the method signIn which take 1 parameter, an object with following entries:
+
+ * success callback
+ * error callback
+ * width of the popup (default: 475px)
+ * height of the popup (default: 500px)
+
+ All are optionals.
+
 
 ```javascript
 GamifyDigital.signIn({
@@ -136,7 +144,9 @@ GamifyDigital.signIn({
          *  "popup closed without signin"
          * if the user close the popup without sign in.
         */
-    }
+    },
+    width: 500,
+    height: 800
 })
 ```
 
@@ -144,6 +154,7 @@ Available fields from in the identity object are listed [here](http://apidoc.gam
 
 Call this method opens a popup which query the IS /authorize endpoint. If the user has already a valid session, the popup closes directly and success callback is called. If not, the signin form is displayed and the user should fill and validate it. If it's the sign in success, the popup is automaticaly closed.
 If the user close the popup himself, the error callback is called with the message
+
 ```javascript
  "popup closed without signin"
  ```

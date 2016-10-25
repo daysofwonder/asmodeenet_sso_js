@@ -22,8 +22,11 @@ window.GamifyDigital = (->
             window.location.reload()
 
     oauthpopup = (options) ->
+        options.width ?= 475
+        options.height ?= 500
         options.windowName ?= 'GamifyConnectWithOAuth'
-        options.windowOptions ?= 'location=0,status=0,width=400,height=585'
+        options.windowOptions ?= 'location=0,status=0,width=' + options.width +
+                                    ',height=' + options.height
         options.callback ?= () -> window.location.reload()
         that = this
         that._oauthWindow = window.open(options.path, options.windowName, options.windowOptions)
@@ -163,7 +166,8 @@ window.GamifyDigital = (->
         nonce = (Math.random().toString(36)+'00000000000000000').slice(2, 16+2)
         main_cb = options.success || () -> console.log arguments
         error_cb = options.error || () -> console.error 'error', arguments
-        options.path = this.auth_endpoint() + '?response_type='+encodeURI(settings.response_type)+
+        options.path = this.auth_endpoint() + '?display=popup&response_type='+
+            encodeURI(settings.response_type)+
             '&state='+state+'&client_id='+
             settings.client_id+'&redirect_uri='+
             encodeURI(settings.redirect_uri)+'&scope='+settings.scope

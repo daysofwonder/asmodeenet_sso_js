@@ -26,11 +26,17 @@
     };
     oauthpopup = function(options) {
       var that;
+      if (options.width == null) {
+        options.width = 475;
+      }
+      if (options.height == null) {
+        options.height = 500;
+      }
       if (options.windowName == null) {
         options.windowName = 'GamifyConnectWithOAuth';
       }
       if (options.windowOptions == null) {
-        options.windowOptions = 'location=0,status=0,width=400,height=585';
+        options.windowOptions = 'location=0,status=0,width=' + options.width + ',height=' + options.height;
       }
       if (options.callback == null) {
         options.callback = function() {
@@ -246,7 +252,7 @@
         error_cb = options.error || function() {
           return console.error('error', arguments);
         };
-        options.path = this.auth_endpoint() + '?response_type=' + encodeURI(settings.response_type) + '&state=' + state + '&client_id=' + settings.client_id + '&redirect_uri=' + encodeURI(settings.redirect_uri) + '&scope=' + settings.scope;
+        options.path = this.auth_endpoint() + '?display=popup&response_type=' + encodeURI(settings.response_type) + '&state=' + state + '&client_id=' + settings.client_id + '&redirect_uri=' + encodeURI(settings.redirect_uri) + '&scope=' + settings.scope;
         if (settings.response_type.search('id_token') >= 0) {
           options.path += '&nonce=' + nonce;
         }

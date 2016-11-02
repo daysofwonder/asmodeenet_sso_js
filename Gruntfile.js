@@ -47,28 +47,28 @@ module.exports = function (grunt) {
             },
             my_target: {
                 files: {
-                    'build/gamifyd_sso.min.js': ['build/gamifyd_sso.built.js']
+                    'build/an_sso.min.js': ['build/an_sso.built.js']
                 }
             }
         },
         concat: {
             dist: {
-                  src: ['build/gamifyd_sso.cf.js', 'build/utils.cf.js', 'build/ajax.cf.js', 'ext/jws-3.3.js', 'ext/crypto-1.1.js', 'ext/base64x-1.1.js', 'ext/rsa.js', 'ext/rsasign-1.2.js', 'ext/keyutil-1.0.js'],
-                  dest: 'build/gamifyd_sso.built.js',
+                  src: ['build/an_sso.cf.js', 'build/utils.cf.js', 'build/ajax.cf.js', 'ext/jws-3.3.js', 'ext/crypto-1.1.js', 'ext/base64x-1.1.js', 'ext/rsa.js', 'ext/rsasign-1.2.js', 'ext/keyutil-1.0.js'],
+                  dest: 'build/an_sso.built.js',
             },
             jwt: {
-                src: ['ext/base64-min.js', 'ext/jsbn-min.js', 'ext/json-sans-eval-min.js', 'ext/cryptojs-312-core-fix-min.js', 'ext/hmac-sha256.js', 'build/gamifyd_sso.min.js'],
-                // src: ['ext/jsrsasign-latest-all-min.js', 'build/gamifyd_sso.min.js'],
-                dest: 'dist/gamifyd_sso.min.js'
+                src: ['ext/base64-min.js', 'ext/jsbn-min.js', 'ext/json-sans-eval-min.js', 'ext/cryptojs-312-core-fix-min.js', 'ext/hmac-sha256.js', 'build/an_sso.min.js'],
+                // src: ['ext/jsrsasign-latest-all-min.js', 'build/an_sso.min.js'],
+                dest: 'dist/an_sso.min.js'
             }
         },
         revPackage: {
-            'gamifyd': 'dist/gamifyd_sso.min.js'
+            'ana': 'dist/an_sso.min.js'
         },
         coffee: {
              compileWithMaps: {
                 files: {
-                    'build/gamifyd_sso.cf.js': 'src/gamifyd_sso.coffee',
+                    'build/an_sso.cf.js': 'src/an_sso.coffee',
                     'build/ajax.cf.js': 'src/ajax.coffee',
                     'build/utils.cf.js': 'src/utils.coffee'
                  }

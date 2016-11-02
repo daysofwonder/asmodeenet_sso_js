@@ -1,5 +1,5 @@
 (function() {
-  window.GamifyDigital.extend = function() {
+  window.AsmodeeNet.extend = function() {
     var i, key, len, obj, ret;
     ret = {};
     for (i = 0, len = arguments.length; i < len; i++) {
@@ -13,7 +13,7 @@
     return ret;
   };
 
-  window.GamifyDigital.jwt_decode = function(token, options) {
+  window.AsmodeeNet.jwt_decode = function(token, options) {
     var deco;
     deco = KJUR.jws.JWS.parse(token);
     if (options && options.header !== "undefined" && options.header === true) {
@@ -23,7 +23,7 @@
   };
 
   if (!window.jwt_decode) {
-    window.jwt_decode = window.GamifyDigital.jwt_decode;
+    window.jwt_decode = window.AsmodeeNet.jwt_decode;
   }
 
 }).call(this);

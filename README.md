@@ -1,7 +1,7 @@
-GamifyDigital-SSO JS
+AsmodeeNet-SSO JS
 ------------------
 
-An OpenID Connect library to be used with the Gamify Digital Identity Server to instrument Web pages OpenID Connect authentication and user identity.
+An OpenID Connect library to be used with the Asmodee.net Identity Server to instrument Web pages OpenID Connect authentication and user identity.
 
 **Table of contents**
 
@@ -19,7 +19,7 @@ An OpenID Connect library to be used with the Gamify Digital Identity Server to 
 
 ## Description
 
-This library is designed to be an auto-suffisant tool to connect to the Gamify Digital Identity Server using the OpenID Connect protocol.
+This library is designed to be an auto-suffisant tool to connect to the Asmodee.net Identity Server using the OpenID Connect protocol.
 You can use directly the last min-X.X.X.js present in dist directory or if you want rebuild it:
 
 You need npm/nodeJs installed.
@@ -31,7 +31,7 @@ grunt build
 
 #### Crypto/Token
 
-For this, it embeds all that it needs (micro ajax lib GamifyDigital.ajax, JWT decoder and JWS Token Signature validation).
+For this, it embeds all that it needs (micro ajax lib AsmodeeNet.ajax, JWT decoder and JWS Token Signature validation).
 
 Embedded dependencies for crypto:
 * [jsrsasign](https://kjur.github.io/jsrsasign/)
@@ -70,14 +70,14 @@ console.log(decoded);
 
 #### OpenID Connect
 
-The library provids the global object GamifyDigital (and the alias GD if it's not already used by something else) that is the central point of communication with the Identity Server.
+The library provids the global object AsmodeeNet (and the alias AN if it's not already used by something else) that is the central point of communication with the Identity Server.
 
 ##### Init
 
-The GamifyDigital Object provided should be initiate with few mandatory parameters: client_id and redirect_uri. The same as you configured in the Gamify Digital Studio manager during the app creation.
+The AsmodeeNet Object provided should be initiate with few mandatory parameters: client_id and redirect_uri. The same as you configured in the Asmodee.net Studio manager during the app creation.
 
 ```javascript
-GamifyDigital.init({
+AsmodeeNet.init({
     client_id: 'my_client_id',
     redirect_uri: 'https://my_host.name/callback_page'
 });
@@ -89,7 +89,7 @@ Available paramters:
 * **redirect_uri** *string*
 * **response_type** *string* Optional, default is 'token id_token'. Values could be : token, id_token or both space separate
 * **scope** *string* Optional, default is 'openid+profile'. Value could be a list of `+` separate word: openid, profile, email, adress, public, private. Openid scope is mandatory if you use response_type id_token (and this is one or couple 'token id_token' are strongly advised)
-* **base_is_host** *string* Optional, URL of the GD Identity Server. By default, it's https://account.gamify-digital.com but you can set https://account.staging.gamify-digital.com for your test by ex.
+* **base_is_host** *string* Optional, URL of the AN Identity Server. By default, it's https://account.asmodee.net but you can set https://account.staging.asmodee.net for your test by ex.
 * **base_is_path** *string* Optional. This should be used, in futur, to use an other version of the IS oAuth API. default /main/v2/oauth.
 
 ##### Discover
@@ -97,10 +97,10 @@ Available paramters:
 After the init phase, you could call the discover method to use to discovery capacity of OpenID Connect to auto-configure other parts of the library.
 
 ```javascript
-GamifyDigital.discover();
+AsmodeeNet.discover();
 
 // Or you can chain both calls :
-GamifyDigital.init({...}).discover();
+AsmodeeNet.init({...}).discover();
 ```
 
 This method will query the Identity Server to get the openid-configuration file, configure itself with datas returned and finally query the JWKS files for JWS certification keys.
@@ -118,7 +118,7 @@ After this moment you could try to Sign in with the method signIn which take 1 p
 
 
 ```javascript
-GamifyDigital.signIn({
+AsmodeeNet.signIn({
     success: function(identity, code) {
         /**
          * The first parameter is a Standard JS Object
@@ -131,7 +131,7 @@ GamifyDigital.signIn({
          *   ....
          * }
          *
-         * The second parameter it's the code returned by IdentityServer. (same as GamifyDigital.getCode() )
+         * The second parameter it's the code returned by IdentityServer. (same as AsmodeeNet.getCode() )
         */
     },
     error: function() {
@@ -150,7 +150,7 @@ GamifyDigital.signIn({
 })
 ```
 
-Available fields from in the identity object are listed [here](http://apidoc.gamify-digital.com/#api-openid-identity)  and may vary depending on requested scopes.
+Available fields from in the identity object are listed [here](http://apidoc.asmodee.net/#api-openid-identity)  and may vary depending on requested scopes.
 
 Call this method opens a popup which query the IS /authorize endpoint. If the user has already a valid session, the popup closes directly and success callback is called. If not, the signin form is displayed and the user should fill and validate it. If it's the sign in success, the popup is automaticaly closed.
 If the user close the popup himself, the error callback is called with the message
@@ -164,7 +164,7 @@ If the user close the popup himself, the error callback is called with the messa
 When you delete the session you could call the signOut method which could take an optional parameter, an object with a success callback.
 
 ```javascript
-GamifyDigital.signOut({
+AsmodeeNet.signOut({
     success: function() {
         // User disconnected
     }
@@ -180,7 +180,7 @@ If you pass a callbck, and so the page isn't reload, you can directly re-call th
 
 ##### Other methods
 
-The object GamifyDigital provides the following methods too:
+The object AsmodeeNet provides the following methods too:
 
 * **init**: see [here](#init)
 * **discover**: see [here](#discover)
@@ -193,11 +193,11 @@ The object GamifyDigital provides the following methods too:
 * **getDiscovery**: get the discovery object return from the openid-configuration endpoint.
 * **getCode**: get the code returned by IS. (useful in hybrid flow)
 * **getCheckErrors**: get list of errors during token check if it's a fail
-* **trackCb**: Taking an optional parameter, boolean, default at true, which close the popup. If it's false, the popup will not be close (see [#Backend dialog](#backend-dialog)). This method should be call in the callback "page" called by the IS (the ones configured in **redirect_uri** init's field). You can see the file [examples/cbpop.html](examples/cbpop.html) in examples directory to see how to use it. This page could be only the same content that the cbpop file or could be a dynamic file (in PHP, Node, Ruby,...) that intercept IS error message (passed in query get during callback) from IS before your Web client, but can't catch tokens if authorization is ok, because there are passed in anchor only. You should use this method. If not, your client part can't found tokens. but if you don't want include the JS gamifyd_sso lib in your callback page, you can copy the content of the trackCB method itself in the returned html page.
+* **trackCb**: Taking an optional parameter, boolean, default at true, which close the popup. If it's false, the popup will not be close (see [#Backend dialog](#backend-dialog)). This method should be call in the callback "page" called by the IS (the ones configured in **redirect_uri** init's field). You can see the file [examples/cbpop.html](examples/cbpop.html) in examples directory to see how to use it. This page could be only the same content that the cbpop file or could be a dynamic file (in PHP, Node, Ruby,...) that intercept IS error message (passed in query get during callback) from IS before your Web client, but can't catch tokens if authorization is ok, because there are passed in anchor only. You should use this method. If not, your client part can't found tokens. but if you don't want include the JS an_sso lib in your callback page, you can copy the content of the trackCB method itself in the returned html page.
 
 ##### Backend dialog
 
-If you want that your backend dialog with Identity Server or API of Gamify Digital directly too, you should authorize your backend.
+If you want that your backend dialog with Identity Server or API of Asmodee.net directly too, you should authorize your backend.
 
 For this, you should use an other client_id, but one with client_secret. You can do this in your callback page.
 
@@ -223,7 +223,7 @@ This example don't use SSL (because onliners http server don't manage all SSL ea
 
 * Query Scheduler (prevent signIn call before discover end by ex)
 * Promise capacities
-* HTML data parser for generate Gamify Digital OpenID Connect button.
+* HTML data parser for generate Asmodee.net OpenID Connect button.
 * clean Error system
 * REST API capacities
 * Add some tests

@@ -1,4 +1,4 @@
-window.GamifyDigital.ajax = (url, settings) ->
+window.AsmodeeNet.ajax = (url, settings) ->
     args = arguments
     settings = if args.length == 1 then args[0] else args[1]
 
@@ -17,7 +17,7 @@ window.GamifyDigital.ajax = (url, settings) ->
         complete: emptyFunction
 
     settings = this.extend(defaultSettings, settings || {})
-    
+
     mimeTypes =
         'application/json': 'json'
         'text/html': 'html'

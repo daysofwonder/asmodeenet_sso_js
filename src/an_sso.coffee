@@ -1,9 +1,9 @@
-window.GamifyDigital = (->
+window.AsmodeeNet = (->
 
     settings =
-        base_is_host: 'https://account.gamify-digital.com'
+        base_is_host: 'https://account.asmodee.net'
         base_is_path: '/main/v2/oauth'
-        base_url: 'https://api.gamify-digital.com/main/v1'
+        base_url: 'https://api.asmodee.net/main/v1'
         client_id: null
         redirect_uri: null
         scope: 'openid+profile'
@@ -24,7 +24,7 @@ window.GamifyDigital = (->
     oauthpopup = (options) ->
         options.width ?= 475
         options.height ?= 500
-        options.windowName ?= 'GamifyConnectWithOAuth'
+        options.windowName ?= 'AsmodeeNetConnectWithOAuth'
         options.windowOptions ?= 'location=0,status=0,width=' + options.width +
                                     ',height=' + options.height
         options.callback ?= () -> window.location.reload()
@@ -209,13 +209,13 @@ window.GamifyDigital = (->
 
     identity: (options) ->
         if this.isConnected() && identity_obj
-            options.success(identity_obj, GamifyDigital.getCode()) if options.success
+            options.success(identity_obj, AsmodeeNet.getCode()) if options.success
         else
             this.get '',
                 base_url: this.ident_endpoint()
                 success: (data) ->
                     identity_obj = data
-                    options.success(identity_obj, GamifyDigital.getCode()) if options.success
+                    options.success(identity_obj, AsmodeeNet.getCode()) if options.success
                 error: (context, xhr, type, error) ->
                     console.error  'identity error', context, xhr, type, error
                     options.error(context, xhr, type, error) if options.error
@@ -228,13 +228,18 @@ window.GamifyDigital = (->
 
     trackCb: (closeit) ->
         closeit ?= true
-        if window.name == 'GamifyConnectWithOAuth'
+        if window.name == 'AsmodeeNetConnectWithOAuth'
             if window.location.hash != ""
                 window.localStorage.setItem('gd_connect_hash', window.location.hash)
             else if window.location.search != ""
                 window.localStorage.setItem('gd_connect_hash', window.location.search)
             window.close() if closeit
 )()
+if typeof window.AN == 'undefined'
+    window.AN = window.AsmodeeNet
 
+# For retro compatibility
+if typeof window.GamifyDigital == 'undefined'
+    window.GamifyDigital = window.AsmodeeNet
 if typeof window.GD == 'undefined'
-    window.GD = window.GamifyDigital
+    window.GD = window.AsmodeeNet

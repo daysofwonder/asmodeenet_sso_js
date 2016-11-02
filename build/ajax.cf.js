@@ -1,5 +1,5 @@
 (function() {
-  window.GamifyDigital.ajax = function(url, settings) {
+  window.AsmodeeNet.ajax = function(url, settings) {
     var args, complete, defaultSettings, emptyFunction, error, key, mimeTypes, ref, success, xhr;
     args = arguments;
     settings = args.length === 1 ? args[0] : args[1];

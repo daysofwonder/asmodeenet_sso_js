@@ -12,6 +12,8 @@ An OpenID Connect library to be used with the Asmodee.net Identity Server to ins
         * [Discover](#discover)
         * [Sign In](#sign-in)
         * [Sign Out](#sign-out)
+            * [RP Logout](#rp-logout)
+            * [Simple logout](#simple-logout)
         * [Other methods](#other-methods)
         * [Backend dialog](#backend-dialog)
 * [Example](#example)
@@ -87,6 +89,8 @@ You could override default other paramters by pass it in this init method.
 Available paramters:
 * **client_id** *string*
 * **redirect_uri** *string*
+* **logout_redirect_uri** *string*
+* **callback_post_logout_redirect** *callback*
 * **response_type** *string* Optional, default is 'token id_token'. Values could be : token, id_token or both space separate
 * **scope** *string* Optional, default is 'openid+profile'. Value could be a list of `+` separate word: openid, profile, email, adress, public, private. Openid scope is mandatory if you use response_type id_token (and this is one or couple 'token id_token' are strongly advised)
 * **base_is_host** *string* Optional, URL of the AN Identity Server. By default, it's https://account.asmodee.net but you can set https://account.staging.asmodee.net for your test by ex.
@@ -161,7 +165,24 @@ If the user close the popup himself, the error callback is called with the messa
 
 ##### Sign out
 
-When you delete the session you could call the signOut method which could take an optional parameter, an object with a success callback.
+###### RP Logout
+
+When you want to log out the user, since the Asmodee.net IdentityServer support the RP logout OpenId Connect feature, you should call the `signOut` method. This one call the IS `end_session` endpoint (described in the IS OpenId configuration discovery document). The user will be disconnect from Asmodee.net IdentityServer and redirected on your post logout redirect uri (passed in parameters in the `init` method and set in your application configuration on the Studio Manager).
+
+If a callback is provided in the init setting (`callback_post_logout_redirect`), this one will be called in return of the IS and if all is OK.
+
+Following the [OpenID Connect RP Logout specification](https://openid.net/specs/openid-connect-session-1_0.html#RPLogout), you should remove your own session before the call of `AsmodeeNet.signOut()`.
+
+```javascript
+AsmodeeNet.signOut();
+```
+
+**N.B.:** If you don't give a `callback_post_logout_redirect` callback, the root of your hostname should be loaded (`/`).
+
+
+###### Simple Sign out
+
+If you don't want to use the OpenID Connect's RP Logout feature of the IdentityServer, you must not configure `logout_redirect_uri` and `callback_post_logout_redirect` init's parameters and when you delete the session you can call the signOut method with an optional parameter: an object with a success callback.
 
 ```javascript
 AsmodeeNet.signOut({
@@ -171,12 +192,11 @@ AsmodeeNet.signOut({
 });
 ```
 
-This method will open a popup querying the signout endpoint of the IdentityServer, and the popup closes directly itself.
+This method will clear stockage made by itself about the current connected user and will execute the given callback.
 
-**N.B.:** If you don't give a sucess callback, the current page is reloaded.
+**N.B.:** If you don't provide a success callback, the current page is reloaded.
 
-If you pass a callbck, and so the page isn't reload, you can directly re-call the signIn method if you want. *Init* and *discover* methods don't need to be recalled.
-
+If you pass a callback, and so the page isn't reload, you can directly re-call the signIn method if you want. *Init* and *discover* methods don't need to be recalled.
 
 ##### Other methods
 

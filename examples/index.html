@@ -1,6 +1,6 @@
 <html>
     <head>
-        <script>document.write('<script src="an_sso.min.0.0.11.js?dev=' + Math.floor(Math.random() * 100) + '"\><\/script>');</script>
+        <script>document.write('<script src="an_sso.min.0.2.0.js?dev=' + Math.floor(Math.random() * 100) + '"\><\/script>');</script>
     </head>
     <body>
         <script>AsmodeeNet.trackCb();</script>
@@ -48,10 +48,7 @@
         });
         findMe('disconnect_bt').addEventListener('click', function() {
             AsmodeeNet.signOut({
-                success: unsigned,
-                error: function() {
-                    echo("SIGNOUT ERROR", arguments);
-                }
+                success: unsigned
             });
         });
         findMe('my_identity').addEventListener('click', function() {
@@ -63,13 +60,18 @@
         });
         AsmodeeNet.init({
             // Required parameters
-            client_id: 'openid-dow',
+            client_id: 'test_direct', //'openid-dow',
             redirect_uri: 'http://localhost:8080/cbpop.html',
-
             // Example of optional parameters
-            base_is_host: 'https://account.asmodee.net', //https://account.asmodee.net',
+            base_is_host: 'https://account.asmodee.net',
             scope: 'openid+email+address+public',
-            response_type: 'code id_token token'
+            response_type: 'code id_token token',
+            logout_redirect_uri: 'http://localhost:8080/?logout_redirect=1',
+            // if next callback for RP logout openid's feature is not provided, the AsmodeeNet SSO lib, redirect the user to the root ('/') of the current host
+            callback_post_logout_redirect: function() {
+                alert('Disconnected');
+                window.location = '/';
+            }
         }).discover();
         </script>
     </body>

@@ -3,14 +3,28 @@ window.AsmodeeNet = (->
     settings =
         base_is_host: 'https://account.asmodee.net'
         base_is_path: '/main/v2/oauth'
+        logout_endpoint: '/main/v2/logout'
         base_url: 'https://api.asmodee.net/main/v1'
         client_id: null
-        redirect_uri: null
+        redirect_uri: null,
+        logout_redirect_uri: null,
+        callback_post_logout_redirect: null,
         scope: 'openid+profile'
         response_type: 'id_token token'
 
     access_token = id_token = access_hash = identity_obj = discovery_obj = jwks = code = null
     checkErrors = []
+
+    getCryptoValue = () ->
+        crypto = window.crypto||window.msCrypto
+        rnd = 0
+        res = []
+        if crypto
+            rnd = crypto.getRandomValues(new Uint8Array(30))
+        else
+            rnd = [Math.random()]
+        rnd.forEach( (r) -> res.push(r.toString(36)))
+        return (res.join('')+'00000000000000000').slice(2, 16+2)
 
     disconnect = (callback) ->
         callback ?= false
@@ -82,7 +96,7 @@ window.AsmodeeNet = (->
             if it_dec.iss != settings.base_is_host
                 checkErrors.push 'Invalid issuer'
                 return false
-            if it_dec.aud != settings.client_id
+            if it_dec.aud != settings.client_id && (!Array.isArray(it_dec.aud) || id_dec.aud.indexOf(settings.client_id) == -1)
                 checkErrors.push 'Invalid auditor'
                 return false
             if it_dec.exp < (Date.now()/1000).toPrecision(10)
@@ -101,9 +115,22 @@ window.AsmodeeNet = (->
             return false
         return true
 
+    checkLogoutRedirect = () ->
+        if settings.logout_redirect_uri
+            re = new RegExp(settings.logout_redirect_uri.replace(/([?.+*()])/g, "\\$1"))
+            if re.test(window.location.href)
+                found_state = window.location.href.replace(settings.logout_redirect_uri + '&state=', '').replace(/[&#].*$/, '')
+                if (found_state ==  window.localStorage.getItem 'logout_state') || (!found_state && !window.localStorage.getItem 'logout_state' )
+                    window.localStorage.removeItem 'logout_state'
+                    if settings.callback_post_logout_redirect
+                        settings.callback_post_logout_redirect()
+                    else
+                        window.location = '/'
+
 
     init: (options) ->
         settings = this.extend(settings, options)
+        checkLogoutRedirect()
         this
 
     baseSettings: () ->
@@ -148,6 +175,7 @@ window.AsmodeeNet = (->
             success: (data) ->
                 discovery_obj = data
                 settings.base_is_host = discovery_obj.issuer
+                settings.logout_endpoint = discovery_obj.end_session_endpoint
                 gameThis.getJwks()
             error: () ->
                 console.error "error Discovery ", arguments
@@ -162,8 +190,8 @@ window.AsmodeeNet = (->
                 console.error "error JWKS", arguments
 
     signIn: (options) ->
-        state = (Math.random().toString(36)+'00000000000000000').slice(2, 16+2)
-        nonce = (Math.random().toString(36)+'00000000000000000').slice(2, 16+2)
+        state = getCryptoValue()
+        nonce = getCryptoValue()
         main_cb = options.success || () -> console.log arguments
         error_cb = options.error || () -> console.error 'error', arguments
         options.path = this.auth_endpoint() + '?display=popup&response_type='+
@@ -222,9 +250,15 @@ window.AsmodeeNet = (->
 
     signOut: (options) ->
         if this.isConnected()
-            so_path = options.path || settings.base_is_host + '/signout'
-            cb = options.success || false
-            oauthpopup path: so_path, autoclose: true, callback: () -> disconnect(cb)
+            if settings.logout_redirect_uri
+                state = getCryptoValue()
+                window.localStorage.setItem('logout_state', state)
+                window.location = settings.logout_endpoint +
+                    '?post_logout_redirect_uri='+encodeURI(settings.logout_redirect_uri)+
+                    '&state='+state+
+                    '&id_token_hint='+id_token
+            else
+                disconnect(options.success)
 
     trackCb: (closeit) ->
         closeit ?= true

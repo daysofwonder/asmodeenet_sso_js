@@ -1,1 +1,0 @@
-../dist/gamifyd_sso.min.0.0.8.js

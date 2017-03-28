@@ -140,6 +140,7 @@ window.AsmodeeNet = (->
     defaultSuccessCallback = () -> console.log arguments
     defaultErrorCallback = () -> console.error arguments
 
+    # TODO Code duplicated from inside signIn(), to be deduplicated
     signinCallback = (gameThis) ->
         item = window.localStorage.getItem('gd_connect_hash')
         if !item

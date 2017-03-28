@@ -6,12 +6,16 @@ window.AsmodeeNet = (->
         logout_endpoint: '/main/v2/logout'
         base_url: 'https://api.asmodee.net/main/v1'
         client_id: null
-        redirect_uri: null,
-        logout_redirect_uri: null,
-        callback_post_logout_redirect: null,
+        redirect_uri: null
+        logout_redirect_uri: null
+        callback_post_logout_redirect: null
         scope: 'openid+profile'
         response_type: 'id_token token'
+        display: 'popup'
+        callback_signin_success: defaultSuccessCallback
+        callback_signin_error: defaultErrorCallback
 
+    state = nonce = null
     access_token = id_token = access_hash = identity_obj = discovery_obj = jwks = code = null
     checkErrors = []
 
@@ -34,6 +38,12 @@ window.AsmodeeNet = (->
             callback()
         else
             window.location.reload()
+
+    oauth = (options) ->
+        if settings.display == 'popup'
+            oauthpopup(options)
+        else
+            window.location.assign(options.path)
 
     oauthpopup = (options) ->
         options.width ?= 475
@@ -127,6 +137,44 @@ window.AsmodeeNet = (->
                     else
                         window.location = '/'
 
+    defaultSuccessCallback = () -> console.log arguments
+    defaultErrorCallback = () -> console.error arguments
+
+    # TODO Code duplicated from inside signIn(), to be deduplicated
+    signinCallback = (gameThis) ->
+        item = window.localStorage.getItem('gd_connect_hash')
+        if !item
+            settings.callback_signin_error("popup closed without signin") if settings.display == 'popup'
+        else
+            window.localStorage.removeItem('gd_connect_hash')
+            hash = {}
+            splitted = null
+            if item.search(/^#/) == 0
+                splitted = item.replace(/^#/, '').split('&')
+                for t in splitted
+                    t = t.split('=')
+                    hash[t[0]] = t[1]
+                if hash.token_type && hash.token_type == 'bearer'
+                    state = window.localStorage.getItem('state')
+                    nonce = window.localStorage.getItem('nonce')
+                    if hash.state && hash.state == state
+                        hash.scope = hash.scope.split('+')
+                        checkErrors = []
+                        if checkTokens(nonce, hash)
+                            window.localStorage.removeItem('state')
+                            window.localStorage.removeItem('nonce')
+                            authorized(hash)
+                            gameThis.identity {success: settings.callback_signin_success, error: settings.callback_signin_error}
+                        else
+                            settings.callback_signin_error("Tokens validation issue")
+
+            else if item.search(/^\?/) == 0
+                splitted = item.replace(/^\?/, '').split('&')
+                for t in splitted
+                    t = t.split('=')
+                    hash[t[0]] = t[1]
+                if hash.state && hash.state == state
+                    settings.callback_signin_error(hash.error + ' : ' + hash.error_description.replace(/\+/g, ' '))
 
     init: (options) ->
         settings = this.extend(settings, options)
@@ -181,29 +229,39 @@ window.AsmodeeNet = (->
                 console.error "error Discovery ", arguments
 
     getJwks: () ->
+        gameThis = this
         this.get '',
             base_url: discovery_obj.jwks_uri
             auth: false
             success: (data) ->
                 jwks = data.keys
+                if settings.display != 'popup'
+                    signinCallback gameThis
             error: () ->
                 console.error "error JWKS", arguments
 
     signIn: (options) ->
         state = getCryptoValue()
         nonce = getCryptoValue()
-        main_cb = options.success || () -> console.log arguments
-        error_cb = options.error || () -> console.error 'error', arguments
-        options.path = this.auth_endpoint() + '?display=popup&response_type='+
-            encodeURI(settings.response_type)+
-            '&state='+state+'&client_id='+
-            settings.client_id+'&redirect_uri='+
-            encodeURI(settings.redirect_uri)+'&scope='+settings.scope
+        window.localStorage.setItem('state', state)
+        window.localStorage.setItem('nonce', nonce)
+        settings.callback_signin_success = options.success || settings.callback_signin_success
+        settings.callback_signin_error = options.error || settings.callback_signin_error
+        options.path = this.auth_endpoint() +
+            '?display=' + settings.display +
+            '&response_type=' + encodeURI(settings.response_type) +
+            '&state=' + state +
+            '&client_id=' + settings.client_id +
+            '&redirect_uri=' + encodeURI(settings.redirect_uri) +
+            '&scope=' + settings.scope
         options.path += '&nonce='+nonce if settings.response_type.search('id_token') >= 0
-        gameThis= this
-        pr_callback = () ->
+
+        gameThis = this
+        options.callback = () ->
             item = window.localStorage.getItem('gd_connect_hash')
-            if item
+            if !item
+                settings.callback_signin_error("popup closed without signin") if settings.display == 'popup'
+            else
                 window.localStorage.removeItem('gd_connect_hash')
                 hash = {}
                 splitted = null
@@ -213,14 +271,18 @@ window.AsmodeeNet = (->
                         t = t.split('=')
                         hash[t[0]] = t[1]
                     if hash.token_type && hash.token_type == 'bearer'
+                        state = window.localStorage.getItem('state')
+                        nonce = window.localStorage.getItem('nonce')
                         if hash.state && hash.state == state
                             hash.scope = hash.scope.split('+')
                             checkErrors = []
                             if checkTokens(nonce, hash)
+                                window.localStorage.removeItem('state')
+                                window.localStorage.removeItem('nonce')
                                 authorized(hash)
-                                gameThis.identity {success: main_cb, error: error_cb}
+                                gameThis.identity {success: settings.callback_signin_success, error: settings.callback_signin_error}
                             else
-                                error_cb("Tokens validation issue")
+                                settings.callback_signin_error("Tokens validation issue")
 
                 else if item.search(/^\?/) == 0
                     splitted = item.replace(/^\?/, '').split('&')
@@ -228,12 +290,9 @@ window.AsmodeeNet = (->
                         t = t.split('=')
                         hash[t[0]] = t[1]
                     if hash.state && hash.state == state
-                        error_cb(hash.error + ' : ' + hash.error_description.replace(/\+/g, ' '))
-            else
-                error_cb("popup closed without signin")
+                        settings.callback_signin_error(hash.error + ' : ' + hash.error_description.replace(/\+/g, ' '))
 
-        options.callback = pr_callback
-        oauthpopup(options)
+        oauth(options)
 
     identity: (options) ->
         if this.isConnected() && identity_obj
@@ -262,12 +321,15 @@ window.AsmodeeNet = (->
 
     trackCb: (closeit) ->
         closeit ?= true
+
+        if window.location.hash != ""
+            window.localStorage.setItem('gd_connect_hash', window.location.hash)
+        else if window.location.search != ""
+            window.localStorage.setItem('gd_connect_hash', window.location.search)
+
         if window.name == 'AsmodeeNetConnectWithOAuth'
-            if window.location.hash != ""
-                window.localStorage.setItem('gd_connect_hash', window.location.hash)
-            else if window.location.search != ""
-                window.localStorage.setItem('gd_connect_hash', window.location.search)
             window.close() if closeit
+
 )()
 if typeof window.AN == 'undefined'
     window.AN = window.AsmodeeNet

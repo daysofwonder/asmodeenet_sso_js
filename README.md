@@ -62,7 +62,7 @@ console.log(decoded);
  console.log(headers);
 
  /* prints:
-  * { typ: "JWT",  
+  * { typ: "JWT",
   *   alg: "RS256" }
   */
 
@@ -95,6 +95,12 @@ Available paramters:
 * **scope** *string* Optional, default is 'openid+profile'. Value could be a list of `+` separate word: openid, profile, email, adress, public, private. Openid scope is mandatory if you use response_type id_token (and this is one or couple 'token id_token' are strongly advised)
 * **base_is_host** *string* Optional, URL of the AN Identity Server. By default, it's https://account.asmodee.net but you can set https://account.staging.asmodee.net for your test by ex.
 * **base_is_path** *string* Optional. This should be used, in futur, to use an other version of the IS oAuth API. default /main/v2/oauth.
+* **display** *string* Optional. Defines the way the OAuth flow should be handled. Possible values are `popup`, `touch` and `page`:
+ * `popup` opens a popup which dimensions can be set up with the `signIn()` method (see below);
+ * `touch` keeps the user in the same window or tab and provides a clean layout for the login page, suitable for mobile displays (phones or tablets);
+ * `page` keeps the user in the same window or tab and provides a standard layout for the login page.
+* **callback_signin_success** *callback* Optional. The function to call after a successful sign-in. Default is `console.log`.
+* **callback_signin_error** *callback* Optional. The function to call after an unsuccessful sign-in. Default is `console.error`.
 
 ##### Discover
 
@@ -113,13 +119,14 @@ This method will query the Identity Server to get the openid-configuration file,
 
 After this moment you could try to Sign in with the method signIn which take 1 parameter, an object with following entries:
 
- * success callback
- * error callback
+ * success callback (default: `callback_signin_success`, see above)
+ * error callback (default: `callback_signin_error`, see above)
  * width of the popup (default: 475px)
  * height of the popup (default: 500px)
 
  All are optionals.
 
+ **Note:** When using a display flow other than `popup`, the success and error callbacks passed to `signIn()` will not be called, so you **have** to use `init()` to set those up in such cases.
 
 ```javascript
 AsmodeeNet.signIn({

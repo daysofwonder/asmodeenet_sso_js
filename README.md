@@ -96,8 +96,8 @@ Available paramters:
 * **base_is_host** *string* Optional, URL of the AN Identity Server. By default, it's https://account.asmodee.net but you can set https://account.staging.asmodee.net for your test by ex.
 * **base_is_path** *string* Optional. This should be used, in futur, to use an other version of the IS oAuth API. default /main/v2/oauth.
 * **display** *string* Optional. Defines the way the OAuth flow should be handled. Possible values are `popup` (which conveniently opens a popup), and `touch` (which keeps the flow in the same window). Default is `popup`.
-* **callback_signin_success** Optional. The function to call after a successful sign-in. Default is `console.log`.
-* **callback_signin_error** Optional. The function to call after an unsuccessful sign-in. Default is `console.error`.
+* **callback_signin_success** *callback* Optional. The function to call after a successful sign-in. Default is `console.log`.
+* **callback_signin_error** *callback* Optional. The function to call after an unsuccessful sign-in. Default is `console.error`.
 
 ##### Discover
 

@@ -321,12 +321,12 @@ window.AsmodeeNet = (->
     trackCb: (closeit) ->
         closeit ?= true
 
-        if window.name == 'AsmodeeNetConnectWithOAuth'
-            if window.location.hash != ""
-                window.localStorage.setItem('gd_connect_hash', window.location.hash)
-            else if window.location.search != ""
-                window.localStorage.setItem('gd_connect_hash', window.location.search)
+        if window.location.hash != ""
+            window.localStorage.setItem('gd_connect_hash', window.location.hash)
+        else if window.location.search != ""
+            window.localStorage.setItem('gd_connect_hash', window.location.search)
 
+        if window.name == 'AsmodeeNetConnectWithOAuth'
             window.close() if closeit
 
 )()

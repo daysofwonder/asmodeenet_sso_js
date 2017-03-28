@@ -1,6 +1,6 @@
 (function() {
   window.AsmodeeNet = (function() {
-    var access_hash, access_token, authorized, catHashCheck, checkErrors, checkLogoutRedirect, checkTokens, code, disconnect, discovery_obj, getCryptoValue, id_token, identity_obj, jwks, oauthpopup, settings;
+    var access_hash, access_token, authorized, catHashCheck, checkErrors, checkLogoutRedirect, checkTokens, code, defaultErrorCallback, defaultSuccessCallback, disconnect, discovery_obj, getCryptoValue, id_token, identity_obj, jwks, nonce, oauth, oauthpopup, settings, signinCallback, state;
     settings = {
       base_is_host: 'https://account.asmodee.net',
       base_is_path: '/main/v2/oauth',
@@ -11,8 +11,12 @@
       logout_redirect_uri: null,
       callback_post_logout_redirect: null,
       scope: 'openid+profile',
-      response_type: 'id_token token'
+      response_type: 'id_token token',
+      display: 'popup',
+      callback_signin_success: defaultSuccessCallback,
+      callback_signin_error: defaultErrorCallback
     };
+    state = nonce = null;
     access_token = id_token = access_hash = identity_obj = discovery_obj = jwks = code = null;
     checkErrors = [];
     getCryptoValue = function() {
@@ -40,6 +44,13 @@
         return callback();
       } else {
         return window.location.reload();
+      }
+    };
+    oauth = function(options) {
+      if (settings.display === 'popup') {
+        return oauthpopup(options);
+      } else {
+        return window.location.assign(options.path);
       }
     };
     oauthpopup = function(options) {
@@ -182,6 +193,62 @@
         }
       }
     };
+    defaultSuccessCallback = function() {
+      return console.log(arguments);
+    };
+    defaultErrorCallback = function() {
+      return console.error(arguments);
+    };
+    signinCallback = function(gameThis) {
+      var hash, i, item, j, len, len1, splitted, t;
+      item = window.localStorage.getItem('gd_connect_hash');
+      if (!item) {
+        if (settings.display === 'popup') {
+          return settings.callback_signin_error("popup closed without signin");
+        }
+      } else {
+        window.localStorage.removeItem('gd_connect_hash');
+        hash = {};
+        splitted = null;
+        if (item.search(/^#/) === 0) {
+          splitted = item.replace(/^#/, '').split('&');
+          for (i = 0, len = splitted.length; i < len; i++) {
+            t = splitted[i];
+            t = t.split('=');
+            hash[t[0]] = t[1];
+          }
+          if (hash.token_type && hash.token_type === 'bearer') {
+            state = window.localStorage.getItem('state');
+            nonce = window.localStorage.getItem('nonce');
+            if (hash.state && hash.state === state) {
+              hash.scope = hash.scope.split('+');
+              checkErrors = [];
+              if (checkTokens(nonce, hash)) {
+                window.localStorage.removeItem('state');
+                window.localStorage.removeItem('nonce');
+                authorized(hash);
+                return gameThis.identity({
+                  success: settings.callback_signin_success,
+                  error: settings.callback_signin_error
+                });
+              } else {
+                return settings.callback_signin_error("Tokens validation issue");
+              }
+            }
+          }
+        } else if (item.search(/^\?/) === 0) {
+          splitted = item.replace(/^\?/, '').split('&');
+          for (j = 0, len1 = splitted.length; j < len1; j++) {
+            t = splitted[j];
+            t = t.split('=');
+            hash[t[0]] = t[1];
+          }
+          if (hash.state && hash.state === state) {
+            return settings.callback_signin_error(hash.error + ' : ' + hash.error_description.replace(/\+/g, ' '));
+          }
+        }
+      }
+    };
     return {
       init: function(options) {
         settings = this.extend(settings, options);
@@ -268,11 +335,16 @@
         });
       },
       getJwks: function() {
+        var gameThis;
+        gameThis = this;
         return this.get('', {
           base_url: discovery_obj.jwks_uri,
           auth: false,
           success: function(data) {
-            return jwks = data.keys;
+            jwks = data.keys;
+            if (settings.display !== 'popup') {
+              return signinCallback(gameThis);
+            }
           },
           error: function() {
             return console.error("error JWKS", arguments);
@@ -280,24 +352,26 @@
         });
       },
       signIn: function(options) {
-        var error_cb, gameThis, main_cb, nonce, pr_callback, state;
+        var gameThis;
         state = getCryptoValue();
         nonce = getCryptoValue();
-        main_cb = options.success || function() {
-          return console.log(arguments);
-        };
-        error_cb = options.error || function() {
-          return console.error('error', arguments);
-        };
-        options.path = this.auth_endpoint() + '?display=popup&response_type=' + encodeURI(settings.response_type) + '&state=' + state + '&client_id=' + settings.client_id + '&redirect_uri=' + encodeURI(settings.redirect_uri) + '&scope=' + settings.scope;
+        window.localStorage.setItem('state', state);
+        window.localStorage.setItem('nonce', nonce);
+        settings.callback_signin_success = options.success || settings.callback_signin_success;
+        settings.callback_signin_error = options.error || settings.callback_signin_error;
+        options.path = this.auth_endpoint() + '?display=' + settings.display + '&response_type=' + encodeURI(settings.response_type) + '&state=' + state + '&client_id=' + settings.client_id + '&redirect_uri=' + encodeURI(settings.redirect_uri) + '&scope=' + settings.scope;
         if (settings.response_type.search('id_token') >= 0) {
           options.path += '&nonce=' + nonce;
         }
         gameThis = this;
-        pr_callback = function() {
+        options.callback = function() {
           var hash, i, item, j, len, len1, splitted, t;
           item = window.localStorage.getItem('gd_connect_hash');
-          if (item) {
+          if (!item) {
+            if (settings.display === 'popup') {
+              return settings.callback_signin_error("popup closed without signin");
+            }
+          } else {
             window.localStorage.removeItem('gd_connect_hash');
             hash = {};
             splitted = null;
@@ -309,17 +383,21 @@
                 hash[t[0]] = t[1];
               }
               if (hash.token_type && hash.token_type === 'bearer') {
+                state = window.localStorage.getItem('state');
+                nonce = window.localStorage.getItem('nonce');
                 if (hash.state && hash.state === state) {
                   hash.scope = hash.scope.split('+');
                   checkErrors = [];
                   if (checkTokens(nonce, hash)) {
+                    window.localStorage.removeItem('state');
+                    window.localStorage.removeItem('nonce');
                     authorized(hash);
                     return gameThis.identity({
-                      success: main_cb,
-                      error: error_cb
+                      success: settings.callback_signin_success,
+                      error: settings.callback_signin_error
                     });
                   } else {
-                    return error_cb("Tokens validation issue");
+                    return settings.callback_signin_error("Tokens validation issue");
                   }
                 }
               }
@@ -331,15 +409,12 @@
                 hash[t[0]] = t[1];
               }
               if (hash.state && hash.state === state) {
-                return error_cb(hash.error + ' : ' + hash.error_description.replace(/\+/g, ' '));
+                return settings.callback_signin_error(hash.error + ' : ' + hash.error_description.replace(/\+/g, ' '));
               }
             }
-          } else {
-            return error_cb("popup closed without signin");
           }
         };
-        options.callback = pr_callback;
-        return oauthpopup(options);
+        return oauth(options);
       },
       identity: function(options) {
         if (this.isConnected() && identity_obj) {
@@ -365,7 +440,6 @@
         }
       },
       signOut: function(options) {
-        var state;
         if (this.isConnected()) {
           if (settings.logout_redirect_uri) {
             state = getCryptoValue();

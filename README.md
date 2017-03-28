@@ -123,8 +123,7 @@ After this moment you could try to Sign in with the method signIn which take 1 p
 
  All are optionals.
 
- **Note:** When using a display flow other than `popup`, the success and error callbacks passed to `signIn()` will not be called, so you **have** to use `init()` to set these up in such cases.
-
+ **Note:** When using a display flow other than `popup`, the success and error callbacks passed to `signIn()` will not be called, so you **have** to use `init()` to set those up in such cases.
 
 ```javascript
 AsmodeeNet.signIn({

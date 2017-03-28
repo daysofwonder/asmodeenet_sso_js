@@ -3,7 +3,7 @@
         <script>document.write('<script src="an_sso.min.0.2.0.js?dev=' + Math.floor(Math.random() * 100) + '"\><\/script>');</script>
     </head>
     <body>
-        <script>AsmodeeNet.trackCb();</script>
+        <script>AsmodeeNet.trackCb(false);</script>
         <button id="connect_bt">Sign In</button>
         <div id="profile" style="display:none;">
             <button id="disconnect_bt">Sign Out</button> -
@@ -66,11 +66,16 @@
             base_is_host: 'https://account.asmodee.net',
             scope: 'openid+email+address+public',
             response_type: 'code id_token token',
+            display: 'popup',
             logout_redirect_uri: 'http://localhost:8080/?logout_redirect=1',
             // if next callback for RP logout openid's feature is not provided, the AsmodeeNet SSO lib, redirect the user to the root ('/') of the current host
             callback_post_logout_redirect: function() {
                 alert('Disconnected');
                 window.location = '/';
+            },
+            callback_signin_success: signed,
+            callback_signin_error: function() {
+                echo("SIGNIN ERROR", arguments);
             }
         }).discover();
         </script>

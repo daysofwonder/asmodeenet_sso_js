@@ -62,7 +62,7 @@ console.log(decoded);
  console.log(headers);
 
  /* prints:
-  * { typ: "JWT",  
+  * { typ: "JWT",
   *   alg: "RS256" }
   */
 
@@ -95,7 +95,10 @@ Available paramters:
 * **scope** *string* Optional, default is 'openid+profile'. Value could be a list of `+` separate word: openid, profile, email, adress, public, private. Openid scope is mandatory if you use response_type id_token (and this is one or couple 'token id_token' are strongly advised)
 * **base_is_host** *string* Optional, URL of the AN Identity Server. By default, it's https://account.asmodee.net but you can set https://account.staging.asmodee.net for your test by ex.
 * **base_is_path** *string* Optional. This should be used, in futur, to use an other version of the IS oAuth API. default /main/v2/oauth.
-* **display** *string* Optional. Defines the way the OAuth flow should be handled. Possible values are `popup` (which conveniently opens a popup), and `touch` (which keeps the flow in the same window). Default is `popup`.
+* **display** *string* Optional. Defines the way the OAuth flow should be handled. Possible values are `popup`, `touch` and `page`:
+ * `popup` opens a popup which dimensions can be set up with the `signIn()` method (see below);
+ * `touch` keeps the user in the same window or tab and provides a clean layout for the login page, suitable for mobile displays (phones or tablets);
+ * `page` keeps the user in the same window or tab and provides a standard layout for the login page.
 * **callback_signin_success** *callback* Optional. The function to call after a successful sign-in. Default is `console.log`.
 * **callback_signin_error** *callback* Optional. The function to call after an unsuccessful sign-in. Default is `console.error`.
 

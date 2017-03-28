@@ -95,6 +95,9 @@ Available paramters:
 * **scope** *string* Optional, default is 'openid+profile'. Value could be a list of `+` separate word: openid, profile, email, adress, public, private. Openid scope is mandatory if you use response_type id_token (and this is one or couple 'token id_token' are strongly advised)
 * **base_is_host** *string* Optional, URL of the AN Identity Server. By default, it's https://account.asmodee.net but you can set https://account.staging.asmodee.net for your test by ex.
 * **base_is_path** *string* Optional. This should be used, in futur, to use an other version of the IS oAuth API. default /main/v2/oauth.
+* **display** *string* Optional. Defines the way the OAuth flow should be handled. Possible values are `popup` (which conveniently opens a popup), and `touch` (which keeps the flow in the same window). Default is `popup`.
+* **callback_signin_success** Optional. The function to call after a successful sign-in. Default is `console.log`.
+* **callback_signin_error** Optional. The function to call after an unsuccessful sign-in. Default is `console.error`.
 
 ##### Discover
 
@@ -113,12 +116,14 @@ This method will query the Identity Server to get the openid-configuration file,
 
 After this moment you could try to Sign in with the method signIn which take 1 parameter, an object with following entries:
 
- * success callback
- * error callback
+ * success callback (default: `callback_signin_success`, see above)
+ * error callback (default: `callback_signin_error`, see above)
  * width of the popup (default: 475px)
  * height of the popup (default: 500px)
 
  All are optionals.
+
+ **Note:** When using a display flow other than `popup`, the success and error callbacks passed to `signIn()` will not be called, so you **have** to use `init()` to set these up in such cases.
 
 
 ```javascript

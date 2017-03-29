@@ -7,11 +7,13 @@ window.AsmodeeNet = (->
         base_url: 'https://api.asmodee.net/main/v1'
         client_id: null
         redirect_uri: null
+        cancel_uri: null
         logout_redirect_uri: null
         callback_post_logout_redirect: null
         scope: 'openid+profile'
         response_type: 'id_token token'
         display: 'popup'
+        display_options: {}
         callback_signin_success: defaultSuccessCallback
         callback_signin_error: defaultErrorCallback
 
@@ -176,8 +178,24 @@ window.AsmodeeNet = (->
                 if hash.state && hash.state == state
                     settings.callback_signin_error(hash.error + ' : ' + hash.error_description.replace(/\+/g, ' '))
 
+    checkDisplayOptions = () ->
+        if Object.keys(settings.display_options).length > 0
+            if settings.display in ['touch', 'popup']
+                tmpopts = {noheader: false, nofooter: false, lnk2bt: false, leglnk: true}
+                for opt, val of settings.display_options
+                    delete settings.display_options[opt] unless opt in Object.keys(tmpopts)
+                if Object.keys(settings.display_options).length > 0
+                    settings.display_options = AsmodeeNet.extend tmpopts, settings.display_options
+            else
+                settings.display_options = {}
+        if settings.display == 'touch'
+            if Object.keys(settings.display_options).length == 0
+                settings.display_options = {noheader: true, nofooter: true, lnk2bt: true, leglnk: false}
+            settings.cancel_uri = settings.redirect_uri if !settings.cancel_uri
+
     init: (options) ->
         settings = this.extend(settings, options)
+        checkDisplayOptions()
         checkLogoutRedirect()
         this
 
@@ -255,6 +273,10 @@ window.AsmodeeNet = (->
             '&redirect_uri=' + encodeURI(settings.redirect_uri) +
             '&scope=' + settings.scope
         options.path += '&nonce='+nonce if settings.response_type.search('id_token') >= 0
+        if Object.keys(settings.display_options).length > 0
+            for k,v of settings.display_options
+                options.path += '&display_opts['+k+']='+ if v then '1' else '0'
+        options.path += '&cancel_uri=' + encodeURI(settings.cancel_uri) unless settings.cancel_uri is null
 
         gameThis = this
         options.callback = () ->

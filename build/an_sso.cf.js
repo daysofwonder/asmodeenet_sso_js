@@ -1,6 +1,8 @@
 (function() {
+  var indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+
   window.AsmodeeNet = (function() {
-    var access_hash, access_token, authorized, catHashCheck, checkErrors, checkLogoutRedirect, checkTokens, code, defaultErrorCallback, defaultSuccessCallback, disconnect, discovery_obj, getCryptoValue, id_token, identity_obj, jwks, nonce, oauth, oauthpopup, settings, signinCallback, state;
+    var access_hash, access_token, authorized, catHashCheck, checkDisplayOptions, checkErrors, checkLogoutRedirect, checkTokens, code, defaultErrorCallback, defaultSuccessCallback, disconnect, discovery_obj, getCryptoValue, id_token, identity_obj, jwks, nonce, oauth, oauthpopup, settings, signinCallback, state;
     settings = {
       base_is_host: 'https://account.asmodee.net',
       base_is_path: '/main/v2/oauth',
@@ -8,11 +10,13 @@
       base_url: 'https://api.asmodee.net/main/v1',
       client_id: null,
       redirect_uri: null,
+      cancel_uri: null,
       logout_redirect_uri: null,
       callback_post_logout_redirect: null,
       scope: 'openid+profile',
       response_type: 'id_token token',
       display: 'popup',
+      display_options: {},
       callback_signin_success: defaultSuccessCallback,
       callback_signin_error: defaultErrorCallback
     };
@@ -249,9 +253,48 @@
         }
       }
     };
+    checkDisplayOptions = function() {
+      var opt, ref, ref1, tmpopts, val;
+      if (Object.keys(settings.display_options).length > 0) {
+        if ((ref = settings.display) === 'touch' || ref === 'popup') {
+          tmpopts = {
+            noheader: false,
+            nofooter: false,
+            lnk2bt: false,
+            leglnk: true
+          };
+          ref1 = settings.display_options;
+          for (opt in ref1) {
+            val = ref1[opt];
+            if (indexOf.call(Object.keys(tmpopts), opt) < 0) {
+              delete settings.display_options[opt];
+            }
+          }
+          if (Object.keys(settings.display_options).length > 0) {
+            settings.display_options = AsmodeeNet.extend(tmpopts, settings.display_options);
+          }
+        } else {
+          settings.display_options = {};
+        }
+      }
+      if (settings.display === 'touch') {
+        if (Object.keys(settings.display_options).length === 0) {
+          settings.display_options = {
+            noheader: true,
+            nofooter: true,
+            lnk2bt: true,
+            leglnk: false
+          };
+        }
+        if (!settings.cancel_uri) {
+          return settings.cancel_uri = settings.redirect_uri;
+        }
+      }
+    };
     return {
       init: function(options) {
         settings = this.extend(settings, options);
+        checkDisplayOptions();
         checkLogoutRedirect();
         return this;
       },
@@ -352,7 +395,7 @@
         });
       },
       signIn: function(options) {
-        var gameThis;
+        var gameThis, k, ref, v;
         state = getCryptoValue();
         nonce = getCryptoValue();
         window.localStorage.setItem('state', state);
@@ -362,6 +405,16 @@
         options.path = this.auth_endpoint() + '?display=' + settings.display + '&response_type=' + encodeURI(settings.response_type) + '&state=' + state + '&client_id=' + settings.client_id + '&redirect_uri=' + encodeURI(settings.redirect_uri) + '&scope=' + settings.scope;
         if (settings.response_type.search('id_token') >= 0) {
           options.path += '&nonce=' + nonce;
+        }
+        if (Object.keys(settings.display_options).length > 0) {
+          ref = settings.display_options;
+          for (k in ref) {
+            v = ref[k];
+            options.path += '&display_opts[' + k + ']=' + (v ? '1' : '0');
+          }
+        }
+        if (settings.cancel_uri !== null) {
+          options.path += '&cancel_uri=' + encodeURI(settings.cancel_uri);
         }
         gameThis = this;
         options.callback = function() {

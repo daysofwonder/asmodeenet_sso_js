@@ -1,6 +1,6 @@
 <html>
     <head>
-        <script>document.write('<script src="an_sso.min.0.2.1.js?dev=' + Math.floor(Math.random() * 100) + '"\><\/script>');</script>
+        <script>document.write('<script src="an_sso.min.0.2.2.js?dev=' + Math.floor(Math.random() * 100) + '"\><\/script>');</script>
     </head>
     <body>
         <script>AsmodeeNet.trackCb(false);</script>
@@ -61,12 +61,19 @@
         AsmodeeNet.init({
             // Required parameters
             client_id: 'test_direct', //'openid-dow',
-            redirect_uri: 'http://localhost:8080/cbpop.html',
+            redirect_uri: 'http://localhost:8080/',
+            cancel_uri: 'http://localhost:8080/?cancel=1',
             // Example of optional parameters
             base_is_host: 'https://account.asmodee.net',
             scope: 'openid+email+address+public',
             response_type: 'code id_token token',
-            display: 'popup',
+            display: 'touch',
+            // display_options: {
+            //     noheader: true,
+            //     lnk2bt: true,
+            //     nofooter: true,
+            //     leglnk: false
+            // },
             logout_redirect_uri: 'http://localhost:8080/?logout_redirect=1',
             // if next callback for RP logout openid's feature is not provided, the AsmodeeNet SSO lib, redirect the user to the root ('/') of the current host
             callback_post_logout_redirect: function() {

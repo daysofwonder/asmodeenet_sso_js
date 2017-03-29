@@ -89,6 +89,7 @@ You could override default other paramters by pass it in this init method.
 Available paramters:
 * **client_id** *string*
 * **redirect_uri** *string*
+* **cancel_uri** *sting* Optional. Used if `display` set to `touch` or `popup` and `display_options.lnk2bt` is true. In this case, if `cancel_uri` is not set, it takes the value of redirect_uri. This value well passed to IS to be use in cancel's link if the user cancel the signin/signup and so comeback.
 * **logout_redirect_uri** *string*
 * **callback_post_logout_redirect** *callback*
 * **response_type** *string* Optional, default is 'token id_token'. Values could be : token, id_token or both space separate
@@ -99,6 +100,16 @@ Available paramters:
  * `popup` opens a popup which dimensions can be set up with the `signIn()` method (see below);
  * `touch` keeps the user in the same window or tab and provides a clean layout for the login page, suitable for mobile displays (phones or tablets);
  * `page` keeps the user in the same window or tab and provides a standard layout for the login page.
+* **display_options** *object* Optional. Defines some display options for signin/signup pages of IS. Usable with `display` at `popup` or `touch`. Available options are:
+    * `noheader` **boolean** Default false. If true, navbar and header of IS pages don't be displayed
+    * `nofooter` **boolean** Default false. If true, footer of IS pages don't be displayed
+    * `lnk2bt`   **boolean** Default false. If true, Some link of formules will be transformed in button.
+    * `leglnk`   **boolean** Default true. If false, some legals link don't be displayed
+  If you set `display` to `touch`, and don't set this options `display_options`, their options are set to:
+    * `noheader` to true
+    * `nofooter` to true
+    * `lnk2bt`   to true
+    * `leglnk`   to false
 * **callback_signin_success** *callback* Optional. The function to call after a successful sign-in. Default is `console.log`.
 * **callback_signin_error** *callback* Optional. The function to call after an unsuccessful sign-in. Default is `console.error`.
 

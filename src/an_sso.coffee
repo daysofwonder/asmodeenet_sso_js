@@ -270,13 +270,13 @@ window.AsmodeeNet = (->
             '&response_type=' + encodeURI(settings.response_type) +
             '&state=' + state +
             '&client_id=' + settings.client_id +
-            '&redirect_uri=' + encodeURI(settings.redirect_uri) +
             '&scope=' + settings.scope
+        options.path += '&redirect_uri=' + encodeURI(settings.redirect_uri) if settings.redirect_uri
         options.path += '&nonce='+nonce if settings.response_type.search('id_token') >= 0
         if Object.keys(settings.display_options).length > 0
             for k,v of settings.display_options
                 options.path += '&display_opts['+k+']='+ if v then '1' else '0'
-        options.path += '&cancel_uri=' + encodeURI(settings.cancel_uri) unless settings.cancel_uri is null
+        options.path += '&cancel_uri=' + encodeURI(settings.cancel_uri) if settings.cancel_uri
 
         gameThis = this
         options.callback = () ->

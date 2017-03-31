@@ -402,7 +402,10 @@
         window.localStorage.setItem('nonce', nonce);
         settings.callback_signin_success = options.success || settings.callback_signin_success;
         settings.callback_signin_error = options.error || settings.callback_signin_error;
-        options.path = this.auth_endpoint() + '?display=' + settings.display + '&response_type=' + encodeURI(settings.response_type) + '&state=' + state + '&client_id=' + settings.client_id + '&redirect_uri=' + encodeURI(settings.redirect_uri) + '&scope=' + settings.scope;
+        options.path = this.auth_endpoint() + '?display=' + settings.display + '&response_type=' + encodeURI(settings.response_type) + '&state=' + state + '&client_id=' + settings.client_id + '&scope=' + settings.scope;
+        if (settings.redirect_uri) {
+          options.path += '&redirect_uri=' + encodeURI(settings.redirect_uri);
+        }
         if (settings.response_type.search('id_token') >= 0) {
           options.path += '&nonce=' + nonce;
         }
@@ -413,7 +416,7 @@
             options.path += '&display_opts[' + k + ']=' + (v ? '1' : '0');
           }
         }
-        if (settings.cancel_uri !== null) {
+        if (settings.cancel_uri) {
           options.path += '&cancel_uri=' + encodeURI(settings.cancel_uri);
         }
         gameThis = this;

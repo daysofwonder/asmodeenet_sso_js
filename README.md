@@ -104,9 +104,9 @@ Parameters:
 * **redirect_uri** *string* Mandatory. The redirection URI.
 * **cancel_uri** *string* Optional. Used only if `display` is set to `touch` or `popup` and `display_options.lnk2bt` is true. In this case, if `cancel_uri` is not set, it takes the value of redirect_uri. This value will be used by the Identity Server for the cancel button. See the `display` and `display_options` parameters for more information.
 * **logout_redirect_uri** *string* Optional.
-* **callback_post_logout_redirect** *callback* Optional. This URI will be called after a logout.
-* **response_type** *string* Optional, default is `'token id_token'`. Values can be: `token`, `id_token` or both as space-separated words. We strongly recommend that you use the default value.
-* **scope** *string* Optional, default is `'openid+profile'`. Value could be a list of `+` separated wordd: `openid`, `profile`, `email`, `address`, `public`, and `private`. The `openid` scope is mandatory if you use the `id_token` response_type.
+* **callback_post_logout_redirect** *callback* Optional. This callback function will be called after a logout.
+* **response_type** *string* Optional, default is `'token id_token'`. Values can be: `code`, `token`, `id_token` or any space-separated combination. We strongly recommend that you use the default combination value.
+* **scope** *string* Optional, default is `'openid+profile'`. Value could be a list of `+` separated words: `openid`, `profile`, `email`, `address`, `public`, and `private`. The `openid` scope is mandatory if you use the `id_token` response_type. Use the `private` scope if you intend to access the user's private data using the REST API later on.
 * **base_is_host** *string* Optional, URL of the AN Identity Server. By default, it's https://account.asmodee.net but you can set it to https://account.staging.asmodee.net if you perform tests on our staging server. We still recommend that you test on our production server: it does not cost anything to create a test account at https://account.asmodee.net and you will be sure that what you do actually works in production. 
 * **base_is_path** *string* Optional. May be used in the future to use another version of the IS OAuth API. Default is `/main/v2/oauth`.
 * **display** *string* Optional. Defines the way the user workflow should be handled. Possible values are `popup`, `touch` and `page`:
@@ -224,7 +224,7 @@ Therefore, you **must** call trackCb if you want the whole thing to work when re
 
 If you are looking for a super simple popup example, look at the [examples/index.html](examples/index.html) and [examples/cbpop.html](examples/cbpop.html) files.
 
-Note that it's OK to place the call to trackCb at teh very top of your HTML page (i.e. even before calling Asmodee.init() ). This will ensure the fastest closing of the popup window. The code is smart enough to work even without the initialization yet.
+Note that it's OK to place the call to trackCb at the very top of your HTML page (i.e. even before calling Asmodee.init() ). This will ensure the fastest closing of the popup window. The code is smart enough to work even without the initialization yet.
 
 Please note that the OpenID Connect specifications require the connection data to be returned as an anchor in the redirect_uri. As a result, server-code won't be exposed to them.  
 
@@ -234,7 +234,7 @@ Please note that the OpenID Connect specifications require the connection data t
 
 The Asmodee.net Identity Server supports the RP logout OpenID Connect feature. Therefore you can simply call the `signOut()` method to log out the user.
 
-The IS `end_session` endpoint (described in the IS OpenId configuration discovery document) will be called. The user will be disconnect from the Asmodee.net Identity Server and redirected on your post-logout redirect uri (passed in parameters in the `init` method and set in your application configuration in the Studio Manager).
+The IS `end_session` endpoint (described in the IS OpenID configuration discovery document) will be called. The user will be disconnect from the Asmodee.net Identity Server and redirected on your post-logout redirect uri (passed in parameters in the `init` method and set in your application configuration in the Studio Manager).
 
 
 If a JS callback is provided in the init setting (`callback_post_logout_redirect`), it will be called in return of the IS in case of success.

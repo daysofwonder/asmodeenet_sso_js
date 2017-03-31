@@ -120,12 +120,14 @@ Parameters:
     * `leglnk` **boolean**. If false, legals links are not displayed.
 
 Default values:
+
 | `display` value | `noheader` | `nofooter` | `lnk2bt` | `leglnk` |
 |:---------------:|:----------:|:----------:|:--------:|:--------:|
 | `popup` | false | false | false | true |
 | `touch` | true | true | true | false |
 | `page` | n/a | n/a | n/a | n/a |
-    
+
+
 * **callback_signin_success** *callback* Optional. The JS function to call after a successful sign-in. Default is `console.log`.
 * **callback_signin_error** *callback* Optional. The JS function to call after an unsuccessful sign-in. Default is `console.error`.
 
@@ -283,11 +285,7 @@ If you want your backend to dialog with the Identity Server or API of Asmodee.ne
 
 This is accomplished by creating another app in the Studio Manager, with another client_id and its own client_secret. You can do this in your callback page.
 
-??? following paragraph to review ???
-
-In the popup HTML code, call the _trackCb_ with parameter `close` set to *false*, or your replacement for it, initialize normal flow openid/oauth (not the implicit flow) for your backend with your client_id/client_secret couple, and so another redirect inside the popup itself on IS. But the user just have already a valid session opened, so the IS call the callback page directly for this 2nd client_id, and you have your backend authorization. And so, you can close the popup.
-
-Your backend is authorized with its own access_token, and your client too.
+As explained above in the `trackCb()` function, if you are in popup mode and that you perform a server-to-server authentication (OpenID Connect hybrid flow), you will want to keep the pop-up window open until the authentication completes. To do this, remember to set the `close` parameter to false when calling  `trackCb()`.
 
 ## Example
 

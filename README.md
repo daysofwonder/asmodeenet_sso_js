@@ -11,7 +11,7 @@ An OpenID Connect library that connects to the **Asmodee.net** Identity Server (
     * [Initialization](#initialization)
     * [Discover](#discover)
     * [Sign-in](#sign-in)
-    * [trackCb](#trackCb)
+    * [trackCb](#trackcb)
     * [Sign-out](#sign-out)
         * [RP Logout](#rp-logout)
         * [Simple Logout](#simple-logout)

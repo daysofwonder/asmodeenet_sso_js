@@ -29,7 +29,12 @@ window.AsmodeeNet = (->
             rnd = crypto.getRandomValues(new Uint8Array(30))
         else
             rnd = [Math.random()]
-        rnd.forEach( (r) -> res.push(r.toString(36)))
+        if rnd.constructor == Array
+            rnd.forEach( (r) -> res.push(r.toString(36)))
+        else
+            for key, value of rnd
+                if rnd.hasOwnProperty(key)
+                    res.push(value.toString(36))
         return (res.join('')+'00000000000000000').slice(2, 16+2)
 
     disconnect = (callback) ->

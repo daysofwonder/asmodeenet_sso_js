@@ -53,13 +53,21 @@ module.exports = function (grunt) {
         },
         concat: {
             dist: {
-                  src: ['build/an_sso.cf.js', 'build/utils.cf.js', 'build/ajax.cf.js', 'ext/jws-3.3.js', 'ext/crypto-1.1.js', 'ext/base64x-1.1.js', 'ext/rsa.js', 'ext/rsasign-1.2.js', 'ext/keyutil-1.0.js'],
+                  src: ['ext/polyfill-addeventlistener.js', 'build/an_sso.cf.js', 'build/utils.cf.js', 'build/ajax.cf.js', 'ext/jws-3.3.js', 'ext/crypto-1.1.js', 'ext/base64x-1.1.js', 'ext/rsa.js', 'ext/rsasign-1.2.js', 'ext/keyutil-1.0.js'],
                   dest: 'build/an_sso.built.js',
             },
             jwt: {
-                src: ['ext/base64-min.js', 'ext/jsbn-min.js', 'ext/json-sans-eval-min.js', 'ext/cryptojs-312-core-fix-min.js', 'ext/hmac-sha256.js', 'build/an_sso.min.js'],
+                src: ['node_modules/es5-shim/es5-shim.min.js', 'ext/base64-min.js', 'ext/jsbn-min.js', 'ext/json-sans-eval-min.js', 'ext/cryptojs-312-core-fix-min.js', 'ext/hmac-sha256.js', 'build/an_sso.min.js'],
                 // src: ['ext/jsrsasign-latest-all-min.js', 'build/an_sso.min.js'],
                 dest: 'dist/an_sso.min.js'
+            },
+            shim: {
+                src: 'node_modules/es5-shim/es5-shim.min.js',
+                dest: 'dist/es5-shim.min.js'
+            },
+            sham: {
+                src: 'node_modules/es5-shim/es5-sham.min.js',
+                dest: 'dist/es5-sham.min.js'
             }
         },
         revPackage: {

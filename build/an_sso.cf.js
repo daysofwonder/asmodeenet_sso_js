@@ -24,7 +24,7 @@
     access_token = id_token = access_hash = identity_obj = discovery_obj = jwks = code = null;
     checkErrors = [];
     getCryptoValue = function() {
-      var crypto, res, rnd;
+      var crypto, key, res, rnd, value;
       crypto = window.crypto || window.msCrypto;
       rnd = 0;
       res = [];
@@ -33,9 +33,18 @@
       } else {
         rnd = [Math.random()];
       }
-      rnd.forEach(function(r) {
-        return res.push(r.toString(36));
-      });
+      if (rnd.constructor === Array) {
+        rnd.forEach(function(r) {
+          return res.push(r.toString(36));
+        });
+      } else {
+        for (key in rnd) {
+          value = rnd[key];
+          if (rnd.hasOwnProperty(key)) {
+            res.push(value.toString(36));
+          }
+        }
+      }
       return (res.join('') + '00000000000000000').slice(2, 16 + 2);
     };
     disconnect = function(callback) {

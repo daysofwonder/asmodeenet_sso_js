@@ -183,7 +183,7 @@
           checkErrors.push('Invalid alg');
           return false;
         }
-        if (it_dec.nonce !== nonce) {
+        if (nonce && (it_dec.nonce !== nonce)) {
           checkErrors.push('Invalid nonce');
           return false;
         }
@@ -203,7 +203,7 @@
           checkErrors.push('Invalid at_hash');
           return false;
         }
-        if (typeof it_dec.c_hash === 'string' && !catHashCheck(it_dec.c_hash, hash.code)) {
+        if (hash.code && typeof it_dec.c_hash === 'string' && !catHashCheck(it_dec.c_hash, hash.code)) {
           checkErrors.push('Invalid c_hash');
           return false;
         }
@@ -512,8 +512,15 @@
         return oauth(options);
       },
       identity: function(options) {
+        if (!this.isConnected()) {
+          console.error('identity error', 'You\'re not connected');
+          if (options && options.error) {
+            options.error('Identity error. Not connected', null, null, 'Not Connected');
+          }
+          return false;
+        }
         if (this.isConnected() && identity_obj) {
-          if (options.success) {
+          if (options && options.success) {
             return options.success(identity_obj, AsmodeeNet.getCode());
           }
         } else {
@@ -521,18 +528,55 @@
             base_url: this.ident_endpoint(),
             success: function(data) {
               identity_obj = data;
-              if (options.success) {
+              if (options && options.success) {
                 return options.success(identity_obj, AsmodeeNet.getCode());
               }
             },
             error: function(context, xhr, type, error) {
               console.error('identity error', context, xhr, type, error);
-              if (options.error) {
+              if (options && options.error) {
                 return options.error(context, xhr, type, error);
               }
             }
           });
         }
+      },
+      restoreTokens: function(saved_access_token, saved_id_token, call_identity) {
+        var hash;
+        if (call_identity == null) {
+          call_identity = true;
+        }
+        if (saved_access_token && access_token) {
+          saved_access_token = null;
+        }
+        if (saved_id_token && id_token) {
+          id_token = null;
+        }
+        if (saved_access_token) {
+          hash = {
+            access_token: saved_access_token,
+            id_token: saved_id_token
+          };
+          if (checkTokens(null, hash)) {
+            authorized(hash);
+            if (call_identity) {
+              this.identity({
+                success: settings.callback_signin_success,
+                error: settings.callback_signin_error
+              });
+            }
+            return true;
+          } else {
+            return false;
+          }
+        }
+        return null;
+      },
+      setAccessToken: function(saved_access_token) {
+        return access_token = saved_access_token;
+      },
+      setIdToken: function(save_id_token) {
+        return id_token = save_id_token;
       },
       signOut: function(options) {
         if (this.isConnected()) {

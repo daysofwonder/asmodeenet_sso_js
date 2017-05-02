@@ -95,7 +95,6 @@ window.AsmodeeNet = (->
         if hash.access_token
             at_dec = jwt_decode(hash.access_token)
             at_head = jwt_decode(hash.access_token, { header: true })
-
         if settings.response_type.search('id_token') >= 0
             if typeof hash.id_token == undefined
                 return false
@@ -107,7 +106,7 @@ window.AsmodeeNet = (->
             if it_head.alg != 'RS256'
                 checkErrors.push 'Invalid alg'
                 return false
-            if it_dec.nonce != nonce
+            if nonce && (it_dec.nonce != nonce)
                 checkErrors.push 'Invalid nonce'
                 return false
             if it_dec.iss != settings.base_is_host
@@ -122,7 +121,7 @@ window.AsmodeeNet = (->
             if typeof it_dec.at_hash == 'string' && !catHashCheck it_dec.at_hash, hash.access_token
                 checkErrors.push 'Invalid at_hash'
                 return false
-            if typeof it_dec.c_hash == 'string' && !catHashCheck it_dec.c_hash, hash.code
+            if hash.code && typeof it_dec.c_hash == 'string' && !catHashCheck it_dec.c_hash, hash.code
                 checkErrors.push 'Invalid c_hash'
                 return false
             alg = [it_head.alg]
@@ -322,17 +321,46 @@ window.AsmodeeNet = (->
         oauth(options)
 
     identity: (options) ->
+        if !this.isConnected()
+            if options && options.error
+                options.error('Identity error. Not connected', null, null, 'Not Connected')
+            else
+                console.error  'identity error', 'You\'re not connected'
+            return false
+
         if this.isConnected() && identity_obj
-            options.success(identity_obj, AsmodeeNet.getCode()) if options.success
+            options.success(identity_obj, AsmodeeNet.getCode()) if options && options.success
         else
             this.get '',
                 base_url: this.ident_endpoint()
                 success: (data) ->
                     identity_obj = data
-                    options.success(identity_obj, AsmodeeNet.getCode()) if options.success
+                    options.success(identity_obj, AsmodeeNet.getCode()) if options && options.success
                 error: (context, xhr, type, error) ->
-                    console.error  'identity error', context, xhr, type, error
-                    options.error(context, xhr, type, error) if options.error
+                    if options && options.error
+                        options.error(context, xhr, type, error)
+                    else
+                        console.error  'identity error', context, xhr, type, error
+
+    restoreTokens: (saved_access_token, saved_id_token, call_identity = true) ->
+        if (saved_access_token && access_token)
+            saved_access_token = null
+        if (saved_id_token && id_token)
+            id_token = null
+        if (saved_access_token)
+            hash = {access_token: saved_access_token, id_token: saved_id_token}
+            if (checkTokens(null, hash))
+                authorized(hash)
+                this.identity({success: settings.callback_signin_success, error: settings.callback_signin_error}) if call_identity
+                return true
+            else
+                return false
+        return null
+
+    setAccessToken: (saved_access_token) ->
+        access_token = saved_access_token
+    setIdToken: (save_id_token) ->
+        id_token = save_id_token
 
     signOut: (options) ->
         if this.isConnected()

@@ -15,6 +15,7 @@ An OpenID Connect library that connects to the **Asmodee.net** Identity Server (
     * [Sign-out](#sign-out)
         * [RP Logout](#rp-logout)
         * [Simple Logout](#simple-logout)
+    * [Restore](#restore-tokens)
     * [Other methods](#other-methods)
     * [Backend dialog](#backend-dialog)
 * [Example](#example)
@@ -107,7 +108,7 @@ Parameters:
 * **callback_post_logout_redirect** *callback* Optional. This callback function will be called after a logout.
 * **response_type** *string* Optional, default is `'token id_token'`. Values can be: `code`, `token`, `id_token` or any space-separated combination. We strongly recommend that you use the default combination value.
 * **scope** *string* Optional, default is `'openid+profile'`. Value could be a list of `+` separated words: `openid`, `profile`, `email`, `address`, `public`, and `private`. The `openid` scope is mandatory if you use the `id_token` response_type. Use the `private` scope if you intend to access the user's private data using the REST API later on.
-* **base_is_host** *string* Optional, URL of the AN Identity Server. By default, it's https://account.asmodee.net but you can set it to https://account.staging.asmodee.net if you perform tests on our staging server. We still recommend that you test on our production server: it does not cost anything to create a test account at https://account.asmodee.net and you will be sure that what you do actually works in production. 
+* **base_is_host** *string* Optional, URL of the AN Identity Server. By default, it's https://account.asmodee.net but you can set it to https://account.staging.asmodee.net if you perform tests on our staging server. We still recommend that you test on our production server: it does not cost anything to create a test account at https://account.asmodee.net and you will be sure that what you do actually works in production.
 * **base_is_path** *string* Optional. May be used in the future to use another version of the IS OAuth API. Default is `/main/v2/oauth`.
 * **display** *string* Optional. Defines the way the user workflow should be handled. Possible values are `popup`, `touch` and `page`:
     * `popup` (default) opens a popup window which dimensions can be set up with the `signIn()` method (see below);
@@ -189,7 +190,7 @@ After you are done with initialization and discovery, you can sign-in with the `
  * `height` of the popup. Optional, default: 500px. Only makes sense for the popup mode.
 
  All these parameters are optional.
- 
+
  **Note:** The `success` and `error` parameters are provided only for backward compatibility with previous versions of the library. They are ignored when the display mode is set to `page` or `touch`. Therefore we strongly recommend that you set these in the call to `AsmodeeNet.init()` in all cases.
 
 ```javascript
@@ -226,7 +227,7 @@ If you are looking for a super simple popup example, look at the [examples/index
 
 Note that it's OK to place the call to trackCb at the very top of your HTML page (i.e. even before calling Asmodee.init() ). This will ensure the fastest closing of the popup window. The code is smart enough to work even without the initialization yet.
 
-Please note that the OpenID Connect specifications require the connection data to be returned as an anchor in the redirect_uri. As a result, server-code won't be exposed to them.  
+Please note that the OpenID Connect specifications require the connection data to be returned as an anchor in the redirect_uri. As a result, server-code won't be exposed to them.
 
 ### Sign-out
 
@@ -266,6 +267,25 @@ This method will clear the local storage containing the current connected user a
 **Note:** If you don't provide a success callback, the current page will be reloaded.
 
 If you pass a callback, the page won't be reload. As a result, you can directly call the `signIn()` method again if you want. The `init()` and `discover()` methods don't need to be called again.
+
+### Restore tokens
+
+If you refresh your page, or after a restart of the browser, it could happens that the JS library lost the tokens of the user. So after, you can't call the identity method, or the signOut by example.
+
+To prevent this, if you have saved the access token and id token in one way or another, in your session system by example, or in the app device, you can restore the "connected" status of the libray calling the method restoreTokens with the two tokens in arguments.
+
+```javascript
+AsmodeeNet.restoreTokens('eY[...]', 'eJ5[...]');
+```
+
+After this call, the JS Library has the same behavior as if it just do the sign-in call.
+
+If you are in this situation, the right way is to call `restoreTokens` just after the `init` / `discover` calls.
+
+Parameters of the method `restoreTokens`:
+* the first one is the **access token** as string
+* the seconde one is the **id token** as string
+* you can pass a third parameter, boolean, true by default. If it's true, after it validates the tokens, call the identity() method with the callback configured in the init method for signin callback (callback_signin_success and callback_signin_error)
 
 ### Other methods
 

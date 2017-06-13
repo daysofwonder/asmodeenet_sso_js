@@ -217,6 +217,7 @@ window.AsmodeeNet = (->
     getDiscovery: () -> discovery_obj
     getCode: () -> code
     getCheckErrors: () -> checkErrors
+    isJwksDone: () -> jwks != null
 
     auth_endpoint: () ->
         return discovery_obj.authorization_endpoint if discovery_obj
@@ -226,15 +227,23 @@ window.AsmodeeNet = (->
         return discovery_obj.userinfo_endpoint if discovery_obj
         settings.base_is_host + settings.base_is_path + '/identity'
 
-    get: (url, options) ->
+    ajaxq: (type, url, options) ->
         options ?= {}
         base_url = options.base_url || settings.base_url
         delete options.base_url
-        sets = this.extend(options, this.baseSettings(), {type: 'GET'})
+        sets = this.extend(options, this.baseSettings(), {type: type})
         if options.auth != undefined && options.auth == false
             delete sets.headers.Authorization if sets.headers.Authorization
             delete sets.auth
         this.ajax(base_url + url, sets)
+    get: (url, options) ->
+        return this.ajaxq('GET', url, options)
+    post: (url, options) ->
+        return this.ajaxq('POST', url, options)
+    update: (url, options) ->
+        return this.ajaxq('PUT', url, options)
+    delete: (url, options) ->
+        return this.ajaxq('DELETE', url, options)
 
     discover: (host_port) ->
         host_port = host_port || settings.base_is_host
@@ -342,19 +351,31 @@ window.AsmodeeNet = (->
                     else
                         console.error  'identity error', context, xhr, type, error
 
-    restoreTokens: (saved_access_token, saved_id_token, call_identity = true) ->
+    restoreTokens: (saved_access_token, saved_id_token, call_identity = true, cbdone = null) ->
         if (saved_access_token && access_token)
             saved_access_token = null
         if (saved_id_token && id_token)
             id_token = null
         if (saved_access_token)
             hash = {access_token: saved_access_token, id_token: saved_id_token}
-            if (checkTokens(null, hash))
-                authorized(hash)
-                this.identity({success: settings.callback_signin_success, error: settings.callback_signin_error}) if call_identity
-                return true
+            if (this.isJwksDone())
+                if (checkTokens(null, hash))
+                    authorized(hash)
+                    this.identity({success: settings.callback_signin_success, error: settings.callback_signin_error}) if call_identity
+                    if cbdone
+                        cbdone(true)
+                    else
+                        return true
+                else
+                    if cbdone
+                        cbdone(false)
+                    else
+                        return false
             else
-                return false
+                setTimeout( () ->
+                    AsmodeeNet.restoreTokens(saved_access_token, saved_id_token, call_identity, cbdone)
+                , 200)
+
         return null
 
     setAccessToken: (saved_access_token) ->

@@ -368,6 +368,9 @@
       getCheckErrors: function() {
         return checkErrors;
       },
+      isJwksDone: function() {
+        return jwks !== null;
+      },
       auth_endpoint: function() {
         if (discovery_obj) {
           return discovery_obj.authorization_endpoint;
@@ -380,7 +383,7 @@
         }
         return settings.base_is_host + settings.base_is_path + '/identity';
       },
-      get: function(url, options) {
+      ajaxq: function(type, url, options) {
         var base_url, sets;
         if (options == null) {
           options = {};
@@ -388,7 +391,7 @@
         base_url = options.base_url || settings.base_url;
         delete options.base_url;
         sets = this.extend(options, this.baseSettings(), {
-          type: 'GET'
+          type: type
         });
         if (options.auth !== void 0 && options.auth === false) {
           if (sets.headers.Authorization) {
@@ -397,6 +400,18 @@
           delete sets.auth;
         }
         return this.ajax(base_url + url, sets);
+      },
+      get: function(url, options) {
+        return this.ajaxq('GET', url, options);
+      },
+      post: function(url, options) {
+        return this.ajaxq('POST', url, options);
+      },
+      update: function(url, options) {
+        return this.ajaxq('PUT', url, options);
+      },
+      "delete": function(url, options) {
+        return this.ajaxq('DELETE', url, options);
       },
       discover: function(host_port) {
         var gameThis;
@@ -513,9 +528,10 @@
       },
       identity: function(options) {
         if (!this.isConnected()) {
-          console.error('identity error', 'You\'re not connected');
           if (options && options.error) {
             options.error('Identity error. Not connected', null, null, 'Not Connected');
+          } else {
+            console.error('identity error', 'You\'re not connected');
           }
           return false;
         }
@@ -533,18 +549,22 @@
               }
             },
             error: function(context, xhr, type, error) {
-              console.error('identity error', context, xhr, type, error);
               if (options && options.error) {
                 return options.error(context, xhr, type, error);
+              } else {
+                return console.error('identity error', context, xhr, type, error);
               }
             }
           });
         }
       },
-      restoreTokens: function(saved_access_token, saved_id_token, call_identity) {
+      restoreTokens: function(saved_access_token, saved_id_token, call_identity, cbdone) {
         var hash;
         if (call_identity == null) {
           call_identity = true;
+        }
+        if (cbdone == null) {
+          cbdone = null;
         }
         if (saved_access_token && access_token) {
           saved_access_token = null;
@@ -557,17 +577,31 @@
             access_token: saved_access_token,
             id_token: saved_id_token
           };
-          if (checkTokens(null, hash)) {
-            authorized(hash);
-            if (call_identity) {
-              this.identity({
-                success: settings.callback_signin_success,
-                error: settings.callback_signin_error
-              });
+          if (this.isJwksDone()) {
+            if (checkTokens(null, hash)) {
+              authorized(hash);
+              if (call_identity) {
+                this.identity({
+                  success: settings.callback_signin_success,
+                  error: settings.callback_signin_error
+                });
+              }
+              if (cbdone) {
+                cbdone(true);
+              } else {
+                return true;
+              }
+            } else {
+              if (cbdone) {
+                cbdone(false);
+              } else {
+                return false;
+              }
             }
-            return true;
           } else {
-            return false;
+            setTimeout(function() {
+              return AsmodeeNet.restoreTokens(saved_access_token, saved_id_token, call_identity, cbdone);
+            }, 200);
           }
         }
         return null;
@@ -653,7 +687,7 @@
 
 (function() {
   window.AsmodeeNet.ajax = function(url, settings) {
-    var args, complete, defaultSettings, emptyFunction, error, key, mimeTypes, ref, success, xhr;
+    var args, complete, defaultSettings, emptyFunction, error, key, mimeTypes, readyStateChange, ref, success, xhr;
     args = arguments;
     settings = args.length === 1 ? args[0] : args[1];
     emptyFunction = function() {
@@ -695,7 +729,7 @@
       return settings.complete.call(settings.context, xhr, status);
     };
     xhr = new XMLHttpRequest();
-    xhr.addEventListener('readystatechange', function() {
+    readyStateChange = function() {
       var dataType, e, error1, mime, result;
       if (xhr.readyState === 4) {
         result = null;
@@ -716,7 +750,12 @@
         }
         return error(null, 'error', xhr, settings);
       }
-    }, false);
+    };
+    if (xhr.addEventListener) {
+      xhr.addEventListener('readystatechange', readyStateChange, false);
+    } else if (xhr.attachEvent) {
+      xhr.attachEvent('onreadystatechange', readyStateChange);
+    }
     xhr.open(settings.type, settings.url);
     if (settings.type === 'POST') {
       settings.headers = this.extend(settings.headers, {

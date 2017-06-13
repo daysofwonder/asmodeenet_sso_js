@@ -1,6 +1,6 @@
 (function() {
   window.AsmodeeNet.ajax = function(url, settings) {
-    var args, complete, defaultSettings, emptyFunction, error, key, mimeTypes, ref, success, xhr;
+    var args, complete, defaultSettings, emptyFunction, error, key, mimeTypes, readyStateChange, ref, success, xhr;
     args = arguments;
     settings = args.length === 1 ? args[0] : args[1];
     emptyFunction = function() {
@@ -42,7 +42,7 @@
       return settings.complete.call(settings.context, xhr, status);
     };
     xhr = new XMLHttpRequest();
-    xhr.addEventListener('readystatechange', function() {
+    readyStateChange = function() {
       var dataType, e, error1, mime, result;
       if (xhr.readyState === 4) {
         result = null;
@@ -63,7 +63,12 @@
         }
         return error(null, 'error', xhr, settings);
       }
-    }, false);
+    };
+    if (xhr.addEventListener) {
+      xhr.addEventListener('readystatechange', readyStateChange, false);
+    } else if (xhr.attachEvent) {
+      xhr.attachEvent('onreadystatechange', readyStateChange);
+    }
     xhr.open(settings.type, settings.url);
     if (settings.type === 'POST') {
       settings.headers = this.extend(settings.headers, {

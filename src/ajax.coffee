@@ -43,7 +43,7 @@ window.AsmodeeNet.ajax = (url, settings) ->
 
     xhr = new XMLHttpRequest()
 
-    xhr.addEventListener 'readystatechange', () ->
+    readyStateChange = () ->
         if xhr.readyState == 4
             result = null
             dataType = null
@@ -61,7 +61,12 @@ window.AsmodeeNet.ajax = (url, settings) ->
                 catch e
 
             error(null, 'error', xhr, settings)
-    , false
+
+    if xhr.addEventListener
+        xhr.addEventListener('readystatechange', readyStateChange, false)
+    else if xhr.attachEvent
+        xhr.attachEvent('onreadystatechange', readyStateChange)
+
 
     xhr.open(settings.type, settings.url)
 

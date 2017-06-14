@@ -371,6 +371,15 @@
       isJwksDone: function() {
         return jwks !== null;
       },
+      getConfiguredScope: function() {
+        return settings.scope;
+      },
+      getConfiguredAPI: function() {
+        return settings.base_url;
+      },
+      getClientId: function() {
+        return settings.client_id;
+      },
       auth_endpoint: function() {
         if (discovery_obj) {
           return discovery_obj.authorization_endpoint;

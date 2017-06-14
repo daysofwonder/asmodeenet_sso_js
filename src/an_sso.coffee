@@ -218,6 +218,9 @@ window.AsmodeeNet = (->
     getCode: () -> code
     getCheckErrors: () -> checkErrors
     isJwksDone: () -> jwks != null
+    getConfiguredScope: () -> settings.scope
+    getConfiguredAPI: () -> settings.base_url
+    getClientId: () -> settings.client_id
 
     auth_endpoint: () ->
         return discovery_obj.authorization_endpoint if discovery_obj

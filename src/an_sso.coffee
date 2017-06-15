@@ -255,7 +255,10 @@ window.AsmodeeNet = (->
             base_url: host_port
             auth: false
             success: (data) ->
-                discovery_obj = data
+                if typeof data == 'object'
+                    discovery_obj = data
+                else
+                    discovery_obj = JSON.parse(data)
                 settings.base_is_host = discovery_obj.issuer
                 settings.logout_endpoint = discovery_obj.end_session_endpoint
                 gameThis.getJwks()
@@ -268,11 +271,16 @@ window.AsmodeeNet = (->
             base_url: discovery_obj.jwks_uri
             auth: false
             success: (data) ->
-                jwks = data.keys
+                if typeof data == 'object'
+                    jwks = data.keys
+                else
+                    jwks = JSON.parse(data).keys
                 if settings.display != 'popup'
                     signinCallback gameThis
             error: () ->
                 console.error "error JWKS", arguments
+                console.error "error JWKS => "+arguments[0] if arguments.length > 0
+                console.error "error JWKS => "+arguments[0].statusText if arguments.length > 0
 
     signIn: (options) ->
         state = getCryptoValue()

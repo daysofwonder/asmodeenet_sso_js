@@ -430,7 +430,11 @@
           base_url: host_port,
           auth: false,
           success: function(data) {
-            discovery_obj = data;
+            if (typeof data === 'object') {
+              discovery_obj = data;
+            } else {
+              discovery_obj = JSON.parse(data);
+            }
             settings.base_is_host = discovery_obj.issuer;
             settings.logout_endpoint = discovery_obj.end_session_endpoint;
             return gameThis.getJwks();
@@ -447,13 +451,23 @@
           base_url: discovery_obj.jwks_uri,
           auth: false,
           success: function(data) {
-            jwks = data.keys;
+            if (typeof data === 'object') {
+              jwks = data.keys;
+            } else {
+              jwks = JSON.parse(data).keys;
+            }
             if (settings.display !== 'popup') {
               return signinCallback(gameThis);
             }
           },
           error: function() {
-            return console.error("error JWKS", arguments);
+            console.error("error JWKS", arguments);
+            if (arguments.length > 0) {
+              console.error("error JWKS => " + arguments[0]);
+            }
+            if (arguments.length > 0) {
+              return console.error("error JWKS => " + arguments[0].statusText);
+            }
           }
         });
       },

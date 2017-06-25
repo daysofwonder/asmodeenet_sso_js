@@ -2,7 +2,7 @@
   var indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   window.AsmodeeNet = (function() {
-    var access_hash, access_token, authorized, catHashCheck, checkDisplayOptions, checkErrors, checkLogoutRedirect, checkTokens, code, defaultErrorCallback, defaultSuccessCallback, disconnect, discovery_obj, getCryptoValue, id_token, identity_obj, jwks, nonce, oauth, oauthpopup, settings, signinCallback, state;
+    var access_hash, access_token, authorized, catHashCheck, checkDisplayOptions, checkErrors, checkLogoutRedirect, checkTokens, clearCookies, clearItems, code, defaultErrorCallback, defaultSuccessCallback, deleteCookie, disconnect, discovery_obj, getCookie, getCryptoValue, getItem, id_token, identity_obj, jwks, localStorageIsAvailable, localStorageIsOk, nonce, oauth, oauthpopup, removeItem, setCookie, setItem, settings, signinCallback, state;
     settings = {
       base_is_host: 'https://account.asmodee.net',
       base_is_path: '/main/v2/oauth',
@@ -23,6 +23,7 @@
     state = nonce = null;
     access_token = id_token = access_hash = identity_obj = discovery_obj = jwks = code = null;
     checkErrors = [];
+    localStorageIsOk = null;
     getCryptoValue = function() {
       var crypto, key, res, rnd, value;
       crypto = window.crypto || window.msCrypto;
@@ -51,7 +52,7 @@
       if (callback == null) {
         callback = false;
       }
-      window.localStorage.clear();
+      clearItems();
       access_token = id_token = access_hash = identity_obj = code = null;
       if (callback) {
         return callback();
@@ -130,7 +131,7 @@
       return b_hash === btoa(mdHex);
     };
     checkTokens = function(nonce, hash) {
-      var alg, at_dec, at_head, i, it_dec, it_head, key, len;
+      var alg, at_dec, at_head, it_dec, it_head, j, key, len;
       if (hash.access_token) {
         at_dec = jwt_decode(hash.access_token);
         at_head = jwt_decode(hash.access_token, {
@@ -178,8 +179,8 @@
           return false;
         }
         alg = [it_head.alg];
-        for (i = 0, len = jwks.length; i < len; i++) {
-          key = jwks[i];
+        for (j = 0, len = jwks.length; j < len; j++) {
+          key = jwks[j];
           if (KJUR.jws.JWS.verify(hash.id_token, KEYUTIL.getKey(key), alg)) {
             return true;
           }
@@ -195,8 +196,8 @@
         re = new RegExp(settings.logout_redirect_uri.replace(/([?.+*()])/g, "\\$1"));
         if (re.test(window.location.href)) {
           found_state = window.location.href.replace(settings.logout_redirect_uri + '&state=', '').replace(/[&#].*$/, '');
-          if ((found_state === window.localStorage.getItem('logout_state')) || (!found_state && !window.localStorage.getItem('logout_state'))) {
-            window.localStorage.removeItem('logout_state');
+          if ((found_state === getItem('logout_state')) || (!found_state && !getItem('logout_state'))) {
+            removeItem('logout_state');
             if (settings.callback_post_logout_redirect) {
               return settings.callback_post_logout_redirect();
             } else {
@@ -206,6 +207,26 @@
         }
       }
     };
+    localStorageIsAvailable = function() {
+      var e, error1;
+      if (localStorageIsOk !== null) {
+        return localStorageIsOk;
+      }
+      if (typeof window.localStorage === 'undefined' || window.localStorage === null || typeof window.localStorage.setItem === 'undefined' || typeof window.localStorage.getItem === 'undefined') {
+        localStorageIsOk = false;
+      } else {
+        try {
+          window.localStorage.setItem('b', 'test');
+          'test' === window.localStorage.getItem('b');
+          window.localStorage.removeItem('b');
+          localStorageIsOk = true;
+        } catch (error1) {
+          e = error1;
+          localStorageIsOk = false;
+        }
+      }
+      return localStorageIsOk;
+    };
     defaultSuccessCallback = function() {
       return console.log(arguments);
     };
@@ -213,32 +234,32 @@
       return console.error(arguments);
     };
     signinCallback = function(gameThis) {
-      var hash, i, item, j, len, len1, splitted, t;
-      item = window.localStorage.getItem('gd_connect_hash');
+      var hash, item, j, l, len, len1, splitted, t;
+      item = getItem('gd_connect_hash');
       if (!item) {
         if (settings.display === 'popup') {
           return settings.callback_signin_error("popup closed without signin");
         }
       } else {
-        window.localStorage.removeItem('gd_connect_hash');
+        removeItem('gd_connect_hash');
         hash = {};
         splitted = null;
         if (item.search(/^#/) === 0) {
           splitted = item.replace(/^#/, '').split('&');
-          for (i = 0, len = splitted.length; i < len; i++) {
-            t = splitted[i];
+          for (j = 0, len = splitted.length; j < len; j++) {
+            t = splitted[j];
             t = t.split('=');
             hash[t[0]] = t[1];
           }
           if (hash.token_type && hash.token_type === 'bearer') {
-            state = window.localStorage.getItem('state');
-            nonce = window.localStorage.getItem('nonce');
+            state = getItem('state');
+            nonce = getItem('nonce');
             if (hash.state && hash.state === state) {
               hash.scope = hash.scope.split('+');
               checkErrors = [];
               if (checkTokens(nonce, hash)) {
-                window.localStorage.removeItem('state');
-                window.localStorage.removeItem('nonce');
+                removeItem('state');
+                removeItem('nonce');
                 authorized(hash);
                 return gameThis.identity({
                   success: settings.callback_signin_success,
@@ -251,8 +272,8 @@
           }
         } else if (item.search(/^\?/) === 0) {
           splitted = item.replace(/^\?/, '').split('&');
-          for (j = 0, len1 = splitted.length; j < len1; j++) {
-            t = splitted[j];
+          for (l = 0, len1 = splitted.length; l < len1; l++) {
+            t = splitted[l];
             t = t.split('=');
             hash[t[0]] = t[1];
           }
@@ -298,6 +319,84 @@
         if (!settings.cancel_uri) {
           return settings.cancel_uri = settings.redirect_uri;
         }
+      }
+    };
+    setCookie = function(name, value, secondes) {
+      var date, expires;
+      if (secondes) {
+        date = new Date();
+        date.setTime(date.getTime() + (secondes * 1000));
+        expires = "; expires=" + date.toGMTString();
+      } else {
+        expires = "";
+      }
+      return document.cookie = name + "=" + value + expires + "; path=/";
+    };
+    getCookie = function(name) {
+      var c, ca, i, nameEQ;
+      nameEQ = name + "=";
+      ca = document.cookie.split(";");
+      i = 0;
+      while (i < ca.length) {
+        c = ca[i];
+        while (c.charAt(0) === " ") {
+          c = c.substring(1, c.length);
+        }
+        if (c.indexOf(nameEQ) === 0) {
+          return c.substring(nameEQ.length, c.length);
+        }
+        i++;
+      }
+      return null;
+    };
+    deleteCookie = function(name) {
+      return setCookie(name, "", -1);
+    };
+    clearCookies = function() {
+      var cookie, cookieBase, cookies, j, len, pathBits, results;
+      cookies = document.cookie.split('; ');
+      results = [];
+      for (j = 0, len = cookies.length; j < len; j++) {
+        cookie = cookies[j];
+        cookieBase = encodeURIComponent(cookie.split(";")[0].split("=")[0]) + '=; expires=Thu, 01-Jan-1970 00:00:01 GMT; domain=' + d.join('.') + ' ;path=';
+        pathBits = location.pathname.split('/');
+        results.push((function() {
+          var results1;
+          results1 = [];
+          while (pathBits.length > 0) {
+            document.cookie = cookieBase + pathBits.join('/');
+            results1.push(pathBits.pop());
+          }
+          return results1;
+        })());
+      }
+      return results;
+    };
+    setItem = function(name, value, minutes) {
+      if (localStorageIsAvailable()) {
+        return window.localStorage.setItem(name, value);
+      } else {
+        return setCookie(name, value, minutes);
+      }
+    };
+    getItem = function(name) {
+      if (localStorageIsAvailable()) {
+        return window.localStorage.getItem(name);
+      }
+      return getCookie(name);
+    };
+    removeItem = function(name) {
+      if (localStorageIsAvailable()) {
+        return window.localStorage.removeItem(name);
+      } else {
+        return deleteCookie(name);
+      }
+    };
+    clearItems = function() {
+      if (localStorageIsAvailable()) {
+        return window.localStorage.clear();
+      } else {
+        return clearCookies();
       }
     };
     return {
@@ -445,8 +544,8 @@
         var gameThis, k, ref, v;
         state = getCryptoValue();
         nonce = getCryptoValue();
-        window.localStorage.setItem('state', state);
-        window.localStorage.setItem('nonce', nonce);
+        setItem('state', state, 100);
+        setItem('nonce', nonce, 100);
         settings.callback_signin_success = options.success || settings.callback_signin_success;
         settings.callback_signin_error = options.error || settings.callback_signin_error;
         options.path = this.auth_endpoint() + '?display=' + settings.display + '&response_type=' + encodeURI(settings.response_type) + '&state=' + state + '&client_id=' + settings.client_id + '&scope=' + settings.scope;
@@ -468,32 +567,32 @@
         }
         gameThis = this;
         options.callback = function() {
-          var hash, i, item, j, len, len1, splitted, t;
-          item = window.localStorage.getItem('gd_connect_hash');
+          var hash, item, j, l, len, len1, splitted, t;
+          item = getItem('gd_connect_hash');
           if (!item) {
             if (settings.display === 'popup') {
               return settings.callback_signin_error("popup closed without signin");
             }
           } else {
-            window.localStorage.removeItem('gd_connect_hash');
+            removeItem('gd_connect_hash');
             hash = {};
             splitted = null;
             if (item.search(/^#/) === 0) {
               splitted = item.replace(/^#/, '').split('&');
-              for (i = 0, len = splitted.length; i < len; i++) {
-                t = splitted[i];
+              for (j = 0, len = splitted.length; j < len; j++) {
+                t = splitted[j];
                 t = t.split('=');
                 hash[t[0]] = t[1];
               }
               if (hash.token_type && hash.token_type === 'bearer') {
-                state = window.localStorage.getItem('state');
-                nonce = window.localStorage.getItem('nonce');
+                state = getItem('state');
+                nonce = getItem('nonce');
                 if (hash.state && hash.state === state) {
                   hash.scope = hash.scope.split('+');
                   checkErrors = [];
                   if (checkTokens(nonce, hash)) {
-                    window.localStorage.removeItem('state');
-                    window.localStorage.removeItem('nonce');
+                    removeItem('state');
+                    removeItem('nonce');
                     authorized(hash);
                     return gameThis.identity({
                       success: settings.callback_signin_success,
@@ -506,8 +605,8 @@
               }
             } else if (item.search(/^\?/) === 0) {
               splitted = item.replace(/^\?/, '').split('&');
-              for (j = 0, len1 = splitted.length; j < len1; j++) {
-                t = splitted[j];
+              for (l = 0, len1 = splitted.length; l < len1; l++) {
+                t = splitted[l];
                 t = t.split('=');
                 hash[t[0]] = t[1];
               }
@@ -609,7 +708,7 @@
         if (this.isConnected()) {
           if (settings.logout_redirect_uri) {
             state = getCryptoValue();
-            window.localStorage.setItem('logout_state', state);
+            setItem('logout_state', state, 100);
             return window.location = settings.logout_endpoint + '?post_logout_redirect_uri=' + encodeURI(settings.logout_redirect_uri) + '&state=' + state + '&id_token_hint=' + id_token;
           } else {
             return disconnect(options.success);
@@ -621,9 +720,9 @@
           closeit = true;
         }
         if (window.location.hash !== "") {
-          window.localStorage.setItem('gd_connect_hash', window.location.hash);
+          setItem('gd_connect_hash', window.location.hash, 100);
         } else if (window.location.search !== "") {
-          window.localStorage.setItem('gd_connect_hash', window.location.search);
+          setItem('gd_connect_hash', window.location.search, 100);
         }
         if (window.name === 'AsmodeeNetConnectWithOAuth') {
           if (closeit) {

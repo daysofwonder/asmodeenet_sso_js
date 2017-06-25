@@ -20,6 +20,7 @@ window.AsmodeeNet = (->
     state = nonce = null
     access_token = id_token = access_hash = identity_obj = discovery_obj = jwks = code = null
     checkErrors = []
+    localStorageIsOk = null
 
     getCryptoValue = () ->
         crypto = window.crypto||window.msCrypto
@@ -39,7 +40,8 @@ window.AsmodeeNet = (->
 
     disconnect = (callback) ->
         callback ?= false
-        window.localStorage.clear()
+        clearItems()
+
         access_token = id_token = access_hash = identity_obj = code = null
         if callback
             callback()
@@ -136,23 +138,37 @@ window.AsmodeeNet = (->
             re = new RegExp(settings.logout_redirect_uri.replace(/([?.+*()])/g, "\\$1"))
             if re.test(window.location.href)
                 found_state = window.location.href.replace(settings.logout_redirect_uri + '&state=', '').replace(/[&#].*$/, '')
-                if (found_state ==  window.localStorage.getItem 'logout_state') || (!found_state && !window.localStorage.getItem 'logout_state' )
-                    window.localStorage.removeItem 'logout_state'
+                if (found_state ==  getItem ('logout_state')) || (!found_state && !getItem('logout_state'))
+                    removeItem 'logout_state'
                     if settings.callback_post_logout_redirect
                         settings.callback_post_logout_redirect()
                     else
                         window.location = '/'
+
+    localStorageIsAvailable = () ->
+        return localStorageIsOk if localStorageIsOk != null
+        if typeof window.localStorage == 'undefined' || window.localStorage == null || typeof window.localStorage.setItem == 'undefined' || typeof window.localStorage.getItem == 'undefined'
+            localStorageIsOk = false
+        else
+            try
+                window.localStorage.setItem('b', 'test')
+                'test' == window.localStorage.getItem('b')
+                window.localStorage.removeItem('b')
+                localStorageIsOk = true
+            catch e
+                localStorageIsOk = false
+        return localStorageIsOk
 
     defaultSuccessCallback = () -> console.log arguments
     defaultErrorCallback = () -> console.error arguments
 
     # TODO Code duplicated from inside signIn(), to be deduplicated
     signinCallback = (gameThis) ->
-        item = window.localStorage.getItem('gd_connect_hash')
+        item = getItem('gd_connect_hash')
         if !item
             settings.callback_signin_error("popup closed without signin") if settings.display == 'popup'
         else
-            window.localStorage.removeItem('gd_connect_hash')
+            removeItem('gd_connect_hash')
             hash = {}
             splitted = null
             if item.search(/^#/) == 0
@@ -161,14 +177,14 @@ window.AsmodeeNet = (->
                     t = t.split('=')
                     hash[t[0]] = t[1]
                 if hash.token_type && hash.token_type == 'bearer'
-                    state = window.localStorage.getItem('state')
-                    nonce = window.localStorage.getItem('nonce')
+                    state = getItem('state')
+                    nonce = getItem('nonce')
                     if hash.state && hash.state == state
                         hash.scope = hash.scope.split('+')
                         checkErrors = []
                         if checkTokens(nonce, hash)
-                            window.localStorage.removeItem('state')
-                            window.localStorage.removeItem('nonce')
+                            removeItem('state')
+                            removeItem('nonce')
                             authorized(hash)
                             gameThis.identity {success: settings.callback_signin_success, error: settings.callback_signin_error}
                         else
@@ -196,6 +212,60 @@ window.AsmodeeNet = (->
             if Object.keys(settings.display_options).length == 0
                 settings.display_options = {noheader: true, nofooter: true, lnk2bt: true, leglnk: false}
             settings.cancel_uri = settings.redirect_uri if !settings.cancel_uri
+
+    setCookie = (name, value, secondes) ->
+        if secondes
+            date = new Date()
+            date.setTime date.getTime() + (secondes * 1000)
+            expires = "; expires=" + date.toGMTString()
+        else
+            expires = ""
+        document.cookie = name + "=" + value + expires + "; path=/"
+
+    getCookie = (name) ->
+        nameEQ = name + "="
+        ca = document.cookie.split(";")
+        i = 0
+        while i < ca.length
+            c = ca[i]
+            c = c.substring(1, c.length)  while c.charAt(0) is " "
+            return c.substring(nameEQ.length, c.length)  if c.indexOf(nameEQ) is 0
+            i++
+        null
+
+    deleteCookie = (name) ->
+        setCookie name, "", -1
+
+    clearCookies = () ->
+        cookies = document.cookie.split('; ')
+        for cookie in cookies
+            cookieBase = encodeURIComponent(cookie.split(";")[0].split("=")[0]) + '=; expires=Thu, 01-Jan-1970 00:00:01 GMT; domain=' + d.join('.') + ' ;path='
+            pathBits = location.pathname.split('/')
+            while pathBits.length > 0
+                document.cookie = cookieBase + pathBits.join('/')
+                pathBits.pop()
+
+    setItem = (name, value, minutes) ->
+        if localStorageIsAvailable()
+            window.localStorage.setItem(name, value)
+        else
+            setCookie(name, value, minutes)
+
+    getItem = (name) ->
+        return window.localStorage.getItem(name) if localStorageIsAvailable()
+        return getCookie(name)
+
+    removeItem = (name) ->
+        if localStorageIsAvailable()
+            window.localStorage.removeItem(name)
+        else
+            deleteCookie(name)
+
+    clearItems = () ->
+        if localStorageIsAvailable()
+            window.localStorage.clear()
+        else
+            clearCookies()
 
     init: (options) ->
         settings = this.extend(settings, options)
@@ -285,8 +355,8 @@ window.AsmodeeNet = (->
     signIn: (options) ->
         state = getCryptoValue()
         nonce = getCryptoValue()
-        window.localStorage.setItem('state', state)
-        window.localStorage.setItem('nonce', nonce)
+        setItem('state', state, 100)
+        setItem('nonce', nonce, 100)
         settings.callback_signin_success = options.success || settings.callback_signin_success
         settings.callback_signin_error = options.error || settings.callback_signin_error
         options.path = this.auth_endpoint() +
@@ -304,11 +374,11 @@ window.AsmodeeNet = (->
 
         gameThis = this
         options.callback = () ->
-            item = window.localStorage.getItem('gd_connect_hash')
+            item = getItem('gd_connect_hash')
             if !item
                 settings.callback_signin_error("popup closed without signin") if settings.display == 'popup'
             else
-                window.localStorage.removeItem('gd_connect_hash')
+                removeItem('gd_connect_hash')
                 hash = {}
                 splitted = null
                 if item.search(/^#/) == 0
@@ -317,14 +387,14 @@ window.AsmodeeNet = (->
                         t = t.split('=')
                         hash[t[0]] = t[1]
                     if hash.token_type && hash.token_type == 'bearer'
-                        state = window.localStorage.getItem('state')
-                        nonce = window.localStorage.getItem('nonce')
+                        state = getItem('state')
+                        nonce = getItem('nonce')
                         if hash.state && hash.state == state
                             hash.scope = hash.scope.split('+')
                             checkErrors = []
                             if checkTokens(nonce, hash)
-                                window.localStorage.removeItem('state')
-                                window.localStorage.removeItem('nonce')
+                                removeItem('state')
+                                removeItem('nonce')
                                 authorized(hash)
                                 gameThis.identity {success: settings.callback_signin_success, error: settings.callback_signin_error}
                             else
@@ -398,7 +468,7 @@ window.AsmodeeNet = (->
         if this.isConnected()
             if settings.logout_redirect_uri
                 state = getCryptoValue()
-                window.localStorage.setItem('logout_state', state)
+                setItem('logout_state', state, 100)
                 window.location = settings.logout_endpoint +
                     '?post_logout_redirect_uri='+encodeURI(settings.logout_redirect_uri)+
                     '&state='+state+
@@ -410,9 +480,9 @@ window.AsmodeeNet = (->
         closeit ?= true
 
         if window.location.hash != ""
-            window.localStorage.setItem('gd_connect_hash', window.location.hash)
+            setItem('gd_connect_hash', window.location.hash, 100)
         else if window.location.search != ""
-            window.localStorage.setItem('gd_connect_hash', window.location.search)
+            setItem('gd_connect_hash', window.location.search, 100)
 
         if window.name == 'AsmodeeNetConnectWithOAuth'
             window.close() if closeit

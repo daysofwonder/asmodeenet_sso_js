@@ -32,7 +32,7 @@
   var indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   window.AsmodeeNet = (function() {
-    var access_hash, access_token, authorized, catHashCheck, checkDisplayOptions, checkErrors, checkLogoutRedirect, checkTokens, clearCookies, clearItems, code, defaultErrorCallback, defaultSuccessCallback, deleteCookie, disconnect, discovery_obj, getCookie, getCryptoValue, getItem, id_token, identity_obj, jwks, localStorageIsAvailable, localStorageIsOk, nonce, oauth, oauthpopup, removeItem, setCookie, setItem, settings, signinCallback, state;
+    var access_hash, access_token, authorized, catHashCheck, checkDisplayOptions, checkErrors, checkLogoutRedirect, checkTokens, clearCookies, clearItems, code, defaultErrorCallback, defaultSuccessCallback, deleteCookie, disconnect, discovery_obj, getCookie, getCryptoValue, getItem, id_token, identity_obj, jwks, localStorageIsOk, nonce, oauth, oauthpopup, removeItem, setCookie, setItem, settings, signinCallback, state;
     settings = {
       base_is_host: 'https://account.asmodee.net',
       base_is_path: '/main/v2/oauth',
@@ -237,26 +237,6 @@
         }
       }
     };
-    localStorageIsAvailable = function() {
-      var e, error1;
-      if (localStorageIsOk !== null) {
-        return localStorageIsOk;
-      }
-      if (typeof window.localStorage === 'undefined' || window.localStorage === null || typeof window.localStorage.setItem === 'undefined' || typeof window.localStorage.getItem === 'undefined') {
-        localStorageIsOk = false;
-      } else {
-        try {
-          window.localStorage.setItem('b', 'test');
-          'test' === window.localStorage.getItem('b');
-          window.localStorage.removeItem('b');
-          localStorageIsOk = true;
-        } catch (error1) {
-          e = error1;
-          localStorageIsOk = false;
-        }
-      }
-      return localStorageIsOk;
-    };
     defaultSuccessCallback = function() {
       return console.log(arguments);
     };
@@ -403,31 +383,29 @@
       return results;
     };
     setItem = function(name, value, minutes) {
-      if (localStorageIsAvailable()) {
-        return window.localStorage.setItem(name, value);
-      } else {
-        return setCookie(name, value, minutes);
+      var error, error1;
+      try {
+        return store.set(name, value, new Date().getTime() + minutes);
+      } catch (error1) {
+        error = error1;
+        return console.error("SetItem '" + name + "'", value, error);
       }
     };
     getItem = function(name) {
-      if (localStorageIsAvailable()) {
-        return window.localStorage.getItem(name);
+      var error, error1;
+      try {
+        return store.get(name);
+      } catch (error1) {
+        error = error1;
+        console.error("GetItem '" + name + "'", error);
+        return null;
       }
-      return getCookie(name);
     };
     removeItem = function(name) {
-      if (localStorageIsAvailable()) {
-        return window.localStorage.removeItem(name);
-      } else {
-        return deleteCookie(name);
-      }
+      return store.remove(name);
     };
     clearItems = function() {
-      if (localStorageIsAvailable()) {
-        return window.localStorage.clear();
-      } else {
-        return clearCookies();
-      }
+      return store.clearAll();
     };
     return {
       init: function(options) {

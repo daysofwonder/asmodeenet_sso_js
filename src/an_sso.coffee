@@ -145,20 +145,6 @@ window.AsmodeeNet = (->
                     else
                         window.location = '/'
 
-    localStorageIsAvailable = () ->
-        return localStorageIsOk if localStorageIsOk != null
-        if typeof window.localStorage == 'undefined' || window.localStorage == null || typeof window.localStorage.setItem == 'undefined' || typeof window.localStorage.getItem == 'undefined'
-            localStorageIsOk = false
-        else
-            try
-                window.localStorage.setItem('b', 'test')
-                'test' == window.localStorage.getItem('b')
-                window.localStorage.removeItem('b')
-                localStorageIsOk = true
-            catch e
-                localStorageIsOk = false
-        return localStorageIsOk
-
     defaultSuccessCallback = () -> console.log arguments
     defaultErrorCallback = () -> console.error arguments
 
@@ -246,26 +232,23 @@ window.AsmodeeNet = (->
                 pathBits.pop()
 
     setItem = (name, value, minutes) ->
-        if localStorageIsAvailable()
-            window.localStorage.setItem(name, value)
-        else
-            setCookie(name, value, minutes)
+        try
+            store.set(name, value, new Date().getTime() + minutes)
+        catch error
+            console.error "SetItem '"+name+"'", value, error
 
     getItem = (name) ->
-        return window.localStorage.getItem(name) if localStorageIsAvailable()
-        return getCookie(name)
+        try
+            return store.get(name)
+        catch error
+            console.error "GetItem '"+name+"'", error
+            return null
 
     removeItem = (name) ->
-        if localStorageIsAvailable()
-            window.localStorage.removeItem(name)
-        else
-            deleteCookie(name)
+        store.remove(name)
 
     clearItems = () ->
-        if localStorageIsAvailable()
-            window.localStorage.clear()
-        else
-            clearCookies()
+        store.clearAll()
 
     init: (options) ->
         settings = this.extend(settings, options)

@@ -57,7 +57,7 @@ module.exports = function (grunt) {
                   dest: 'build/an_sso.built.js',
             },
             jwt: {
-                src: ['node_modules/es5-shim/es5-shim.min.js', 'ext/base64-min.js', 'ext/jsbn-min.js', 'ext/json-sans-eval-min.js', 'ext/cryptojs-312-core-fix-min.js', 'ext/hmac-sha256.js', 'build/an_sso.min.js'],
+                src: ['node_modules/es5-shim/es5-shim.min.js', 'ext/base64-min.js', 'ext/jsbn-min.js', 'ext/json-sans-eval-min.js', 'ext/cryptojs-312-core-fix-min.js', 'ext/hmac-sha256.js', 'node_modules/store/dist/store.legacy.min.js', 'build/an_sso.min.js'],
                 // src: ['ext/jsrsasign-latest-all-min.js', 'build/an_sso.min.js'],
                 dest: 'dist/an_sso.min.js'
             },

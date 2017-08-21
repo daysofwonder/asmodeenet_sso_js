@@ -2,7 +2,7 @@
   var indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   window.AsmodeeNet = (function() {
-    var access_hash, access_token, authorized, catHashCheck, checkDisplayOptions, checkErrors, checkLogoutRedirect, checkTokens, clearCookies, clearItems, code, defaultErrorCallback, defaultSuccessCallback, deleteCookie, disconnect, discovery_obj, getCookie, getCryptoValue, getItem, id_token, identity_obj, jwks, localStorageIsOk, nonce, oauth, oauthpopup, removeItem, setCookie, setItem, settings, signinCallback, state;
+    var access_hash, access_token, authorized, catHashCheck, checkDisplayOptions, checkErrors, checkLogoutRedirect, checkTokens, checkUrlOptions, clearCookies, clearItems, code, defaultErrorCallback, defaultSuccessCallback, deleteCookie, disconnect, discovery_obj, getCookie, getCryptoValue, getItem, id_token, identity_obj, jwks, localStorageIsOk, nonce, oauth, oauthpopup, removeItem, setCookie, setItem, settings, signinCallback, state;
     settings = {
       base_is_host: 'https://account.asmodee.net',
       base_is_path: '/main/v2/oauth',
@@ -189,6 +189,19 @@
         return false;
       }
       return true;
+    };
+    checkUrlOptions = function() {
+      var u;
+      if (settings.base_is_host) {
+        u = URI(settings.base_is_host);
+        settings.base_is_host = u.protocol() + '://' + u.host();
+      }
+      if (settings.base_url) {
+        settings.base_url = URI(settings.base_url).normalize().toString();
+      }
+      if (settings.logout_redirect_uri) {
+        return settings.logout_redirect_uri = URI(settings.logout_redirect_uri).normalize().toString();
+      }
     };
     checkLogoutRedirect = function() {
       var found_state, re;
@@ -380,6 +393,7 @@
     return {
       init: function(options) {
         settings = this.extend(settings, options);
+        checkUrlOptions();
         checkDisplayOptions();
         checkLogoutRedirect();
         return this;
@@ -429,15 +443,15 @@
       },
       auth_endpoint: function() {
         if (discovery_obj) {
-          return discovery_obj.authorization_endpoint;
+          return URI(discovery_obj.authorization_endpoint).normalize().toString();
         }
-        return settings.base_is_host + settings.base_is_path + '/authorize';
+        return URI(settings.base_is_host + settings.base_is_path + '/authorize').normalize().toString();
       },
       ident_endpoint: function() {
         if (discovery_obj) {
-          return discovery_obj.userinfo_endpoint;
+          return URI(discovery_obj.userinfo_endpoint).normalize().toString();
         }
-        return settings.base_is_host + settings.base_is_path + '/identity';
+        return URI(settings.base_is_host + settings.base_is_path + '/identity').normalize().toString();
       },
       ajaxq: function(type, url, options) {
         var base_url, sets;
@@ -482,8 +496,8 @@
             } else {
               discovery_obj = JSON.parse(data);
             }
-            settings.base_is_host = discovery_obj.issuer;
-            settings.logout_endpoint = discovery_obj.end_session_endpoint;
+            settings.base_is_host = URI(discovery_obj.issuer).normalize().toString();
+            settings.logout_endpoint = URI(discovery_obj.end_session_endpoint).normalize().toString();
             return gameThis.getJwks();
           },
           error: function() {
@@ -495,7 +509,7 @@
         var gameThis;
         gameThis = this;
         return this.get('', {
-          base_url: discovery_obj.jwks_uri,
+          base_url: URI(discovery_obj.jwks_uri).normalize().toString(),
           auth: false,
           success: function(data) {
             if (typeof data === 'object') {

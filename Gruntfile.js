@@ -52,8 +52,12 @@ module.exports = function (grunt) {
             }
         },
         concat: {
+            urijs: {
+                src: ['node_modules/urijs/src/URI.js', 'node_modules/urijs/src/IPv6.js', 'node_modules/urijs/src/punycode.js', 'node_modules/urijs/src/SecondLevelDomain.js'],
+                dest: 'build/URIjs.js'
+            },
             dist: {
-                  src: ['ext/polyfill-addeventlistener.js', 'build/an_sso.cf.js', 'build/utils.cf.js', 'build/ajax.cf.js', 'ext/jws-3.3.js', 'ext/crypto-1.1.js', 'ext/base64x-1.1.js', 'ext/rsa.js', 'ext/rsasign-1.2.js', 'ext/keyutil-1.0.js'],
+                  src: ['build/URIjs.js', 'ext/polyfill-addeventlistener.js', 'build/an_sso.cf.js', 'build/utils.cf.js', 'build/ajax.cf.js', 'ext/jws-3.3.js', 'ext/crypto-1.1.js', 'ext/base64x-1.1.js', 'ext/rsa.js', 'ext/rsasign-1.2.js', 'ext/keyutil-1.0.js'],
                   dest: 'build/an_sso.built.js',
             },
             jwt: {
@@ -93,6 +97,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('build', [
     'coffee',
+    'concat:urijs',
     'concat:dist',
     'uglify',
     'concat:jwt',

@@ -133,6 +133,15 @@ window.AsmodeeNet = (->
             return false
         return true
 
+    checkUrlOptions = () ->
+        if settings.base_is_host
+            u = URI(settings.base_is_host)
+            settings.base_is_host = u.protocol() + '://' + u.host()
+        if settings.base_url
+            settings.base_url = URI(settings.base_url).normalize().toString()
+        if settings.logout_redirect_uri
+            settings.logout_redirect_uri = URI(settings.logout_redirect_uri).normalize().toString()
+
     checkLogoutRedirect = () ->
         if settings.logout_redirect_uri
             re = new RegExp(settings.logout_redirect_uri.replace(/([?.+*()])/g, "\\$1"))
@@ -252,6 +261,7 @@ window.AsmodeeNet = (->
 
     init: (options) ->
         settings = this.extend(settings, options)
+        checkUrlOptions()
         checkDisplayOptions()
         checkLogoutRedirect()
         this
@@ -276,12 +286,12 @@ window.AsmodeeNet = (->
     getClientId: () -> settings.client_id
 
     auth_endpoint: () ->
-        return discovery_obj.authorization_endpoint if discovery_obj
-        settings.base_is_host + settings.base_is_path + '/authorize'
+        return URI(discovery_obj.authorization_endpoint).normalize().toString() if discovery_obj
+        URI(settings.base_is_host + settings.base_is_path + '/authorize').normalize().toString()
 
     ident_endpoint: () ->
-        return discovery_obj.userinfo_endpoint if discovery_obj
-        settings.base_is_host + settings.base_is_path + '/identity'
+        return URI(discovery_obj.userinfo_endpoint).normalize().toString() if discovery_obj
+        URI(settings.base_is_host + settings.base_is_path + '/identity').normalize().toString()
 
     ajaxq: (type, url, options) ->
         options ?= {}
@@ -312,8 +322,8 @@ window.AsmodeeNet = (->
                     discovery_obj = data
                 else
                     discovery_obj = JSON.parse(data)
-                settings.base_is_host = discovery_obj.issuer
-                settings.logout_endpoint = discovery_obj.end_session_endpoint
+                settings.base_is_host = URI(discovery_obj.issuer).normalize().toString()
+                settings.logout_endpoint = URI(discovery_obj.end_session_endpoint).normalize().toString()
                 gameThis.getJwks()
             error: () ->
                 console.error "error Discovery ", arguments
@@ -321,7 +331,7 @@ window.AsmodeeNet = (->
     getJwks: () ->
         gameThis = this
         this.get '',
-            base_url: discovery_obj.jwks_uri
+            base_url: URI(discovery_obj.jwks_uri).normalize().toString()
             auth: false
             success: (data) ->
                 if typeof data == 'object'

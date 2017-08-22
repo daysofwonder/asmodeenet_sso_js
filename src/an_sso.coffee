@@ -119,7 +119,7 @@ window.AsmodeeNet = (->
             if nonce && (it_dec.nonce != nonce)
                 checkErrors.push 'Invalid nonce'
                 return false
-            if it_dec.iss != settings.base_is_host
+            if URL(it_dec.iss).normalize().toString() != URI(settings.base_is_host).normalize().toString()
                 checkErrors.push 'Invalid issuer'
                 return false
             if it_dec.aud != settings.client_id && (!Array.isArray(it_dec.aud) || id_dec.aud.indexOf(settings.client_id) == -1)
@@ -323,7 +323,7 @@ window.AsmodeeNet = (->
         host_port = host_port || settings.base_is_host
         gameThis = this
         this.get '/.well-known/openid-configuration',
-            base_url: host_port
+            base_url: URI(host_port).normalize().toString()
             auth: false
             success: (data) ->
                 if typeof data == 'object'

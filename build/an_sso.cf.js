@@ -170,7 +170,7 @@
           checkErrors.push('Invalid nonce');
           return false;
         }
-        if (it_dec.iss !== settings.base_is_host) {
+        if (URL(it_dec.iss).normalize().toString() !== URI(settings.base_is_host).normalize().toString()) {
           checkErrors.push('Invalid issuer');
           return false;
         }
@@ -500,7 +500,7 @@
         host_port = host_port || settings.base_is_host;
         gameThis = this;
         return this.get('/.well-known/openid-configuration', {
-          base_url: host_port,
+          base_url: URI(host_port).normalize().toString(),
           auth: false,
           success: function(data) {
             if (typeof data === 'object') {

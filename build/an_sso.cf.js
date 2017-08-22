@@ -170,7 +170,7 @@
           checkErrors.push('Invalid nonce');
           return false;
         }
-        if (URL(it_dec.iss).normalize().toString() !== URI(settings.base_is_host).normalize().toString()) {
+        if (URI(it_dec.iss).normalize().toString() !== URI(settings.base_is_host).normalize().toString()) {
           checkErrors.push('Invalid issuer');
           return false;
         }
@@ -498,9 +498,11 @@
       discover: function(host_port) {
         var gameThis;
         host_port = host_port || settings.base_is_host;
+        host_port = URI(host_port);
+        host_port = host_port.protocol() + '://' + host_port.host();
         gameThis = this;
         return this.get('/.well-known/openid-configuration', {
-          base_url: URI(host_port).normalize().toString(),
+          base_url: host_port,
           auth: false,
           success: function(data) {
             if (typeof data === 'object') {
@@ -513,7 +515,7 @@
             return gameThis.getJwks();
           },
           error: function() {
-            return console.error("error Discovery ", arguments);
+            return console.error("error Discovery on " + host_port, arguments);
           }
         });
       },

@@ -119,7 +119,7 @@ window.AsmodeeNet = (->
             if nonce && (it_dec.nonce != nonce)
                 checkErrors.push 'Invalid nonce'
                 return false
-            if URL(it_dec.iss).normalize().toString() != URI(settings.base_is_host).normalize().toString()
+            if URI(it_dec.iss).normalize().toString() != URI(settings.base_is_host).normalize().toString()
                 checkErrors.push 'Invalid issuer'
                 return false
             if it_dec.aud != settings.client_id && (!Array.isArray(it_dec.aud) || id_dec.aud.indexOf(settings.client_id) == -1)
@@ -321,9 +321,11 @@ window.AsmodeeNet = (->
 
     discover: (host_port) ->
         host_port = host_port || settings.base_is_host
+        host_port = URI(host_port)
+        host_port = host_port.protocol() + '://' + host_port.host()
         gameThis = this
         this.get '/.well-known/openid-configuration',
-            base_url: URI(host_port).normalize().toString()
+            base_url: host_port
             auth: false
             success: (data) ->
                 if typeof data == 'object'
@@ -334,7 +336,7 @@ window.AsmodeeNet = (->
                 settings.logout_endpoint = URI(discovery_obj.end_session_endpoint).normalize().toString()
                 gameThis.getJwks()
             error: () ->
-                console.error "error Discovery ", arguments
+                console.error "error Discovery on "+host_port, arguments
 
     getJwks: () ->
         gameThis = this

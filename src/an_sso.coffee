@@ -95,13 +95,21 @@ window.AsmodeeNet = (->
 
     checkTokens = (nonce, hash) ->
         if hash.access_token
-            at_dec = jwt_decode(hash.access_token)
-            at_head = jwt_decode(hash.access_token, { header: true })
+            try
+                at_dec = jwt_decode(hash.access_token)
+                at_head = jwt_decode(hash.access_token, { header: true })
+            catch errdecode
+                checkErrors.push "access_token decode error : "+errdecode
+                return false
         if settings.response_type.search('id_token') >= 0
             if typeof hash.id_token == undefined
                 return false
-            it_dec = jwt_decode(hash.id_token)
-            it_head = jwt_decode(hash.id_token, { header: true })
+            try
+                it_dec = jwt_decode(hash.id_token)
+                it_head = jwt_decode(hash.id_token, { header: true })
+            catch errdecode
+                checkErrors.push "id_token decode error : "+errdecode
+                return false
             if it_head.typ != 'JWT'
                 checkErrors.push 'Invalid type'
                 return false
@@ -183,7 +191,7 @@ window.AsmodeeNet = (->
                             authorized(hash)
                             gameThis.identity {success: settings.callback_signin_success, error: settings.callback_signin_error}
                         else
-                            settings.callback_signin_error("Tokens validation issue")
+                            settings.callback_signin_error("Tokens validation issue : ", checkErrors)
 
             else if item.search(/^\?/) == 0
                 splitted = item.replace(/^\?/, '').split('&')
@@ -391,7 +399,7 @@ window.AsmodeeNet = (->
                                 authorized(hash)
                                 gameThis.identity {success: settings.callback_signin_success, error: settings.callback_signin_error}
                             else
-                                settings.callback_signin_error("Tokens validation issue")
+                                settings.callback_signin_error("Tokens validation issue", checkErrors)
 
                 else if item.search(/^\?/) == 0
                     splitted = item.replace(/^\?/, '').split('&')
@@ -442,7 +450,7 @@ window.AsmodeeNet = (->
                         return true
                 else
                     if cbdone
-                        cbdone(false)
+                        cbdone(false, checkErrors)
                     else
                         return false
             else

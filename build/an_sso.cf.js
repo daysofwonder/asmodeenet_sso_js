@@ -131,21 +131,33 @@
       return b_hash === btoa(mdHex);
     };
     checkTokens = function(nonce, hash) {
-      var alg, at_dec, at_head, it_dec, it_head, j, key, len;
+      var alg, at_dec, at_head, errdecode, error1, error2, it_dec, it_head, j, key, len;
       if (hash.access_token) {
-        at_dec = jwt_decode(hash.access_token);
-        at_head = jwt_decode(hash.access_token, {
-          header: true
-        });
+        try {
+          at_dec = jwt_decode(hash.access_token);
+          at_head = jwt_decode(hash.access_token, {
+            header: true
+          });
+        } catch (error1) {
+          errdecode = error1;
+          checkErrors.push("access_token decode error : " + errdecode);
+          return false;
+        }
       }
       if (settings.response_type.search('id_token') >= 0) {
         if (typeof hash.id_token === void 0) {
           return false;
         }
-        it_dec = jwt_decode(hash.id_token);
-        it_head = jwt_decode(hash.id_token, {
-          header: true
-        });
+        try {
+          it_dec = jwt_decode(hash.id_token);
+          it_head = jwt_decode(hash.id_token, {
+            header: true
+          });
+        } catch (error2) {
+          errdecode = error2;
+          checkErrors.push("id_token decode error : " + errdecode);
+          return false;
+        }
         if (it_head.typ !== 'JWT') {
           checkErrors.push('Invalid type');
           return false;
@@ -259,7 +271,7 @@
                   error: settings.callback_signin_error
                 });
               } else {
-                return settings.callback_signin_error("Tokens validation issue");
+                return settings.callback_signin_error("Tokens validation issue : ", checkErrors);
               }
             }
           }
@@ -591,7 +603,7 @@
                       error: settings.callback_signin_error
                     });
                   } else {
-                    return settings.callback_signin_error("Tokens validation issue");
+                    return settings.callback_signin_error("Tokens validation issue", checkErrors);
                   }
                 }
               }
@@ -677,7 +689,7 @@
               }
             } else {
               if (cbdone) {
-                cbdone(false);
+                cbdone(false, checkErrors);
               } else {
                 return false;
               }

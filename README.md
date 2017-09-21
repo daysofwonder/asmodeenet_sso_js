@@ -18,7 +18,10 @@ An OpenID Connect library that connects to the **Asmodee.net** Identity Server (
     * [Restore](#restore-tokens)
     * [Other methods](#other-methods)
     * [Backend dialog](#backend-dialog)
-* [Example](#example)
+* [Examples](#example)
+* [Tests](#tests)
+    * [Unit tests](#unit-tests)
+    * [Acceptance tests](#acceptance-tests)
 
 
 ## Installation
@@ -110,10 +113,11 @@ Parameters:
 * **scope** *string* Optional, default is `'openid+profile'`. Value could be a list of `+` separated words: `openid`, `profile`, `email`, `address`, `public`, and `private`. The `openid` scope is mandatory if you use the `id_token` response_type. Use the `private` scope if you intend to access the user's private data using the REST API later on.
 * **base_is_host** *string* Optional, URL of the AN Identity Server. By default, it's https://account.asmodee.net but you can set it to https://account.staging.asmodee.net if you perform tests on our staging server. We still recommend that you test on our production server: it does not cost anything to create a test account at https://account.asmodee.net and you will be sure that what you do actually works in production.
 * **base_is_path** *string* Optional. May be used in the future to use another version of the IS OAuth API. Default is `/main/v2/oauth`.
-* **display** *string* Optional. Defines the way the user workflow should be handled. Possible values are `popup`, `touch` and `page`:
+* **display** *string* Optional. Defines the way the user workflow should be handled. Possible values are `popup`, `touch`, `iframe`and `page`:
     * `popup` (default) opens a popup window which dimensions can be set up with the `signIn()` method (see below);
-    * `page` keeps the user in the same window or tab and provides a standard layout for the sign-in and sign-up pages.
+    * `iframe` keeps the user in the same window or tab and provides an iframe to integrate in your client side page, to display the Identity Server account page. The iframe itself will be initialized only after the call to the `signIn()` method, so you can chain the call directly after the call to the `discover()` method;
     * `touch` keeps the user in the same window or tab and provides a clean layout for the sign-in and sign-up page, suitable for mobile displays (phones or tablets);
+    * `page` keeps the user in the same window or tab and provides a standard layout for the sign-in and sign-up pages;
 * **display_options** *object* Optional. Defines additional display options for sign-in/sign-up pages. Used only when `display` is set to `popup` or `touch`. Available options are (see default values after):
     * `noheader` **boolean**. If true, the navigation bar and the header of the IS pages are not displayed.
     * `nofooter` **boolean**. If true, the footer of the IS pages are not displayed.
@@ -126,6 +130,7 @@ Default values:
 |:---------------:|:----------:|:----------:|:--------:|:--------:|
 | `popup` | false | false | false | true |
 | `touch` | true | true | true | false |
+| `iframe` | true | true | true | false |
 | `page` | n/a | n/a | n/a | n/a |
 
 
@@ -186,8 +191,8 @@ After you are done with initialization and discovery, you can sign-in with the `
 
  * `success` callback. Optional, default: `callback_signin_success`, see above.
  * `error` callback. Optional, default: `callback_signin_error`, see above.
- * `width` of the popup. Optional, default: 475px. Only makes sense for the popup mode.
- * `height` of the popup. Optional, default: 500px. Only makes sense for the popup mode.
+ * `width` of the popup or of the iframe. Optional, default: 475px. Only makes sense for popup and iframe modes.
+ * `height` of the popup or of the iframe. Optional, default: 500px. Only makes sense for popup and iframe modes.
 
  All these parameters are optional.
 
@@ -223,7 +228,7 @@ In all situations, the connection data is verified (JWT token verifications), an
 
 Therefore, you **must** call trackCb if you want the whole thing to work when returning from the Identity Server.
 
-If you are looking for a super simple popup example, look at the [examples/index.html](examples/index.html) and [examples/cbpop.html](examples/cbpop.html) files.
+If you are looking for a super simple popup example, look at the [examples/index_popup.html](examples/index_popup.html) and [examples/cbpop.html](examples/cbpop.html) files.
 
 Note that it's OK to place the call to trackCb at the very top of your HTML page (i.e. even before calling Asmodee.init() ). This will ensure the fastest closing of the popup window. The code is smart enough to work even without the initialization yet.
 
@@ -309,7 +314,13 @@ As explained above in the `trackCb()` function, if you are in popup mode and tha
 
 ## Example
 
-The file index.html shows a simple example, using cbpop.html as the popup callback page. You can display errors and the identity in the page once logged, and you can sign-out. To run it, launch a simple Web server. For example, run in the examples directory `php -S localhost:XXXX`, or `ruby -run -ehttpd . -p XXXX` or another similar http server (see https://gist.github.com/willurd/5720255). If you have node, you can do:
+You will find one example per display mode in the directory examples.
+The file index.html shows a simple example in `page` mode.
+The file index_touch.html a simple example in `touch` mode.
+The file index_popup.html a simple example in `popup` mode, using cbpop.html as the popup callback page.
+The file index_iframe.html a simple example in `iframe` mode, using cbpop.html as the iframe callback page.
+
+You can display errors and the identity in the page once logged, and you can sign-out. To run it, launch a simple Web server. For example, run in the examples directory `php -S localhost:XXXX`, or `ruby -run -ehttpd . -p XXXX` or another similar http server (see https://gist.github.com/willurd/5720255). If you have node, you can do:
 ```shell
 npm install # if not done yet
 grunt serve
@@ -320,13 +331,50 @@ Replace in the init call the `client_id` and `redirect_uri` parameters with the 
 This example does not use SSL (because http servers don't manage SSL easily) but in production your page should be encapsulated with SSL of course!
 
 
+## Tests
+
+### Unit tests
+
+Unit tests use Jasmine 2.8 as test framework with some usefull extends, jasmine-ajax 1.3.1 which can mimic and capture xhr query, and jasmine-expect based on Jasmine-Matchers which extends assertion and matchers
+
+[Jasmine base page ](https://jasmine.github.io/pages/getting_started.html)
+[Jasmine-ajax](https://github.com/jasmine/jasmine-ajax/tree/v1.3.1)
+[Jasmine-expect/jasmine-matchers](https://github.com/JamieMason/Jasmine-Matchers)
+
+After the command `npm install`, you can launch unit test with the command:
+```
+grunt test:unit
+```
+
+This command launch test in terminal and output result in terminal and reports them in tests/unit/junit/ in XML format compatible with Jenkins and you have test coverage in tests/unit/reports/coverage.xml
+
+You can launch tests in real browser too:
+```
+grunt test:server
+```
+
+It will launch a node server and open default browser page on file tests/unit/SpecRunner.html. And you can saw test and test results in html page. You can launch specific test by the UI.
+
+### Acceptance tests
+
+Also called end-to-end (e2e) tests, this tests use [nightwatchjs](http://nightwatchjs.org). This test launch a node server will serve files of the directory tests/e2e/server, and execute acceptance tests on differente use cases of the AsmodeeNet SSO js library.
+
+You can launch them by:
+```
+grunt test:e2e
+```
+
+This will output results in terminal (nightwatchjs is configured to use PhantomJS) and reports will be find in tests/e2e/reports in format usable by Jenkins.
+
+This tests use Asmodee.net staging account server [https://account-staging.asmodee.net](https://account-staging.asmodee.net)
 
 ## TODO (not ordered, not closed)
 
 * Query Scheduler (prevent signIn call before discover end by ex)
 * Promise capacities
+* Add events
 * HTML data parser to generate an Asmodee.net OpenID Connect button.
 * clean Error system
 * REST API capacities
-* Add some tests
+* ~~And some tests~~
 * ...

@@ -1,26 +1,38 @@
 window.AsmodeeNet = (->
 
-    settings =
+    defaultSuccessCallback = () -> console.log arguments
+    defaultErrorCallback = () -> console.error arguments
+
+    default_settings =
         base_is_host: 'https://account.asmodee.net'
         base_is_path: '/main/v2/oauth'
         logout_endpoint: '/main/v2/logout'
         base_url: 'https://api.asmodee.net/main/v1'
         client_id: null
         redirect_uri: null
-        cancel_uri: null
-        logout_redirect_uri: null
-        callback_post_logout_redirect: null
+        cancel_uri: null # Only used in touch mode by the IS
+        logout_redirect_uri: null # if not provided, and not configured in Studio manager for this app, the IS will redirect the user on IS page only!
+        callback_post_logout_redirect: null # the only one solution for callback success in 'page' or 'touch' display mode
+        base_uri_for_iframe: null
         scope: 'openid+profile'
         response_type: 'id_token token'
         display: 'popup'
         display_options: {}
-        callback_signin_success: defaultSuccessCallback
-        callback_signin_error: defaultErrorCallback
+        iframe_css: null # only used un 'iframe' display mode
+        callback_signin_success: defaultSuccessCallback # the only one solution for callback success in 'page' or 'touch' display mode
+        callback_signin_error: defaultErrorCallback # the only one solution for callback error in 'page' or 'touch' display mode
 
+    settings = {}
     state = nonce = null
     access_token = id_token = access_hash = identity_obj = discovery_obj = jwks = code = null
     checkErrors = []
     localStorageIsOk = null
+    popupIframeWindowName = 'AsmodeeNetConnectWithOAuth'
+
+    iFrame =
+        element: null
+        receiveMessageCallback: null
+        saveOptions: null
 
     getCryptoValue = () ->
         crypto = window.crypto||window.msCrypto
@@ -45,24 +57,30 @@ window.AsmodeeNet = (->
         access_token = id_token = access_hash = identity_obj = code = null
         if callback
             callback()
+            AsmodeeNet.signIn iFrame.saveOptions if settings.display == 'iframe'
         else
             window.location.reload()
 
     oauth = (options) ->
         if settings.display == 'popup'
             oauthpopup(options)
+        else if settings.display == 'iframe'
+            oauthiframe(options)
         else
             window.location.assign(options.path)
 
-    oauthpopup = (options) ->
+    getPopup = (options) ->
         options.width ?= 475
         options.height ?= 500
-        options.windowName ?= 'AsmodeeNetConnectWithOAuth'
+        options.windowName ?= popupIframeWindowName
         options.windowOptions ?= 'location=0,status=0,width=' + options.width +
                                     ',height=' + options.height
         options.callback ?= () -> window.location.reload()
+        this._oauthWindow = window.open(options.path, options.windowName, options.windowOptions)
+
+    oauthpopup = (options) ->
+        getPopup options
         that = this
-        that._oauthWindow = window.open(options.path, options.windowName, options.windowOptions)
         if options.autoclose
             that._oauthAutoCloseInterval = window.setInterval () ->
                 that._oauthWindow.close()
@@ -79,18 +97,38 @@ window.AsmodeeNet = (->
                 options.callback()
         , 1000
 
+    oauthiframe = (options) ->
+        options.width ?= 475
+        options.height ?= 500
+        options.callback ?= () -> window.location.reload()
+        iFrame.element = if settings.iframe_css.indexOf('#') != -1 then window.document.getElementById(settings.iframe_css.replace('#', '')) else window.document.getElementsByClassName(settings.iframe_css)[0]
+        if iFrame.element
+            iFrame.element.name = popupIframeWindowName
+            iFrame.element.width = options.width
+            iFrame.element.height = options.height
+            iFrame.element.src = options.path
+            redirect_uri = settings.redirect_uri
+            iFrame.element.focus() if iFrame.element && !iFrame.element.closed
+            iFrame.element.removeEventListener('load', iFrame.receiveMessageCallback) if iFrame.receiveMessageCallback
+            iFrame.receiveMessageCallback = (e) ->
+                if e.currentTarget.name == popupIframeWindowName
+                    d = (e.currentTarget.contentWindow || e.currentTarget.contentDocument)
+                    item = getItem('gd_connect_hash')
+                    options.callback() if item
+            iFrame.element.addEventListener('load', iFrame.receiveMessageCallback, false)
+
     authorized = (access_hash_clt) ->
         access_hash = access_hash_clt
         access_token = access_hash.access_token
         id_token = access_hash.id_token
-        if access_hash.code
-            code = access_hash.code
+        code = access_hash.code if access_hash.code
 
     catHashCheck = (b_hash, bcode) ->
         mdHex = KJUR.crypto.Util.sha256(bcode)
         mdHex = mdHex.substr(0, mdHex.length/2)
         while !(b_hash.length % 4 == 0)
             b_hash += '='
+        window.AsmodeeNet.verifyBHash(b_hash)
         return b_hash == btoa(mdHex)
 
     checkTokens = (nonce, hash) ->
@@ -153,7 +191,7 @@ window.AsmodeeNet = (->
     checkLogoutRedirect = () ->
         if settings.logout_redirect_uri
             re = new RegExp(settings.logout_redirect_uri.replace(/([?.+*()])/g, "\\$1"))
-            if re.test(window.location.href)
+            if re.test(window.location.href) && settings.display != 'iframe'
                 found_state = window.location.href.replace(settings.logout_redirect_uri + '&state=', '').replace(/[&#].*$/, '')
                 if (found_state ==  getItem ('logout_state')) || (!found_state && !getItem('logout_state'))
                     removeItem 'logout_state'
@@ -162,10 +200,6 @@ window.AsmodeeNet = (->
                     else
                         window.location = '/'
 
-    defaultSuccessCallback = () -> console.log arguments
-    defaultErrorCallback = () -> console.error arguments
-
-    # TODO Code duplicated from inside signIn(), to be deduplicated
     signinCallback = (gameThis) ->
         item = getItem('gd_connect_hash')
         if !item
@@ -182,16 +216,19 @@ window.AsmodeeNet = (->
                 if hash.token_type && hash.token_type == 'bearer'
                     state = getItem('state')
                     nonce = getItem('nonce')
-                    if hash.state && hash.state == state
-                        hash.scope = hash.scope.split('+')
-                        checkErrors = []
-                        if checkTokens(nonce, hash)
-                            removeItem('state')
-                            removeItem('nonce')
-                            authorized(hash)
-                            gameThis.identity {success: settings.callback_signin_success, error: settings.callback_signin_error}
+                    if hash.state
+                        if hash.state == state
+                            hash.scope = hash.scope.split('+')
+                            checkErrors = []
+                            if checkTokens(nonce, hash)
+                                removeItem('state')
+                                removeItem('nonce')
+                                authorized(hash)
+                                gameThis.identity {success: settings.callback_signin_success, error: settings.callback_signin_error}
+                            else
+                                settings.callback_signin_error('Tokens validation issue : ', checkErrors)
                         else
-                            settings.callback_signin_error("Tokens validation issue : ", checkErrors)
+                            settings.callback_signin_error('Tokens validation issue : ', 'Unvalid state')
 
             else if item.search(/^\?/) == 0
                 splitted = item.replace(/^\?/, '').split('&')
@@ -202,18 +239,17 @@ window.AsmodeeNet = (->
                     settings.callback_signin_error(hash.error + ' : ' + hash.error_description.replace(/\+/g, ' '))
 
     checkDisplayOptions = () ->
-        if Object.keys(settings.display_options).length > 0
-            if settings.display in ['touch', 'popup']
+        if Object.keys(settings.display_options).length == 0
+            tmpopts = null
+            if settings.display in ['touch', 'iframe']
+                tmpopts = {noheader: true, nofooter: true, lnk2bt: true, leglnk: false}
+            else if settings.display == 'popup'
                 tmpopts = {noheader: false, nofooter: false, lnk2bt: false, leglnk: true}
+            if tmpopts
                 for opt, val of settings.display_options
                     delete settings.display_options[opt] unless opt in Object.keys(tmpopts)
-                if Object.keys(settings.display_options).length > 0
-                    settings.display_options = AsmodeeNet.extend tmpopts, settings.display_options
-            else
-                settings.display_options = {}
+                settings.display_options = AsmodeeNet.extend tmpopts, settings.display_options
         if settings.display == 'touch'
-            if Object.keys(settings.display_options).length == 0
-                settings.display_options = {noheader: true, nofooter: true, lnk2bt: true, leglnk: false}
             settings.cancel_uri = settings.redirect_uri if !settings.cancel_uri
 
     setCookie = (name, value, secondes) ->
@@ -267,8 +303,11 @@ window.AsmodeeNet = (->
     clearItems = () ->
         store.clearAll()
 
+
+    verifyBHash: (b_hash) -> b_hash # internal use for tests
+
     init: (options) ->
-        settings = this.extend(settings, options)
+        settings = this.extend(default_settings, options)
         checkUrlOptions()
         checkDisplayOptions()
         checkLogoutRedirect()
@@ -292,6 +331,8 @@ window.AsmodeeNet = (->
     getConfiguredScope: () -> settings.scope
     getConfiguredAPI: () -> settings.base_url
     getClientId: () -> settings.client_id
+    getSettings: () -> this.extend({}, settings)
+    getIdentity: () -> identity_obj
 
     auth_endpoint: () ->
         return URI(discovery_obj.authorization_endpoint).normalize().toString() if discovery_obj
@@ -303,7 +344,7 @@ window.AsmodeeNet = (->
 
     ajaxq: (type, url, options) ->
         options ?= {}
-        base_url = options.base_url || settings.base_url
+        base_url = options.base_url || settings.base_url || default_settings.base_url
         delete options.base_url
         sets = this.extend(options, this.baseSettings(), {type: type})
         if options.auth != undefined && options.auth == false
@@ -320,7 +361,7 @@ window.AsmodeeNet = (->
         return this.ajaxq('DELETE', url, options)
 
     discover: (host_port) ->
-        host_port = host_port || settings.base_is_host
+        host_port = host_port || settings.base_is_host || default_settings.base_is_host
         host_port = URI(host_port)
         host_port = host_port.protocol() + '://' + host_port.host()
         gameThis = this
@@ -356,10 +397,12 @@ window.AsmodeeNet = (->
                 console.error "error JWKS => "+arguments[0].statusText if arguments.length > 0
 
     signIn: (options) ->
+        options = options || {}
+        iFrame.saveOptions = AsmodeeNet.extend {}, options if settings.display == 'iframe'
         state = getCryptoValue()
         nonce = getCryptoValue()
-        setItem('state', state, 100)
-        setItem('nonce', nonce, 100)
+        setItem('state', state, if settings.display == 'iframe' then 10000 else 100)
+        setItem('nonce', nonce, if settings.display == 'iframe' then 10000 else 100)
         settings.callback_signin_success = options.success || settings.callback_signin_success
         settings.callback_signin_error = options.error || settings.callback_signin_error
         options.path = this.auth_endpoint() +
@@ -377,39 +420,7 @@ window.AsmodeeNet = (->
 
         gameThis = this
         options.callback = () ->
-            item = getItem('gd_connect_hash')
-            if !item
-                settings.callback_signin_error("popup closed without signin") if settings.display == 'popup'
-            else
-                removeItem('gd_connect_hash')
-                hash = {}
-                splitted = null
-                if item.search(/^#/) == 0
-                    splitted = item.replace(/^#/, '').split('&')
-                    for t in splitted
-                        t = t.split('=')
-                        hash[t[0]] = t[1]
-                    if hash.token_type && hash.token_type == 'bearer'
-                        state = getItem('state')
-                        nonce = getItem('nonce')
-                        if hash.state && hash.state == state
-                            hash.scope = hash.scope.split('+')
-                            checkErrors = []
-                            if checkTokens(nonce, hash)
-                                removeItem('state')
-                                removeItem('nonce')
-                                authorized(hash)
-                                gameThis.identity {success: settings.callback_signin_success, error: settings.callback_signin_error}
-                            else
-                                settings.callback_signin_error("Tokens validation issue", checkErrors)
-
-                else if item.search(/^\?/) == 0
-                    splitted = item.replace(/^\?/, '').split('&')
-                    for t in splitted
-                        t = t.split('=')
-                        hash[t[0]] = t[1]
-                    if hash.state && hash.state == state
-                        settings.callback_signin_error(hash.error + ' : ' + hash.error_description.replace(/\+/g, ' '))
+            signinCallback(gameThis)
 
         oauth(options)
 
@@ -422,12 +433,14 @@ window.AsmodeeNet = (->
             return false
 
         if this.isConnected() && identity_obj
+            iFrame.element.src = '' if settings.display == 'iframe'
             options.success(identity_obj, AsmodeeNet.getCode()) if options && options.success
         else
             this.get '',
                 base_url: this.ident_endpoint()
                 success: (data) ->
                     identity_obj = data
+                    iFrame.element.src = '' if settings.display == 'iframe'
                     options.success(identity_obj, AsmodeeNet.getCode()) if options && options.success
                 error: (context, xhr, type, error) ->
                     if options && options.error
@@ -468,16 +481,32 @@ window.AsmodeeNet = (->
         id_token = save_id_token
 
     signOut: (options) ->
+        successCallback = if options && typeof options.success != 'undefined' then options.success else null
         if this.isConnected()
             if settings.logout_redirect_uri
                 state = getCryptoValue()
                 setItem('logout_state', state, 100)
-                window.location = settings.logout_endpoint +
+                logout_ep = settings.logout_endpoint +
                     '?post_logout_redirect_uri='+encodeURI(settings.logout_redirect_uri)+
                     '&state='+state+
                     '&id_token_hint='+id_token
+                if settings.display == 'iframe'
+                    if iFrame.element
+                        iFrame.element.src = logout_ep
+                        redirect_uri = settings.logout_redirect_uri
+                        iFrame.element.removeEventListener('load', iFrame.receiveMessageCallback) if iFrame.receiveMessageCallback
+                        iFrame.receiveMessageCallback = (e) ->
+                            disconnect(successCallback) if e.currentTarget.name == popupIframeWindowName
+                        iFrame.element.addEventListener('load', iFrame.receiveMessageCallback, false)
+                else if settings.display == 'popup'
+                    options.path = logout_ep
+                    options.callback = () ->
+                        disconnect(successCallback)
+                    oauthpopup(options)
+                else
+                    window.location = logout_ep
             else
-                disconnect(options.success)
+                disconnect(successCallback)
 
     trackCb: (closeit) ->
         closeit ?= true
@@ -488,7 +517,11 @@ window.AsmodeeNet = (->
             setItem('gd_connect_hash', window.location.search, 100)
 
         if window.name == 'AsmodeeNetConnectWithOAuth'
+            console.log 'ok try closeit'
             window.close() if closeit
+
+    inIframe: () ->
+        return (window.self == window.top)
 
 )()
 if typeof window.AN == 'undefined'

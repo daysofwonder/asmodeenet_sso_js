@@ -1,6 +1,6 @@
 <html>
     <head>
-        <script>document.write('<script src="an_sso.min.js?dev=' + Math.floor(Math.random() * 100) + '"\><\/script>');</script>
+        <script src="an_sso.min.js"></script>
     </head>
     <body>
         <script>AsmodeeNet.trackCb(false);</script>
@@ -48,7 +48,7 @@
         });
         findMe('disconnect_bt').addEventListener('click', function() {
             AsmodeeNet.signOut({
-                success: unsigned // this callback will be never used in page/touch mode
+                success: unsigned
             });
         });
         findMe('my_identity').addEventListener('click', function() {
@@ -62,13 +62,12 @@
         AsmodeeNet.init({
             // Required parameters
             client_id: 'test_direct', //'openid-ffg', //'test_direct', //'openid-dow',
-            redirect_uri: 'http://localhost:8080/', //'https://community-dev.fantasyflightgames.com/oauth/callback',
-            cancel_uri: 'http://localhost:8080/?cancel=1', // only used by the touch mode on IS
+            redirect_uri: 'http://localhost:8080/cbpop.html', //'https://community-dev.fantasyflightgames.com/oauth/callback',
             // Example of optional parameters
-            base_is_host: 'https://localhost:8009/', //https://account.asmodee.net',
+            base_is_host: 'http://localhost:8209/', //https://account.asmodee.net',
             scope: 'openid+email+profile',
             response_type: 'code id_token token',
-            display: 'page', // display type: 'page' 'touch' 'popup' 'iframe' (page by default)
+            display: 'popup', // display type: page touch popup iframe (page by default)
 
             display_options: {
                 // noheader: true,
@@ -76,7 +75,7 @@
                 // nofooter: true,
                 // leglnk: false
             },
-            logout_redirect_uri: 'http://localhost:8080/?logout_redirect=1',
+            logout_redirect_uri: 'http://localhost:8080/cbpop.html?logout_redirect=1',
             // if next callback for RP logout openid's feature is not provided, the AsmodeeNet SSO lib, redirect the user to the root ('/') of the current host
             callback_post_logout_redirect: function() {
                 alert('Disconnected');

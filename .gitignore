@@ -1,3 +1,16 @@
 node_modules
+composer.phar
+.grunt
 .node-version
 /.idea/
+vendor/
+reports
+tests/unit/build
+tests/unit/reports
+tests/unit/junit
+tests/e2e/reports
+build/an_sso.*
+!build/an_sso.min.*
+selenium-debug.log
+phantomjsdriver.log
+asmodeenet_platform

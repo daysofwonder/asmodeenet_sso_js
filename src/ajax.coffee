@@ -25,7 +25,7 @@ window.AsmodeeNet.ajax = (url, settings) ->
 
     if !settings.cache
         settings.url = settings.url +
-                        (settings.url.indexOf('?') ? '&' : '?') +
+                        (if settings.url.indexOf('?') then '&' else '?') +
                         'noCache=' +
                         Math.floor(Math.random() * 9e9)
 
@@ -46,11 +46,10 @@ window.AsmodeeNet.ajax = (url, settings) ->
     readyStateChange = () ->
         if xhr.readyState == 4
             result = null
-            dataType = null
+            mime = xhr.getResponseHeader('content-type')
+            dataType = mimeTypes[mime] || 'text'
 
             if (xhr.status >= 200 && xhr.status < 300) || xhr.status == 304
-                mime = xhr.getResponseHeader('content-type')
-                dataType = mimeTypes[mime] || 'text'
                 result = xhr.responseText
 
                 try
@@ -59,8 +58,20 @@ window.AsmodeeNet.ajax = (url, settings) ->
                     success(result, xhr, settings)
                     return
                 catch e
+                    error(e.message, 'parsererror', xhr, settings)
+                    return
+            else
+                result = xhr.responseText
+                try
+                    if dataType == 'json'
+                        result = JSON.parse(result)
+                    error(result, 'error', xhr, settings)
+                    return
+                catch e
+                    error(e.message, 'parsererror', xhr, settings)
+                    return
 
-            error(null, 'error', xhr, settings)
+            error(result, 'error', xhr, settings)
 
     if xhr.addEventListener
         xhr.addEventListener('readystatechange', readyStateChange, false)
@@ -71,10 +82,11 @@ window.AsmodeeNet.ajax = (url, settings) ->
     xhr.open(settings.type, settings.url)
 
     if settings.type == 'POST'
-        settings.headers = this.extend(settings.headers, {
-            'X-Requested-With': 'XMLHttpRequest',
+        settings.headers = this.extend {
             'Content-type': 'application/x-www-form-urlencoded'
-        })
+        }, settings.headers, {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
 
     for key of settings.headers
         xhr.setRequestHeader(key, settings.headers[key])

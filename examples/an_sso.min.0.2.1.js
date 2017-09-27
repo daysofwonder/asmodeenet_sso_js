@@ -1,1 +1,0 @@
-../dist/an_sso.min.0.2.1.js

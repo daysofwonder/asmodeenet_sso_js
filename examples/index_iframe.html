@@ -4,7 +4,7 @@
     </head>
     <body>
         <script>AsmodeeNet.trackCb(false);</script>
-        <button id="connect_bt">Sign In</button>
+        <iframe id="iframe_asnet_ssoID" class="iframe_asnet_sso"></iframe>
         <div id="profile" style="display:none;">
             <button id="disconnect_bt">Sign Out</button> -
             <button id="my_identity">My identity</button>
@@ -27,28 +27,17 @@
 
         function signed(identity) {
             echo(identity, AsmodeeNet.getAccessHash());
-            // console.log(jwt_decode(AsmodeeNet.getAccessToken()));
-            findMe('connect_bt').style.display = 'none';
+            findMe('iframe_asnet_ssoID').style.display = 'none';
             findMe('profile').style.display = 'block';
         }
         function unsigned() {
             findMe('profile').style.display = 'none';
-            findMe('connect_bt').style.display = 'block';
+            findMe('iframe_asnet_ssoID').style.display = 'block';
             echo("You're logged out");
         }
-        findMe('connect_bt').addEventListener('click', function() {
-            AsmodeeNet.signIn({
-                // width: 475,
-                // height: 500,
-                success: signed,
-                error: function() {
-                    echo("SIGNIN ERROR", arguments);
-                }
-            });
-        });
         findMe('disconnect_bt').addEventListener('click', function() {
             AsmodeeNet.signOut({
-                success: unsigned // this callback will be never used in page/touch mode
+                success: unsigned
             });
         });
         findMe('my_identity').addEventListener('click', function() {
@@ -62,21 +51,14 @@
         AsmodeeNet.init({
             // Required parameters
             client_id: 'test_direct', //'openid-ffg', //'test_direct', //'openid-dow',
-            redirect_uri: 'http://localhost:8080/', //'https://community-dev.fantasyflightgames.com/oauth/callback',
-            cancel_uri: 'http://localhost:8080/?cancel=1', // only used by the touch mode on IS
+            redirect_uri: 'http://localhost:8080/cbpop.html', //'https://community-dev.fantasyflightgames.com/oauth/callback',
             // Example of optional parameters
-            base_is_host: 'https://localhost:8009/', //https://account.asmodee.net',
+            base_is_host: 'http://localhost:8009/', //https://account.asmodee.net',
             scope: 'openid+email+profile',
             response_type: 'code id_token token',
-            display: 'page', // display type: 'page' 'touch' 'popup' 'iframe' (page by default)
-
-            display_options: {
-                // noheader: true,
-                // lnk2bt: true,
-                // nofooter: true,
-                // leglnk: false
-            },
-            logout_redirect_uri: 'http://localhost:8080/?logout_redirect=1',
+            display: 'iframe', // display type: 'page' 'touch' 'popup' 'iframe' (page by default)
+            iframe_css: 'iframe_asnet_sso',
+            logout_redirect_uri: 'http://localhost:8080/cbpop.html?logout_redirect=1',
             // if next callback for RP logout openid's feature is not provided, the AsmodeeNet SSO lib, redirect the user to the root ('/') of the current host
             callback_post_logout_redirect: function() {
                 alert('Disconnected');
@@ -86,7 +68,12 @@
             callback_signin_error: function() {
                 echo("SIGNIN ERROR", arguments);
             }
-        }).discover();
+        }).discover().signIn({
+            success: signed,
+            error: function() {
+                echo("SIGNIN ERROR", arguments);
+            }
+        });
         </script>
     </body>
 </html>

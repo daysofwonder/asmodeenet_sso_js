@@ -1,6 +1,6 @@
 <html>
     <head>
-        <script>document.write('<script src="an_sso.min.js?dev=' + Math.floor(Math.random() * 100) + '"\><\/script>');</script>
+        <script src="an_sso.min.js"></script>
     </head>
     <body>
         <script>AsmodeeNet.trackCb(false);</script>
@@ -65,7 +65,7 @@
             redirect_uri: 'http://localhost:8080/', //'https://community-dev.fantasyflightgames.com/oauth/callback',
             cancel_uri: 'http://localhost:8080/?cancel=1', // only used by the touch mode on IS
             // Example of optional parameters
-            base_is_host: 'https://localhost:8009/', //https://account.asmodee.net',
+            base_is_host: 'http://localhost:8209/', //https://account.asmodee.net',
             scope: 'openid+email+profile',
             response_type: 'code id_token token',
             display: 'page', // display type: 'page' 'touch' 'popup' 'iframe' (page by default)
@@ -87,6 +87,7 @@
                 echo("SIGNIN ERROR", arguments);
             }
         }).discover();
+        console.error("LKLKLKLK");
         </script>
     </body>
 </html>

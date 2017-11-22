@@ -163,7 +163,7 @@ window.AsmodeeNet = (->
             if it_dec.aud != settings.client_id && (!Array.isArray(it_dec.aud) || id_dec.aud.indexOf(settings.client_id) == -1)
                 checkErrors.push 'Invalid auditor'
                 return false
-            if it_dec.exp < (Date.now()/1000).toPrecision(10)
+            if it_dec.exp < window.AsmodeeNet.limit_exp_time()
                 checkErrors.push 'Invalid expiration date'
                 return false
             if typeof it_dec.at_hash == 'string' && !catHashCheck it_dec.at_hash, hash.access_token

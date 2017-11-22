@@ -58,7 +58,7 @@
             response_type: 'code id_token token',
             display: 'iframe', // display type: 'page' 'touch' 'popup' 'iframe' (page by default)
             iframe_css: 'iframe_asnet_sso',
-            logout_redirect_uri: 'http://localhost:8080/cbpop.html?logout_redirect=1',
+            logout_redirect_uri: 'http://localhost:8080/cbpop.html',
             // if next callback for RP logout openid's feature is not provided, the AsmodeeNet SSO lib, redirect the user to the root ('/') of the current host
             callback_post_logout_redirect: function() {
                 alert('Disconnected');

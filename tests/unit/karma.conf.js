@@ -2,9 +2,18 @@
 module.exports = function (config) {
     config.set({
         browsers: ['PhantomJS'],
+        // browsers: ['PhantomJS'],
         // frameworks: ['mocha', 'sinon-chai', 'phantomjs-shim'],
         frameworks: ['jasmine-ajax', 'jasmine', 'jasmine-matchers'], //, 'phantomjs-shim'],
         reporters: ['spec', 'junit'],
+
+        customLaunchers: {
+            'PhantomJS_debug': {
+                base: 'PhantomJS',
+                debug: true
+            }
+        },
+        singleRun: false,
 
         files: [
             // dependencies
@@ -34,7 +43,8 @@ module.exports = function (config) {
             reporters: [
                 // { type: 'lcov', subdir: '.' },
                 { type: 'text-summary' },
-                { type: 'clover', subdir: 'reports', file: 'coverage.xml' }
+                { type: 'clover', subdir: 'reports', file: 'coverage.xml' },
+                { type: 'lcov', subdir: 'coverage' }
             ]
         }
     });

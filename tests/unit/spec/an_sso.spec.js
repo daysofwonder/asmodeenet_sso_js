@@ -656,6 +656,9 @@ describe('AsmodeeNet Main Object', function () {
             expect(onFailure).not.toHaveBeenCalled();
             expect(onStoreSet).toHaveBeenCalled();
 
+            var getLimitExp = spyOn(window.AsmodeeNet, 'limit_exp_time').and.callFake(function () {
+                return '1506872982';
+            });
             var onSha = spyOn(window.KJUR.crypto.Util, 'sha256').and.returnValue('BOBsldfkzjblkqsbfvlkqsbflvhqsbflvhbqsfvbh');
             var bash;
             var onBash = spyOn(window.AsmodeeNet, 'verifyBHash').and.callFake(function (bHash) {
@@ -674,6 +677,7 @@ describe('AsmodeeNet Main Object', function () {
             request = jasmine.Ajax.requests.mostRecent();
             request.respondWith(responseForJwksJson);
 
+            expect(getLimitExp).toHaveBeenCalled();
             expect(onStoreGet).toHaveBeenCalled();
             expect(onStoreRemove).toHaveBeenCalled();
             expect(onSha).toHaveBeenCalled();
@@ -834,6 +838,10 @@ describe('AsmodeeNet Main Object', function () {
 
             expect(onFailure).not.toHaveBeenCalled();
 
+            var getLimitExp = spyOn(window.AsmodeeNet, 'limit_exp_time').and.callFake(function () {
+                return '1506872982';
+            });
+
             var onSha = spyOn(window.KJUR.crypto.Util, 'sha256').and.returnValue('BOBsldfkzjblkqsbfvlkqsbflvhqsbflvhbqsfvbh');
             var bash;
             var onBash = spyOn(window.AsmodeeNet, 'verifyBHash').and.callFake(function (bHash) {
@@ -847,6 +855,7 @@ describe('AsmodeeNet Main Object', function () {
 
             iframeEventLoad({currentTarget: iframe, contentWindow: {}});
 
+            expect(getLimitExp).toHaveBeenCalled();
             expect(onStoreGet).toHaveBeenCalledWith('gd_connect_hash');
             expect(onSha).toHaveBeenCalled();
             expect(onBash).toHaveBeenCalled();

@@ -23,7 +23,6 @@ An OpenID Connect library that connects to the **Asmodee.net** Identity Server (
     * [Unit tests](#unit-tests)
     * [Acceptance tests](#acceptance-tests)
 
-
 ## Installation
 
 This library is designed to be a self-sufficient stand-alone tool.

@@ -1,8 +1,8 @@
 // var config = require('../../config');
 
 // http://nightwatchjs.org/gettingstarted#settings-file
-var chromefinder = require('chrome-launcher/chrome-finder');
-console.log(chromefinder[process.platform]()[0]);
+// var chromefinder = require('chrome-launcher/chrome-finder');
+// console.log(chromefinder[process.platform]()[0]);
 module.exports = {
     src_folders: ['spec'],
     output_folder: 'reports',
@@ -39,27 +39,28 @@ module.exports = {
                 'phantomjs.binary.path': require('phantomjs-prebuilt').path,
                 'phantomjs.cli.args': ['--ignore-ssl-errors=true', '--webdriver=8080', '--webdriver-selenium-grid-hub=http://127.0.0.1:4445']
             }
-        },
-
-        chrome: {
-            desiredCapabilities: {
-                browserName: 'chrome',
-                // 'webdriver.chrome.driver': require('chromedriver').path,
-                javascriptEnabled: true,
-                acceptSslCerts: true,
-                chromeOptions: {
-                    args: ['--headless', '--disable-gpu'],
-                    binary: chromefinder[process.platform]()[0]
-                }
-            }
-        },
-
-        firefox: {
-            desiredCapabilities: {
-                browserName: 'firefox',
-                javascriptEnabled: true,
-                acceptSslCerts: true
-            }
         }
+        // ,
+        //
+        // chrome: {
+        //     desiredCapabilities: {
+        //         browserName: 'chrome',
+        //         // 'webdriver.chrome.driver': require('chromedriver').path,
+        //         javascriptEnabled: true,
+        //         acceptSslCerts: true,
+        //         chromeOptions: {
+        //             args: ['--headless', '--disable-gpu'],
+        //             binary: chromefinder[process.platform]()[0]
+        //         }
+        //     }
+        // },
+        //
+        // firefox: {
+        //     desiredCapabilities: {
+        //         browserName: 'firefox',
+        //         javascriptEnabled: true,
+        //         acceptSslCerts: true
+        //     }
+        // }
     }
 };

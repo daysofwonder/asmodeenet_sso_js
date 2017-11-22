@@ -34,7 +34,6 @@ if [ "$IS_CONTINUOUS_INTEGRATION" == true ]; then
         mkdir -p ./asmodeenet_platform/identity-server
     fi
     cd ./asmodeenet_platform/identity-server
-    curl -s -z composer.phar -o composer.phar http://getcomposer.org/composer.phar
     ret=$(find ./ -type f -iname .gitignore)
     if [ "" == "${ret}" ]; then
         git clone git@github.com:daysofwonder/identity-server.git ./
@@ -42,6 +41,7 @@ if [ "$IS_CONTINUOUS_INTEGRATION" == true ]; then
     else
         git reset --hard master
     fi
+    curl -s -z composer.phar -o composer.phar http://getcomposer.org/composer.phar
     php composer.phar --no-ansi --no-interaction install
     cd -
 fi

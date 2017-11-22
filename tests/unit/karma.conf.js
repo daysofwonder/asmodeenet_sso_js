@@ -43,7 +43,8 @@ module.exports = function (config) {
             reporters: [
                 // { type: 'lcov', subdir: '.' },
                 { type: 'text-summary' },
-                { type: 'clover', subdir: 'reports', file: 'coverage.xml' }
+                { type: 'clover', subdir: 'reports', file: 'coverage.xml' },
+                { type: 'lcov', subdir: 'coverage' }
             ]
         }
     });

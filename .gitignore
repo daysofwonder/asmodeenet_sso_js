@@ -5,6 +5,7 @@ composer.phar
 /.idea/
 vendor/
 reports
+coverage
 tests/unit/build
 tests/unit/reports
 tests/unit/junit

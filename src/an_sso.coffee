@@ -239,16 +239,17 @@ window.AsmodeeNet = (->
                     settings.callback_signin_error(hash.error + ' : ' + hash.error_description.replace(/\+/g, ' '))
 
     checkDisplayOptions = () ->
-        if Object.keys(settings.display_options).length == 0
-            tmpopts = null
-            if settings.display in ['touch', 'iframe']
-                tmpopts = {noheader: true, nofooter: true, lnk2bt: true, leglnk: false}
-            else if settings.display == 'popup'
-                tmpopts = {noheader: false, nofooter: false, lnk2bt: false, leglnk: true}
+        tmpopts = null
+        if settings.display in ['touch', 'iframe']
+            tmpopts = {noheader: true, nofooter: true, lnk2bt: true, leglnk: false, cookies: true}
+        else if settings.display == 'popup'
+            tmpopts = {noheader: false, nofooter: false, lnk2bt: false, leglnk: true}
+        if Object.keys(settings.display_options).length > 0
             if tmpopts
                 for opt, val of settings.display_options
                     delete settings.display_options[opt] unless opt in Object.keys(tmpopts)
-                settings.display_options = AsmodeeNet.extend tmpopts, settings.display_options
+        settings.display_options = AsmodeeNet.extend tmpopts, settings.display_options
+        delete settings.display_options.cookies if 'cookies' in Object.keys(settings.display_options) && settings.display_options.cookies == true
         if settings.display == 'touch'
             settings.cancel_uri = settings.redirect_uri if !settings.cancel_uri
 

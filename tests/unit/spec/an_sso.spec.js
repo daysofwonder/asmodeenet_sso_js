@@ -615,7 +615,7 @@ describe('AsmodeeNet Main Object', function () {
             expect(onStoreGet).toHaveBeenCalled();
             expect(onStoreRemove).toHaveBeenCalled();
             expect(onStoreClear).not.toHaveBeenCalled();
-            expect(onFailure).toHaveBeenCalledWith('Tokens validation issue : ', 'Unvalid state');
+            expect(onFailure).toHaveBeenCalledWith('Tokens validation issue : ', 'Invalid state');
         });
 
         it('should call signin page with success', function () {

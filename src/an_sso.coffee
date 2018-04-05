@@ -228,7 +228,7 @@ window.AsmodeeNet = (->
                             else
                                 settings.callback_signin_error('Tokens validation issue : ', checkErrors)
                         else
-                            settings.callback_signin_error('Tokens validation issue : ', 'Unvalid state')
+                            settings.callback_signin_error('Tokens validation issue : ', 'Invalid state')
 
             else if item.search(/^\?/) == 0
                 splitted = item.replace(/^\?/, '').split('&')
@@ -287,7 +287,7 @@ window.AsmodeeNet = (->
 
     setItem = (name, value, minutes) ->
         try
-            store.set(name, value, new Date().getTime() + minutes)
+            store.set(name, value, new Date().getTime() + (minutes * 60000))
         catch error
             console.error "SetItem '"+name+"'", value, error
 
@@ -402,8 +402,8 @@ window.AsmodeeNet = (->
         iFrame.saveOptions = AsmodeeNet.extend {}, options if settings.display == 'iframe'
         state = getCryptoValue()
         nonce = getCryptoValue()
-        setItem('state', state, if settings.display == 'iframe' then 10000 else 100)
-        setItem('nonce', nonce, if settings.display == 'iframe' then 10000 else 100)
+        setItem('state', state, if settings.display == 'iframe' then 1440 else 20)
+        setItem('nonce', nonce, if settings.display == 'iframe' then 1440 else 20)
         settings.callback_signin_success = options.success || settings.callback_signin_success
         settings.callback_signin_error = options.error || settings.callback_signin_error
         options.path = this.auth_endpoint() +
@@ -486,7 +486,7 @@ window.AsmodeeNet = (->
         if this.isConnected()
             if settings.logout_redirect_uri
                 state = getCryptoValue()
-                setItem('logout_state', state, 100)
+                setItem('logout_state', state, 5)
                 logout_ep = settings.logout_endpoint +
                     '?post_logout_redirect_uri='+encodeURI(settings.logout_redirect_uri)+
                     '&state='+state+
@@ -513,9 +513,9 @@ window.AsmodeeNet = (->
         closeit ?= true
 
         if window.location.hash != ""
-            setItem('gd_connect_hash', window.location.hash, 100)
+            setItem('gd_connect_hash', window.location.hash, 5)
         else if window.location.search != ""
-            setItem('gd_connect_hash', window.location.search, 100)
+            setItem('gd_connect_hash', window.location.search, 5)
 
         if window.name == 'AsmodeeNetConnectWithOAuth'
             console.log 'ok try closeit'

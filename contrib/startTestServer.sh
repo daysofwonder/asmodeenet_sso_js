@@ -26,7 +26,7 @@ function finish {
 }
 trap finish EXIT SIGINT SIGTERM ERR
 
-if [ "$IS_CONTINUOUS_INTEGRATION" == true ]; then
+# if [ "$IS_CONTINUOUS_INTEGRATION" == true ]; then
     echo "installing npm and composer for asmodeenet_sso_js."
     rm -rf target
     npm install
@@ -44,7 +44,7 @@ if [ "$IS_CONTINUOUS_INTEGRATION" == true ]; then
     curl -s -z composer.phar -o composer.phar http://getcomposer.org/composer.phar
     php composer.phar --no-ansi --no-interaction install
     cd -
-fi
+# fi
 
 # Start IdentityServer
 echo "generate .env and .env.acceptance"
@@ -105,20 +105,26 @@ cd -
 echo "generate openid-configuration"
 cat ./asmodeenet_platform/identity-server/public/.well-known/openid-configuration.test | sed -e 's/localhost:8010/localhost:8209/' > ./asmodeenet_platform/identity-server/public/.well-known/openid-configuration
 
-if [ ! -f ./asmodeenet_platform/identity-server/contrib/db/is.sql.backup ]; then
-    cp ./asmodeenet_platform/identity-server/contrib/db/is.sql ./asmodeenet_platform/identity-server/contrib/db/is.sql.backup
-else
-    cp ./asmodeenet_platform/identity-server/contrib/db/is.sql.backup ./asmodeenet_platform/identity-server/contrib/db/is.sql
+if [ -f asmodeenet_platform/identity-server/vendor/daysofwonder/db-migrations/projects/asnet/db_data.sql.bckup ]; then
+    cp asmodeenet_platform/identity-server/vendor/daysofwonder/db-migrations/projects/asnet/db_data.sql.bckup asmodeenet_platform/identity-server/vendor/daysofwonder/db-migrations/projects/asnet/db_data.sql
 fi
-cat contrib/extra_data_e2e.sql >> asmodeenet_platform/identity-server/contrib/db/is.sql
+
+cp asmodeenet_platform/identity-server/vendor/daysofwonder/db-migrations/projects/asnet/db_data.sql asmodeenet_platform/identity-server/vendor/daysofwonder/db-migrations/projects/asnet/db_data.sql.bckup
+
+cat contrib/extra_data_e2e.sql >> asmodeenet_platform/identity-server/vendor/daysofwonder/db-migrations/projects/asnet/db_data.sql
+
+mkdir -p asmodeenet_platform/identity-server/contrib/db
 
 source asmodeenet_platform/identity-server/.env.acceptance
 
+cd asmodeenet_platform/identity-server/
 echo "make reset-db"
-make -C asmodeenet_platform/identity-server/ reset-db
+make reset-db
 
 echo "make assets-dev"
-make -C asmodeenet_platform/identity-server/ assets-dev
+make assets-dev
+
+cd -
 
 echo "prepare autoload"
 # mkdir -p ./asmodeenet_platform/identity-server/.public

@@ -28,6 +28,7 @@ window.AsmodeeNet = (->
     checkErrors = []
     localStorageIsOk = null
     popupIframeWindowName = 'AsmodeeNetConnectWithOAuth'
+    try_refresh_name = 'try_refresh'
 
     iFrame =
         element: null
@@ -174,7 +175,11 @@ window.AsmodeeNet = (->
                 return false
             alg = [it_head.alg]
             for key in jwks
-                return true if KJUR.jws.JWS.verify(hash.id_token, KEYUTIL.getKey(key), alg)
+                if key.alg && key.alg == alg[0]
+                    try
+                        return true if KJUR.jws.JWS.verify(hash.id_token, KEYUTIL.getKey(key), alg)
+                    catch e
+                        console.error('JWS verify error', e)
             checkErrors.push 'Invalid JWS key'
             return false
         return true
@@ -219,6 +224,7 @@ window.AsmodeeNet = (->
                     if hash.state
                         if hash.state == state
                             hash.scope = hash.scope.split('+')
+                            hash.expires = jwt_decode(hash.access_token)['exp']
                             checkErrors = []
                             if checkTokens(nonce, hash)
                                 removeItem('state')
@@ -235,8 +241,10 @@ window.AsmodeeNet = (->
                 for t in splitted
                     t = t.split('=')
                     hash[t[0]] = t[1]
+                state = getItem('state')
+                removeItem('state')
                 if hash.state && hash.state == state
-                    settings.callback_signin_error(hash.error + ' : ' + hash.error_description.replace(/\+/g, ' '))
+                    settings.callback_signin_error(parseInt(hash.status), hash.error, hash.error_description.replace(/\+/g, ' '))
 
     checkDisplayOptions = () ->
         tmpopts = null
@@ -335,6 +343,18 @@ window.AsmodeeNet = (->
     getSettings: () -> this.extend({}, settings)
     getIdentity: () -> identity_obj
 
+    getScopes: () ->
+        return null if !this.isConnected()
+        this.getAccessHash()['scope']
+
+    getExpires: () ->
+        return null if !this.isConnected()
+        this.getAccessHash()['expires']
+
+    getExpiresDate: () ->
+        return null if !this.isConnected()
+        new Date(this.getAccessHash()['expires']*1000)
+
     auth_endpoint: () ->
         return URI(discovery_obj.authorization_endpoint).normalize().toString() if discovery_obj
         URI(settings.base_is_host + settings.base_is_path + '/authorize').normalize().toString()
@@ -386,10 +406,13 @@ window.AsmodeeNet = (->
             base_url: URI(discovery_obj.jwks_uri).normalize().toString()
             auth: false
             success: (data) ->
+                console.log 'data', data
                 if typeof data == 'object'
                     jwks = data.keys
                 else
+                    console.log 'json parse'
                     jwks = JSON.parse(data).keys
+                    console.log 'jwks', jwks
                 if settings.display != 'popup'
                     signinCallback gameThis
             error: () ->
@@ -421,6 +444,7 @@ window.AsmodeeNet = (->
 
         gameThis = this
         options.callback = () ->
+            removeItem(try_refresh_name)
             signinCallback(gameThis)
 
         oauth(options)
@@ -449,7 +473,7 @@ window.AsmodeeNet = (->
                     else
                         console.error  'identity error', context, xhr, type, error
 
-    restoreTokens: (saved_access_token, saved_id_token, call_identity = true, cbdone = null) ->
+    restoreTokens: (saved_access_token, saved_id_token, call_identity = true, cbdone = null, clear_before_refresh = null) ->
         if (saved_access_token && access_token)
             saved_access_token = null
         if (saved_id_token && id_token)
@@ -458,6 +482,11 @@ window.AsmodeeNet = (->
             hash = {access_token: saved_access_token, id_token: saved_id_token}
             if (this.isJwksDone())
                 if (checkTokens(null, hash))
+                    decoded = jwt_decode(saved_access_token)
+                    hash.scope = decoded['scope'].split(' ')
+                    hash.expires = decode['exp']
+                    hash.token_type = decode['token_type']
+                    removeItem(try_refresh_name)
                     authorized(hash)
                     this.identity({success: settings.callback_signin_success, error: settings.callback_signin_error}) if call_identity
                     if cbdone
@@ -465,13 +494,20 @@ window.AsmodeeNet = (->
                     else
                         return true
                 else
-                    if cbdone
-                        cbdone(false, checkErrors)
+                    already_try_refresh = getItem(try_refresh_name)
+                    removeItem(try_refresh_name)
+                    if checkErrors[0] == 'Invalid expiration date' && clear_before_refresh && !already_try_refresh
+                        console.log 'try refresh token'
+                        setItem(try_refresh_name, true)
+                        clear_before_refresh() && AsmodeeNet.signIn({success: cbdone})
                     else
-                        return false
+                        if cbdone
+                            cbdone(false, checkErrors)
+                        else
+                            return false
             else
                 setTimeout( () ->
-                    AsmodeeNet.restoreTokens(saved_access_token, saved_id_token, call_identity, cbdone)
+                    AsmodeeNet.restoreTokens(saved_access_token, saved_id_token, call_identity, cbdone, clear_before_refresh)
                 , 200)
 
         return null
@@ -483,14 +519,15 @@ window.AsmodeeNet = (->
 
     signOut: (options) ->
         successCallback = if options && typeof options.success != 'undefined' then options.success else null
-        if this.isConnected()
+        if this.isConnected() || options.force
             if settings.logout_redirect_uri
                 state = getCryptoValue()
+                id_token_hint = id_token
                 setItem('logout_state', state, 5)
                 logout_ep = settings.logout_endpoint +
                     '?post_logout_redirect_uri='+encodeURI(settings.logout_redirect_uri)+
                     '&state='+state+
-                    '&id_token_hint='+id_token
+                    '&id_token_hint='+id_token_hint
                 if settings.display == 'iframe'
                     if iFrame.element
                         iFrame.element.src = logout_ep

@@ -39,7 +39,15 @@ trap finish EXIT SIGINT SIGTERM ERR
         git clone git@github.com:daysofwonder/identity-server.git ./
         git checkout master
     else
+        git remote update
+        git checkout master
         git reset --hard master
+        git pull origin master
+        cd -
+        cd ./asmodeenet_platform/identity-server/vendor/daysofwonder/db-migrations
+        git reset --hard
+        cd -
+        cd ./asmodeenet_platform/identity-server
     fi
     curl -s -z composer.phar -o composer.phar http://getcomposer.org/composer.phar
     php composer.phar --no-ansi --no-interaction install

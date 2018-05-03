@@ -60,25 +60,26 @@
         AsmodeeNet.init({
             // Required parameters
             client_id: 'test_direct', //'openid-ffg', //'test_direct', //'openid-dow',
-            redirect_uri: 'http://localhost:8080/',//'https://community-dev.fantasyflightgames.com/oauth/callback',
-            cancel_uri: 'http://localhost:8080/?cancel=1',
+            redirect_uri: 'http://localhost:8080/index_touch.html', // 'http://storesmanager:8080/authenticated', //'http://localhost:8080/index_touch.html' //'http://localhost:8080/',//'https://community-dev.fantasyflightgames.com/oauth/callback',
+            cancel_uri: 'http://localhost:8080/index_touch.html?cancel=1',
             // Example of optional parameters
             base_is_host: 'http://localhost:8009/', //https://account.asmodee.net',
-            scope: 'openid+email+profile',
+            scope: 'openid profile email', //'openid+email+profile',
             response_type: 'code id_token token',
             display: 'touch', // display type: 'page' 'touch' 'popup' 'iframe' (page by default)
 
             display_options: {
+                cookies: '0'
                 // noheader: true,
                 // lnk2bt: true,
                 // nofooter: true,
                 // leglnk: false
             },
-            logout_redirect_uri: 'http://localhost:8080/?logout_redirect=1',
+            logout_redirect_uri: 'http://localhost:8080/index_touch.html?logout_redirect=1', // 'http://storesmanager:8080/logout', //'http://localhost:8080/index_touch.html?logout_redirect=1', // 'https://asmoclub.asmodee.net/secur/logout.jsp', //'http://localhost:8080/?logout_redirect=1',
             // if next callback for RP logout openid's feature is not provided, the AsmodeeNet SSO lib, redirect the user to the root ('/') of the current host
             callback_post_logout_redirect: function() {
                 alert('Disconnected');
-                window.location = '/';
+                window.location = '/index_touch.html';
             },
             callback_signin_success: signed,
             callback_signin_error: function() {

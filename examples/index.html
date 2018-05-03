@@ -61,12 +61,12 @@
 
         AsmodeeNet.init({
             // Required parameters
-            client_id: 'test_direct', //'openid-ffg', //'test_direct', //'openid-dow',
-            redirect_uri: 'http://localhost:8080/', //'https://community-dev.fantasyflightgames.com/oauth/callback',
+            client_id: 'studio-app', // 'openid-dow', //'openid-ffg', //'test_direct', //'openid-dow', 'asmoclub', //
+            redirect_uri: 'http://localhost:8080/?conok=1', // 'https://login.salesforce.com/services/authcallback/00D2000000099GxEAI/asmoclub', // 'https://community-dev.fantasyflightgames.com/oauth/callback',
             cancel_uri: 'http://localhost:8080/?cancel=1', // only used by the touch mode on IS
             // Example of optional parameters
-            base_is_host: 'http://localhost:8009/', //https://account.asmodee.net',
-            scope: 'openid+email+profile',
+            base_is_host: 'http://localhost:8009/', // 'https://account.asmodee.net'
+            scope: 'studio+openid+email+profile',
             response_type: 'code id_token token',
             display: 'page', // display type: 'page' 'touch' 'popup' 'iframe' (page by default)
 

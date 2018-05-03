@@ -50,7 +50,7 @@
 
         AsmodeeNet.init({
             // Required parameters
-            client_id: 'test_direct', //'openid-ffg', //'test_direct', //'openid-dow',
+            client_id: 'studio-app', //'openid-ffg', //'test_direct', //'openid-dow',
             redirect_uri: 'http://localhost:8080/cbpop.html', //'https://community-dev.fantasyflightgames.com/oauth/callback',
             // Example of optional parameters
             base_is_host: 'http://localhost:8009/', //https://account.asmodee.net',
@@ -64,13 +64,18 @@
                 alert('Disconnected');
                 window.location = '/';
             },
-            callback_signin_success: signed,
-            callback_signin_error: function() {
-                echo("SIGNIN ERROR", arguments);
-            }
+            callback_signin_success: signed
         }).discover().signIn({
             success: signed,
             error: function() {
+                console.log(arguments, arguments.length, arguments[0]);
+                if (arguments.length === 3) {
+                    if (arguments[0] === 403) {
+                        // do a logout
+                        console.log('do signout');
+                        AsmodeeNet.signOut();
+                    }
+                }
                 echo("SIGNIN ERROR", arguments);
             }
         });

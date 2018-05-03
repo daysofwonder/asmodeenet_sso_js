@@ -406,13 +406,10 @@ window.AsmodeeNet = (->
             base_url: URI(discovery_obj.jwks_uri).normalize().toString()
             auth: false
             success: (data) ->
-                console.log 'data', data
                 if typeof data == 'object'
                     jwks = data.keys
                 else
-                    console.log 'json parse'
                     jwks = JSON.parse(data).keys
-                    console.log 'jwks', jwks
                 if settings.display != 'popup'
                     signinCallback gameThis
             error: () ->

@@ -162,6 +162,8 @@ AsmodeeNet.init({
          *  If a query error occurs, arguments is a
          *  list a params coming from the ajax XHR request
          *
+         * If the errors occurs for not authorized scope for the user (but user is good), the arguments are, in order, the html status code (403), "invalid_scope", "The scope requested is invalid for this user". In this case, the user is connected on the IS, but not token is returned. With iframe could be problematic if you don't manage this case, in the error callback.
+         *
          * But that could be the message:
          *  "popup closed without signin"
          * if the user closes the popup without sign-in.
@@ -289,9 +291,11 @@ After this call, the JS Library has the same behavior as if it just do the sign-
 If you are in this situation, the right way is to call `restoreTokens` just after the `init` / `discover` calls.
 
 Parameters of the method `restoreTokens`:
-* the first one is the **access token** as string
-* the seconde one is the **id token** as string
-* you can pass a third parameter, boolean, true by default. If it's true, after it validates the tokens, call the identity() method with the callback configured in the init method for signin callback (callback_signin_success and callback_signin_error)
+* **saved_access_token**: The **access token** as string, you stocked in your side (as cookie or local storage)
+* **saved_id_token**: The **id token** as string, you stocked in your side (as cookie or local storage)
+* **call_identity**: *optional* you can pass a third parameter, boolean, true by default. If it's true, after it validates the tokens, call the identity() method with the callback configured in the init method for signin callback (callback_signin_success and callback_signin_error)
+* **cbdone**: *optional* A callback if resotre is a success. If a callback is passed, it will be call with one parameter (a boolean worth true). In default situation, `restoreTokens` return itself true
+* **clear_before_refresh**: *optional* A callback for refresh tokens. If you have stocked the token as a cookie or in local storage in your code, and call `restoreTokens` with this tokens, and if tokens are expired, the `restoreTokens` method could try to refresh them (only once). To do it, it call first this *clear_before_refresh* callback, and you **must** remove your cookie/local storage for this tokens and return a boolean, if it's *true*, the `signIn` will be call to try to refresh the tokens, if it's false *nothing* is done.
 
 ### Other methods
 
@@ -304,6 +308,9 @@ The object `AsmodeeNet` provides the following additional methods:
 * **getDiscovery**: get the `discovery` object return from the `openid-configuration` endpoint. Can be useful for debugging.
 * **getCode**: get the OpenID Connect "code" returned by the Identity Server. Useful in an hybrid flow.
 * **getCheckErrors**: get the list of errors during the token check - if it failed.
+* **getScopes**: get the OpenID Connect scopes returned by the Identity Server for the current user. It's an array of string.
+* **getExpires**: get The expires date time of the current token, in unix timestamp format.
+* **getExpiresDate**: get The expires date time of the current token, Javascript Date object.
 
 ### Backend dialog
 

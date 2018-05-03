@@ -1,6 +1,6 @@
 {
   "name": "ana_sso.js",
-  "version": "0.3.0-3",
+  "version": "0.3.2",
   "repository": {},
   "scripts": {
     "postinstall": "bash ./contrib/install_githook.sh"

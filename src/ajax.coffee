@@ -55,11 +55,11 @@ window.AsmodeeNet.ajax = (url, settings) ->
                 try
                     if dataType == 'json'
                         result = JSON.parse(result)
-                    success(result, xhr, settings)
-                    return
                 catch e
                     error(e.message, 'parsererror', xhr, settings)
                     return
+                success(result, xhr, settings)
+                return
             else
                 result = xhr.responseText
                 try

@@ -484,8 +484,8 @@ window.AsmodeeNet = (->
                 if (checkTokens(null, hash))
                     decoded = jwt_decode(saved_access_token)
                     hash.scope = decoded['scope'].split(' ')
-                    hash.expires = decode['exp']
-                    hash.token_type = decode['token_type']
+                    hash.expires = decoded['exp']
+                    hash.token_type = decoded['token_type']
                     removeItem(try_refresh_name)
                     authorized(hash)
                     this.identity({success: settings.callback_signin_success, error: settings.callback_signin_error}) if call_identity

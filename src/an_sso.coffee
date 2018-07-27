@@ -29,6 +29,7 @@ window.AsmodeeNet = (->
     localStorageIsOk = null
     popupIframeWindowName = 'AsmodeeNetConnectWithOAuth'
     try_refresh_name = 'try_refresh'
+    _oauthWindow = null
 
     iFrame =
         element: null

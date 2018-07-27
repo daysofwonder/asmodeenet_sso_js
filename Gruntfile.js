@@ -61,6 +61,20 @@ module.exports = function (grunt) {
 
     // Define the configuration for all the tasks
     grunt.initConfig({
+        babel: {
+            options: {
+                sourceMap: true,
+                presets: ['es2015']
+            },
+            dist: {
+                files: {
+                    'build/an_sso.src.cf.js': 'build/an_sso.src.cf.js',
+                    'tests/unit/build/an_sso.test.cf.js': 'tests/unit/build/an_sso.test.cf.js',
+                    'tests/unit/build/ajax.test.cf.js': 'tests/unit/build/ajax.test.cf.js',
+                    'tests/unit/build/utils.test.cf.js': 'tests/unit/build/utils.test.cf.js'
+                }
+            }
+        },
         connect: {
             server: {
                 options: {
@@ -309,6 +323,7 @@ module.exports = function (grunt) {
         'coffee:compileWithMaps',
         // 'concat:urijs',
         'concat:ext',
+        'babel',
         'uglify',
         'concat:jwt'
     ]);
@@ -316,7 +331,7 @@ module.exports = function (grunt) {
     grunt.registerTask('dist', [
         'build',
         // 'merge-source-maps:jwt',
-        'sorcery',
+        // 'sorcery',
         'concat:map',
         'concat:cp',
         'concat:cpbuild',
@@ -337,8 +352,11 @@ module.exports = function (grunt) {
 
     grunt.registerTask('test:unit', [
         'lint',
+        'coffee:compileWithMaps',
+        'concat:ext',
         'coffee:compileForTest',
         'concat:ext',
+        'babel',
         'karma:unit'
     ]);
 
@@ -346,6 +364,7 @@ module.exports = function (grunt) {
         'lint',
         'coffee:compileForTest',
         'concat:ext',
+        'babel',
         'karma:coverage'
     ]);
 
@@ -368,6 +387,7 @@ module.exports = function (grunt) {
         'lint',
         'coffee:compileForTest',
         'concat:ext',
+        'babel',
         // 'connect:fake_is_server',
         'connect:server_test_unit',
         'watch:test'

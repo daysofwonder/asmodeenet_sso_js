@@ -61,6 +61,17 @@ module.exports = function (grunt) {
 
     // Define the configuration for all the tasks
     grunt.initConfig({
+        babel: {
+            options: {
+                sourceMap: true,
+                presets: ['es2015']
+            },
+            dist: {
+                files: {
+                    'build/an_sso.src.cf.js': 'build/an_sso.src.cf.js'
+                }
+            }
+        },
         connect: {
             server: {
                 options: {
@@ -309,6 +320,7 @@ module.exports = function (grunt) {
         'coffee:compileWithMaps',
         // 'concat:urijs',
         'concat:ext',
+        'babel',
         'uglify',
         'concat:jwt'
     ]);
@@ -316,7 +328,7 @@ module.exports = function (grunt) {
     grunt.registerTask('dist', [
         'build',
         // 'merge-source-maps:jwt',
-        'sorcery',
+        // 'sorcery',
         'concat:map',
         'concat:cp',
         'concat:cpbuild',

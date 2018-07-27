@@ -1,6 +1,6 @@
 <html>
     <head>
-        <script>document.write('<script src="an_sso.min.js?dev=' + Math.floor(Math.random() * 100) + '"\><\/script>');</script>
+        <script>document.write('<script src="an_sso.min.js?dev=' + Date.now() + '+' + Math.floor(Math.random() * 100) + '"\><\/script>');</script>
     </head>
     <body>
         <script>AsmodeeNet.trackCb(false);</script>
@@ -50,7 +50,7 @@
 
         AsmodeeNet.init({
             // Required parameters
-            client_id: 'studio-app', //'openid-ffg', //'test_direct', //'openid-dow',
+            client_id: 'test_direct', //'openid-ffg', //'test_direct', //'openid-dow',
             redirect_uri: 'http://localhost:8080/cbpop.html', //'https://community-dev.fantasyflightgames.com/oauth/callback',
             // Example of optional parameters
             base_is_host: 'http://localhost:8009/', //https://account.asmodee.net',

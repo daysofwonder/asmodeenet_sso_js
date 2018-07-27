@@ -42,6 +42,7 @@
     "grunt-rev-package": "^0.0.6",
     "grunt-shell-spawn": "^0.3.10",
     "gruntify-eslint": "^4.0.0",
+    "hoek": "^4.2.1",
     "http-proxy": "^1.16.2",
     "jasmine": "^2.8.0",
     "jasmine-ajax": "^3.3.1",

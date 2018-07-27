@@ -68,7 +68,10 @@ module.exports = function (grunt) {
             },
             dist: {
                 files: {
-                    'build/an_sso.src.cf.js': 'build/an_sso.src.cf.js'
+                    'build/an_sso.src.cf.js': 'build/an_sso.src.cf.js',
+                    'tests/unit/build/an_sso.test.cf.js': 'tests/unit/build/an_sso.test.cf.js',
+                    'tests/unit/build/ajax.test.cf.js': 'tests/unit/build/ajax.test.cf.js',
+                    'tests/unit/build/utils.test.cf.js': 'tests/unit/build/utils.test.cf.js'
                 }
             }
         },
@@ -349,8 +352,11 @@ module.exports = function (grunt) {
 
     grunt.registerTask('test:unit', [
         'lint',
+        'coffee:compileWithMaps',
+        'concat:ext',
         'coffee:compileForTest',
         'concat:ext',
+        'babel',
         'karma:unit'
     ]);
 
@@ -358,6 +364,7 @@ module.exports = function (grunt) {
         'lint',
         'coffee:compileForTest',
         'concat:ext',
+        'babel',
         'karma:coverage'
     ]);
 
@@ -380,6 +387,7 @@ module.exports = function (grunt) {
         'lint',
         'coffee:compileForTest',
         'concat:ext',
+        'babel',
         // 'connect:fake_is_server',
         'connect:server_test_unit',
         'watch:test'

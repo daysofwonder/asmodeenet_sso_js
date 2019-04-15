@@ -1,0 +1,48 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "This file is @generated automatically"
+    ],
+    "content-hash": "2eb644b496decb7a2df8d12440a9373f",
+    "packages": [],
+    "packages-dev": [
+        {
+            "name": "daysofwonder/local-backends",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "git@github.com:daysofwonder/local-backends.git",
+                "reference": "dd74733045f724af1924b8436f0ad02e5c8e5167"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/daysofwonder/local-backends/zipball/dd74733045f724af1924b8436f0ad02e5c8e5167",
+                "reference": "dd74733045f724af1924b8436f0ad02e5c8e5167",
+                "shasum": ""
+            },
+            "type": "project",
+            "authors": [
+                {
+                    "name": "Brice Figureau",
+                    "email": "brice@daysofwonder.com"
+                }
+            ],
+            "description": "Run asmodee.net services locally",
+            "support": {
+                "source": "https://github.com/daysofwonder/local-backends/tree/master",
+                "issues": "https://github.com/daysofwonder/local-backends/issues"
+            },
+            "time": "2019-04-12T15:51:02+00:00"
+        }
+    ],
+    "aliases": [],
+    "minimum-stability": "dev",
+    "stability-flags": {
+        "daysofwonder/local-backends": 20
+    },
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": [],
+    "platform-dev": []
+}

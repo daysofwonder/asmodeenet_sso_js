@@ -440,6 +440,16 @@ This will output results in terminal (nightwatchjs is configured to use PhantomJ
 
 This tests use Asmodee.net staging account server [https://account-staging.asmodee.net](https://account-staging.asmodee.net)
 
+For testing this project depends on the [local-backends](https://github.com/daysofwonder/local-backends) project.
+Before running the tests you have to install the local-backends root certificate in your system:
+
+```sh
+composer install # install the local-backends in vendor if not already done
+make -C vendor/daysofwonder/local-backends init-ca
+```
+
+Note that this last command might ask you for your password to gain elevated privileges on some systems.
+
 ## TODO (not ordered, not closed)
 
 * Query Scheduler (prevent signIn call before discover end by ex)

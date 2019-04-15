@@ -208,7 +208,7 @@ window.AsmodeeNet = (->
                     else
                         window.location = '/'
 
-    baseLinkAction = (endpoint, options) ->
+    baseLinkAction = (that, endpoint, options) ->
         options = options || {}
         iFrame.saveOptions = AsmodeeNet.extend {}, options if settings.display == 'iframe'
         state = getCryptoValue()
@@ -230,7 +230,7 @@ window.AsmodeeNet = (->
                 options.path += '&display_opts['+k+']='+ if v then '1' else '0'
         options.path += '&cancel_uri=' + encodeURI(settings.cancel_uri) if settings.cancel_uri
 
-        gameThis = this
+        gameThis = that
         options.callback = () ->
             removeItem(try_refresh_name)
             signinCallback(gameThis)
@@ -451,14 +451,14 @@ window.AsmodeeNet = (->
 
     signUp: (locale, options) ->
         locale = 'en' if acceptableLocales.indexOf(locale) == -1
-        baseLinkAction(URI(discovery_obj.issuer).normalize().toString() + locale + '/signup', options)
+        baseLinkAction(this, URI(discovery_obj.issuer).normalize().toString() + locale + '/signup', options)
 
     resetPass: (locale, options) ->
         locale = 'en' if acceptableLocales.indexOf(locale) == -1
-        baseLinkAction(URI(discovery_obj.issuer).normalize().toString() + locale + '/reset', options)
+        baseLinkAction(this, URI(discovery_obj.issuer).normalize().toString() + locale + '/reset', options)
 
     signIn: (options) ->
-        baseLinkAction(this.auth_endpoint(), options)
+        baseLinkAction(this, this.auth_endpoint(), options)
 
     identity: (options) ->
         if !this.isConnected()

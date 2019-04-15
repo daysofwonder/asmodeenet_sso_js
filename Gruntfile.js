@@ -8,9 +8,9 @@
 // 'test/spec/{,*/}*.js'
 // use this if you want to recursively match all subfolders:
 // 'test/spec/**/*.js'
-
-var phpport, proxyPhp, proxyStatic, PHPMiddle;
-var ISStaticPort = 9144;
+//
+// var phpport, proxyPhp, proxyStatic, PHPMiddle;
+// var ISStaticPort = 9144;
 
 module.exports = function (grunt) {
     // Load grunt tasks automatically
@@ -27,37 +27,37 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-shell-spawn');
 
     var sorcery = require('sorcery');
-    var httpProxy = require('http-proxy');
+    // var httpProxy = require('http-proxy');
 
-    var createPhpProxy = function () {
-        proxyStatic = httpProxy.createProxyServer({
-            host: '127.0.0.1',
-            port: ISStaticPort,
-            https: false,
-            xforward: false,
-            headers: {
-                'x-custom-added-header': 'blob'
-            },
-            hideHeaders: ['x-removed-header']
-        });
-
-        PHPMiddle = require('./grunt-is/PHPMiddle.js')(grunt, proxyStatic, 'http://localhost:' + ISStaticPort, ISStaticPort);
-    };
-
-    var createProxyPhp = function (port) {
-        phpport = port;
-        proxyPhp = httpProxy.createProxyServer({
-            host: '127.0.0.1',
-            port: 9145,
-            https: false,
-            xforward: false,
-            headers: {
-                'x-by-proxy-host': 'http://localhost:' + phpport
-            },
-            hideHeaders: ['x-removed-header']
-        });
-        PHPMiddle.settings(proxyPhp, phpport, 9145);
-    };
+    // var createPhpProxy = function () {
+    //     proxyStatic = httpProxy.createProxyServer({
+    //         host: '127.0.0.1',
+    //         port: ISStaticPort,
+    //         https: false,
+    //         xforward: false,
+    //         headers: {
+    //             'x-custom-added-header': 'blob'
+    //         },
+    //         hideHeaders: ['x-removed-header']
+    //     });
+    //
+    //     PHPMiddle = require('./grunt-is/PHPMiddle.js')(grunt, proxyStatic, 'http://localhost:' + ISStaticPort, ISStaticPort);
+    // };
+    //
+    // var createProxyPhp = function (port) {
+    //     phpport = port;
+    //     proxyPhp = httpProxy.createProxyServer({
+    //         host: '127.0.0.1',
+    //         port: 9145,
+    //         https: false,
+    //         xforward: false,
+    //         headers: {
+    //             'x-by-proxy-host': 'http://localhost:' + phpport
+    //         },
+    //         hideHeaders: ['x-removed-header']
+    //     });
+    //     PHPMiddle.settings(proxyPhp, phpport, 9145);
+    // };
 
     // Define the configuration for all the tasks
     grunt.initConfig({
@@ -105,27 +105,27 @@ module.exports = function (grunt) {
                     port: 8080,
                     keepalive: false
                 }
-            },
-            fake_is_static_server: {
-                options: {
-                    port: ISStaticPort,
-                    hostname: '127.0.0.1',
-                    base: 'asmodeenet_platform/identity-server/public'
-                }
-            },
-            fake_is_server: {
-                options: {
-                    port: 8209,
-                    keepalive: false,
-                    hostname: '127.0.0.1',
-                    base: 'public',
-                    middleware: [
-                        function (req, res, next) {
-                            return PHPMiddle.ware(req, res, next);
-                        }
-                    ]
-                }
             }
+            // fake_is_static_server: {
+            //     options: {
+            //         port: ISStaticPort,
+            //         hostname: '127.0.0.1',
+            //         base: 'asmodeenet_platform/identity-server/public'
+            //     }
+            // },
+            // fake_is_server: {
+            //     options: {
+            //         port: 8209,
+            //         keepalive: false,
+            //         hostname: '127.0.0.1',
+            //         base: 'public',
+            //         middleware: [
+            //             function (req, res, next) {
+            //                 return PHPMiddle.ware(req, res, next);
+            //             }
+            //         ]
+            //     }
+            // }
         },
         coffee: {
             compileWithMaps: {
@@ -259,21 +259,21 @@ module.exports = function (grunt) {
             }
         },
         shell: {
-            is_server_prepare: {
+            docker_and_test: {
                 command: 'bash ./contrib/startTestServer.sh ' + (grunt.option('envtype') || 'local') // envtype could be local or ci
-            },
-            is_server_launch: {
-                command: 'APPLICATION_ENV=localtest php -S 127.0.0.1:9145 -t public',
-                options: {
-                    async: true,
-                    execOptions: {
-                        cwd: './asmodeenet_platform/identity-server/'
-                    },
-                    stdout: true,
-                    stderr: true,
-                    failOnError: true
-                }
             }
+            // is_server_launch: {
+            //     command: 'APPLICATION_ENV=localtest php -S 127.0.0.1:9145 -t public',
+            //     options: {
+            //         async: true,
+            //         execOptions: {
+            //             cwd: './asmodeenet_platform/identity-server/'
+            //         },
+            //         stdout: true,
+            //         stderr: true,
+            //         failOnError: true
+            //     }
+            // }
             // ,
             // is_server_ci: {
             //     command: 'sh ./contrib/startTestServer.sh ci'
@@ -298,15 +298,15 @@ module.exports = function (grunt) {
     });
     grunt.registerTask('serve', ['connect:server']);
 
-    grunt.registerTask('createProxyE2e', '', function () {
-        createPhpProxy();
-        createProxyPhp(8209);
-    });
-
-    grunt.registerTask('closeProxyE2e', '', function () {
-        proxyStatic.close();
-        proxyPhp.close();
-    });
+    // grunt.registerTask('createProxyE2e', '', function () {
+    //     createPhpProxy();
+    //     createProxyPhp(8209);
+    // });
+    //
+    // grunt.registerTask('closeProxyE2e', '', function () {
+    //     proxyStatic.close();
+    //     proxyPhp.close();
+    // });
 
     grunt.registerTask('sorcery', '', function () {
         var chain = sorcery.loadSync('build/an_sso.min.js');
@@ -368,19 +368,24 @@ module.exports = function (grunt) {
         'karma:coverage'
     ]);
 
+    grunt.registerTask('test:e2eRealtestByCLI', [
+        'connect:server_test_e2e',
+        'nightwatch:chrome'
+    ]);
+
     grunt.registerTask('test:e2e', [
         'lint',
         'coffee:compileForTest',
         'concat:ext',
-        'shell:is_server_prepare',
-        'shell:is_server_launch',
-        'createProxyE2e',
-        'connect:fake_is_static_server',
-        'connect:fake_is_server',
-        'connect:server_test_e2e',
-        'nightwatch:phantomjs',
-        'closeProxyE2e',
-        'shell:is_server_launch:kill'
+        'shell:docker_and_test'
+        // 'shell:is_server_launch',
+        // 'createProxyE2e',
+        // 'connect:fake_is_static_server',
+        // 'connect:fake_is_server',
+        // 'connect:server_test_e2e',
+        // 'nightwatch:phantomjs',
+        // 'closeProxyE2e',
+        // 'shell:is_server_launch:kill'
     ]);
 
     grunt.registerTask('test:server', [

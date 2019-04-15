@@ -9,7 +9,7 @@ module.exports = {
             .consoleLogging()
             .waitForElementVisible('#connect_bt', 5000)
             .click('#connect_bt')
-            .assert.urlContains('http://localhost:8209/main/v2/oauth/authorize?display=page&response_type=code')
+            .assert.urlContains('https://account.dev.asmodee.net/main/v2/oauth/authorize?display=page&response_type=code')
             .waitForElementVisible('#inputLogin', 5000)
             .setValue('#inputLogin', 'Brice')
             .setValue('#inputPassword', 'test')

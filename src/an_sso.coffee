@@ -3,6 +3,8 @@ window.AsmodeeNet = (->
     defaultSuccessCallback = () -> console.log arguments
     defaultErrorCallback = () -> console.error arguments
 
+    acceptableLocales = ['fr', 'de', 'en', 'it', 'es']
+
     default_settings =
         base_is_host: 'https://account.asmodee.net'
         base_is_path: '/main/v2/oauth'
@@ -205,6 +207,35 @@ window.AsmodeeNet = (->
                         settings.callback_post_logout_redirect()
                     else
                         window.location = '/'
+
+    baseLinkAction = (that, endpoint, options) ->
+        options = options || {}
+        iFrame.saveOptions = AsmodeeNet.extend {}, options if settings.display == 'iframe'
+        state = getCryptoValue()
+        nonce = getCryptoValue()
+        setItem('state', state, if settings.display == 'iframe' then 1440 else 20)
+        setItem('nonce', nonce, if settings.display == 'iframe' then 1440 else 20)
+        settings.callback_signin_success = options.success || settings.callback_signin_success
+        settings.callback_signin_error = options.error || settings.callback_signin_error
+        options.path = endpoint +
+            '?display=' + settings.display +
+            '&response_type=' + encodeURI(settings.response_type) +
+            '&state=' + state +
+            '&client_id=' + settings.client_id +
+            '&scope=' + settings.scope
+        options.path += '&redirect_uri=' + encodeURI(settings.redirect_uri) if settings.redirect_uri
+        options.path += '&nonce='+nonce if settings.response_type.search('id_token') >= 0
+        if Object.keys(settings.display_options).length > 0
+            for k,v of settings.display_options
+                options.path += '&display_opts['+k+']='+ if v then '1' else '0'
+        options.path += '&cancel_uri=' + encodeURI(settings.cancel_uri) if settings.cancel_uri
+
+        gameThis = that
+        options.callback = () ->
+            removeItem(try_refresh_name)
+            signinCallback(gameThis)
+
+        oauth(options)
 
     signinCallback = (gameThis) ->
         item = getItem('gd_connect_hash')
@@ -418,34 +449,16 @@ window.AsmodeeNet = (->
                 console.error "error JWKS => "+arguments[0] if arguments.length > 0
                 console.error "error JWKS => "+arguments[0].statusText if arguments.length > 0
 
+    signUp: (locale, options) ->
+        locale = 'en' if acceptableLocales.indexOf(locale) == -1
+        baseLinkAction(this, URI(discovery_obj.issuer).normalize().toString() + locale + '/signup', options)
+
+    resetPass: (locale, options) ->
+        locale = 'en' if acceptableLocales.indexOf(locale) == -1
+        baseLinkAction(this, URI(discovery_obj.issuer).normalize().toString() + locale + '/reset', options)
+
     signIn: (options) ->
-        options = options || {}
-        iFrame.saveOptions = AsmodeeNet.extend {}, options if settings.display == 'iframe'
-        state = getCryptoValue()
-        nonce = getCryptoValue()
-        setItem('state', state, if settings.display == 'iframe' then 1440 else 20)
-        setItem('nonce', nonce, if settings.display == 'iframe' then 1440 else 20)
-        settings.callback_signin_success = options.success || settings.callback_signin_success
-        settings.callback_signin_error = options.error || settings.callback_signin_error
-        options.path = this.auth_endpoint() +
-            '?display=' + settings.display +
-            '&response_type=' + encodeURI(settings.response_type) +
-            '&state=' + state +
-            '&client_id=' + settings.client_id +
-            '&scope=' + settings.scope
-        options.path += '&redirect_uri=' + encodeURI(settings.redirect_uri) if settings.redirect_uri
-        options.path += '&nonce='+nonce if settings.response_type.search('id_token') >= 0
-        if Object.keys(settings.display_options).length > 0
-            for k,v of settings.display_options
-                options.path += '&display_opts['+k+']='+ if v then '1' else '0'
-        options.path += '&cancel_uri=' + encodeURI(settings.cancel_uri) if settings.cancel_uri
-
-        gameThis = this
-        options.callback = () ->
-            removeItem(try_refresh_name)
-            signinCallback(gameThis)
-
-        oauth(options)
+        baseLinkAction(this, this.auth_endpoint(), options)
 
     identity: (options) ->
         if !this.isConnected()

@@ -1,0 +1,13 @@
+{
+  "name": "daysofwonder/asmodeenet_sso_js",
+  "minimum-stability": "dev",
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "git@github.com:daysofwonder/local-backends.git"
+    }
+  ],
+  "require-dev": {
+    "daysofwonder/local-backends": "dev-master"
+  }
+}

@@ -221,6 +221,70 @@ If the user is already connected, no user interface will be displayed to the use
 
 In popup mode, if the user closes the popup himself, the error callback will be called with the message `'popup closed without signin'`.
 
+### Sign-Up
+
+After you are done with initialization and discovery, you can sign-up with the `signUp()` method which takes two parameters. The first is a string with the locale wanted for the current user (Authorized locales are `de`, `en`, `es`, `fr` and `it`. The default if you give an other locale is `en`) and the second parameter is optional and is an object with the following entries:
+
+ * `success` callback. Optional, default: `callback_signin_success`, see above.
+ * `error` callback. Optional, default: `callback_signin_error`, see above.
+ * `width` of the popup or of the iframe. Optional, default: 475px. Only makes sense for popup and iframe modes.
+ * `height` of the popup or of the iframe. Optional, default: 500px. Only makes sense for popup and iframe modes.
+
+ All these configuration entries for this second paramters are optional.
+
+ **Note:** The `success` and `error` parameters are provided only for backward compatibility with previous versions of the library. They are ignored when the display mode is set to `page` or `touch`. Therefore we strongly recommend that you set these in the call to `AsmodeeNet.init()` in all cases.
+
+```javascript
+// Open the sign-in UI in a pop-up window
+AsmodeeNet.init({
+    client_id: 'my_client_id',
+    redirect_uri: 'https://my_host.name/callback_page'
+});
+AsmodeeNet.discover();
+AsmodeeNet.trackCb();
+if (...user pushes a Sign-Up button...) {
+    AsmodeeNet.signUp('fr', {
+        width: 500,
+        height: 800
+    })
+}
+```
+
+If the user is already connected, no user interface will be displayed to the user and the success callback will be called immediately.
+
+In popup mode, if the user closes the popup himself, the error callback will be called with the message `'popup closed without signin'`.
+
+### Reset my Password
+
+After you are done with initialization and discovery, you can call reset my password form from Asmodee.net with the `resetPass()` method which takes two parameters. The first is a string with the locale wanted for the current user (Authorized locales are `de`, `en`, `es`, `fr` and `it`. The default if you give an other locale is `en`) and the second parameter is optional and is an object with the following entries:
+
+ * `success` callback. Optional, default: `callback_signin_success`, see above.
+ * `error` callback. Optional, default: `callback_signin_error`, see above.
+ * `width` of the popup or of the iframe. Optional, default: 475px. Only makes sense for popup and iframe modes.
+ * `height` of the popup or of the iframe. Optional, default: 500px. Only makes sense for popup and iframe modes.
+
+ All these configuration entries for this second paramters are optional.
+
+ **Note:** The `success` and `error` parameters are provided only for backward compatibility with previous versions of the library. They are ignored when the display mode is set to `page` or `touch`. Therefore we strongly recommend that you set these in the call to `AsmodeeNet.init()` in all cases.
+
+```javascript
+// Open the sign-in UI in a pop-up window
+AsmodeeNet.init({
+    client_id: 'my_client_id',
+    redirect_uri: 'https://my_host.name/callback_page'
+});
+AsmodeeNet.discover();
+AsmodeeNet.trackCb();
+if (...user pushes a Reset my password button...) {
+    AsmodeeNet.resetPass('de', {
+        width: 500,
+        height: 800
+    })
+}
+```
+
+In popup mode, if the user closes the popup himself, the error callback will be called with the message `'popup closed without signin'`.
+
 ### trackCb
 
 This function ("Track Call-back") detects if the current page was called from the Identity Server, as the result of a sign-in or sign-up interaction. In this case, it stores temporarily the resulting connection data inside the browser local storage.
@@ -375,6 +439,16 @@ grunt test:e2e
 This will output results in terminal (nightwatchjs is configured to use PhantomJS) and reports will be find in tests/e2e/reports in format usable by Jenkins.
 
 This tests use Asmodee.net staging account server [https://account-staging.asmodee.net](https://account-staging.asmodee.net)
+
+For testing this project depends on the [local-backends](https://github.com/daysofwonder/local-backends) project.
+Before running the tests you have to install the local-backends root certificate in your system:
+
+```sh
+composer install # install the local-backends in vendor if not already done
+make -C vendor/daysofwonder/local-backends init-ca
+```
+
+Note that this last command might ask you for your password to gain elevated privileges on some systems.
 
 ## TODO (not ordered, not closed)
 

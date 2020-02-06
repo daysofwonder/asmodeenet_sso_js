@@ -208,8 +208,14 @@ window.AsmodeeNet = (->
                     else
                         window.location = '/'
 
+    getLocation =(href) ->
+        l = document.createElement("a")
+        l.href = href
+
     baseLinkAction = (that, endpoint, options) ->
         options = options || {}
+        locale = if options.locale then '/' + options.locale else ''
+        locale = 'en' if (locale != '' && acceptableLocales.indexOf(locale) == -1)
         iFrame.saveOptions = AsmodeeNet.extend {}, options if settings.display == 'iframe'
         state = getCryptoValue()
         nonce = getCryptoValue()
@@ -217,13 +223,18 @@ window.AsmodeeNet = (->
         setItem('nonce', nonce, if settings.display == 'iframe' then 1440 else 20)
         settings.callback_signin_success = options.success || settings.callback_signin_success
         settings.callback_signin_error = options.error || settings.callback_signin_error
-        options.path = endpoint +
+        urlParsed = getLocation(endpoint)
+        localizedEndpoint = endpoint.replace(urlParsed.pathname, options.locale + urlParsed.pathname)
+        options.path = localizedEndpoint +
             '?display=' + settings.display +
             '&response_type=' + encodeURI(settings.response_type) +
             '&state=' + state +
             '&client_id=' + settings.client_id +
             '&scope=' + settings.scope
-        options.path += '&redirect_uri=' + encodeURI(settings.redirect_uri) if settings.redirect_uri
+        if settings.redirect_uri
+            ruri = settings.redirect_uri
+            ruri += options.redirect_extra if options.redirect_extra
+            options.path += '&redirect_uri=' + encodeURI(ruri)
         options.path += '&nonce='+nonce if settings.response_type.search('id_token') >= 0
         if Object.keys(settings.display_options).length > 0
             for k,v of settings.display_options

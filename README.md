@@ -192,10 +192,12 @@ Unless you know what you are doing and need to specifically adjust some OpenID C
 
 After you are done with initialization and discovery, you can sign-in with the `signIn()` method which takes one parameter, as an object with the following entries:
 
+ * `redirect_extra` string, if it's set, this string is added to the redirect uri (like to add a contextual query data `?returnto=[...]`). Optional, default: `null`.
  * `success` callback. Optional, default: `callback_signin_success`, see above.
  * `error` callback. Optional, default: `callback_signin_error`, see above.
  * `width` of the popup or of the iframe. Optional, default: 475px. Only makes sense for popup and iframe modes.
  * `height` of the popup or of the iframe. Optional, default: 500px. Only makes sense for popup and iframe modes.
+ * `locale` Redirect to this specific locale on the Asmodee.net server. (Authorized locales are `de`, `en`, `es`, `fr` and `it`. The default if you give an other locale is `en`)
 
  All these parameters are optional.
 
@@ -225,6 +227,7 @@ In popup mode, if the user closes the popup himself, the error callback will be 
 
 After you are done with initialization and discovery, you can sign-up with the `signUp()` method which takes two parameters. The first is a string with the locale wanted for the current user (Authorized locales are `de`, `en`, `es`, `fr` and `it`. The default if you give an other locale is `en`) and the second parameter is optional and is an object with the following entries:
 
+ * `redirect_extra` string, if it's set, this string is added to the redirect uri (like to add a contextual query data `?returnto=[...]`). Optional, default: `null`.
  * `success` callback. Optional, default: `callback_signin_success`, see above.
  * `error` callback. Optional, default: `callback_signin_error`, see above.
  * `width` of the popup or of the iframe. Optional, default: 475px. Only makes sense for popup and iframe modes.
@@ -258,6 +261,7 @@ In popup mode, if the user closes the popup himself, the error callback will be 
 
 After you are done with initialization and discovery, you can call reset my password form from Asmodee.net with the `resetPass()` method which takes two parameters. The first is a string with the locale wanted for the current user (Authorized locales are `de`, `en`, `es`, `fr` and `it`. The default if you give an other locale is `en`) and the second parameter is optional and is an object with the following entries:
 
+ * `redirect_extra` string, if it's set, this string is added to the redirect uri (like to add a contextual query data `?returnto=[...]`). Optional, default: `null`.
  * `success` callback. Optional, default: `callback_signin_success`, see above.
  * `error` callback. Optional, default: `callback_signin_error`, see above.
  * `width` of the popup or of the iframe. Optional, default: 475px. Only makes sense for popup and iframe modes.

@@ -495,7 +495,7 @@ window.AsmodeeNet = (->
                     else
                         console.error  'identity error', context, xhr, type, error
 
-    restoreTokens: (saved_access_token, saved_id_token, call_identity = true, cbdone = null, clear_before_refresh = null) ->
+    restoreTokens: (saved_access_token, saved_id_token, call_identity = true, cbdone = null, clear_before_refresh = null, saved_identity = null) ->
         if (saved_access_token && access_token)
             saved_access_token = null
         if (saved_id_token && id_token)
@@ -511,6 +511,7 @@ window.AsmodeeNet = (->
                     removeItem(try_refresh_name)
                     authorized(hash)
                     this.identity({success: settings.callback_signin_success, error: settings.callback_signin_error}) if call_identity
+                    identity_obj = saved_identity if saved_identity
                     if cbdone
                         cbdone(true)
                     else
@@ -529,7 +530,7 @@ window.AsmodeeNet = (->
                             return false
             else
                 setTimeout( () ->
-                    AsmodeeNet.restoreTokens(saved_access_token, saved_id_token, call_identity, cbdone, clear_before_refresh)
+                    AsmodeeNet.restoreTokens(saved_access_token, saved_id_token, call_identity, cbdone, clear_before_refresh, saved_identity)
                 , 200)
 
         return null

@@ -364,6 +364,7 @@ Parameters of the method `restoreTokens`:
 * **call_identity**: *optional* you can pass a third parameter, boolean, true by default. If it's true, after it validates the tokens, call the identity() method with the callback configured in the init method for signin callback (callback_signin_success and callback_signin_error)
 * **cbdone**: *optional* A callback if resotre is a success. If a callback is passed, it will be call with one parameter (a boolean worth true). In default situation, `restoreTokens` return itself true
 * **clear_before_refresh**: *optional* A callback for refresh tokens. If you have stocked the token as a cookie or in local storage in your code, and call `restoreTokens` with this tokens, and if tokens are expired, the `restoreTokens` method could try to refresh them (only once). To do it, it call first this *clear_before_refresh* callback, and you **must** remove your cookie/local storage for this tokens and return a boolean, if it's *true*, the `signIn` will be call to try to refresh the tokens, if it's false *nothing* is done.
+* **saved_identity**: *optional* If you saved the identity, instead of call identity on IS Server with the identity() method, fill the identity object with object value given.
 
 ### Other methods
 

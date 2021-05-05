@@ -43,6 +43,7 @@
                 // width: 475,
                 // height: 500,
                 success: signed,
+                // redirect_extra: '?returnto=papa',
                 error: function() {
                     echo("SIGNIN ERROR", arguments);
                 }
@@ -83,14 +84,14 @@
 
         AsmodeeNet.init({
             // Required parameters
-            client_id: 'openid-dow', //'test_direct', //'openid-ffg', //'test_direct', //'openid-dow', 'asmoclub', //
-            redirect_uri: 'http://localhost:8080/cbpop.html', // 'https://login.salesforce.com/services/authcallback/00D2000000099GxEAI/asmoclub', // 'https://community-dev.fantasyflightgames.com/oauth/callback',
+            client_id: 'xwing-web-portal', //'test_direct', //'openid-ffg', //'test_direct', //'openid-dow', 'asmoclub', // 'asnet-api', // 'xwing-web-portal'
+            redirect_uri: 'http://localhost:8080/', // 'https://login.salesforce.com/services/authcallback/00D2000000099GxEAI/asmoclub', // 'https://community-dev.fantasyflightgames.com/oauth/callback',
             cancel_uri: 'http://localhost:8080/?cancel=1', // only used by the touch mode on IS
             // Example of optional parameters
-            base_is_host: 'http://localhost:8009/', // 'https://account.asmodee.net'
+            base_is_host: 'https://is.dev.internal.asmodee.net:8443/', // 'https://account.asmodee.net', //'https://is.dev.internal.asmodee.net:8443/', //'https://account.asmodee.net', // 'https://is.dev.internal.asmodee.net:8443/', // 'https://account.asmodee.net'
             scope: 'openid+public',
             response_type: 'code id_token token',
-            display: 'touch', // display type: 'page' 'touch' 'popup' 'iframe' (page by default)
+            display: 'page', // display type: 'page' 'touch' 'popup' 'iframe' (page by default)
 
             display_options: {
                 // noheader: true,

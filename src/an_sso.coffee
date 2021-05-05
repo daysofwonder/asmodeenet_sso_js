@@ -460,16 +460,24 @@ window.AsmodeeNet = (->
                 console.error "error JWKS => "+arguments[0] if arguments.length > 0
                 console.error "error JWKS => "+arguments[0].statusText if arguments.length > 0
 
-    signUp: (locale, options) ->
+    signUp: (locale, options, special_host, special_path) ->
         locale = 'en' if acceptableLocales.indexOf(locale) == -1
-        baseLinkAction(this, URI(discovery_obj.issuer).normalize().toString() + locale + '/signup', options)
+        special_host = discovery_obj.issuer unless special_host
+        special_path = '/signup' unless special_path
+        baseLinkAction(this, URI(special_host).normalize().toString() + locale + special_path, options)
 
-    resetPass: (locale, options) ->
+    resetPass: (locale, options, special_host, special_path) ->
         locale = 'en' if acceptableLocales.indexOf(locale) == -1
-        baseLinkAction(this, URI(discovery_obj.issuer).normalize().toString() + locale + '/reset', options)
+        special_host = discovery_obj.issuer unless special_host
+        special_path = '/reset' unless special_path
+        baseLinkAction(this, URI(discovery_obj.issuer).normalize().toString() + locale + special_path, options)
 
-    signIn: (options) ->
-        baseLinkAction(this, this.auth_endpoint(), options)
+    signIn: (options, special_host, special_path) ->
+        if special_host
+            special_host = URI(special_host).normalize().toString() + locale + special_path
+        else
+            special_host = this.auth_endpoint()
+        baseLinkAction(this, special_host, options)
 
     identity: (options) ->
         if !this.isConnected()

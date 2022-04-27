@@ -3,8 +3,8 @@
 version: 2.1
 
 orbs:
-  aws-ecr: circleci/aws-ecr@7.2.0
-  browser-tools: circleci/browser-tools@1.1.0
+#  aws-ecr: circleci/aws-ecr@7.2.0 # https://circleci.com/developer/orbs/orb/circleci/aws-ecr
+  browser-tools: circleci/browser-tools@1.1.0 # https://circleci.com/developer/orbs/orb/circleci/browser-tools
 
 notify:
     webhooks:
@@ -19,7 +19,8 @@ jobs:
       # docker_layer_caching: true # DISABLED BECAUSE USE 200 credits for each job using it. So the job should by itself have a duration > 20minutes without the DLC to have an economy of credits... (you have an economy of time, but if it's not suffisent, the cost of credits is not profitable)
     # parallelism: 2
     steps:
-      - browser-tools/install-browser-tools
+      - browser-tools/install-chrome
+      - browser-tools/install-chromedriver
       - checkout
 
       - restore_cache: # special step to restore the dependency cache if `composer.lock` does not change
@@ -28,10 +29,9 @@ jobs:
             # fallback to using the latest cache if no exact match is found (See https://circleci.com/docs/2.0/caching/)
             - cache-node-v1-
 
-      - aws-ecr/ecr-login
+#      - aws-ecr/ecr-login
 
       - run: npm install
-      - run: npm install grunt@"^1.3.2"
       - run:
           name: "launch test unit"
           command: |
@@ -49,9 +49,10 @@ jobs:
     docker:
       - image: cimg/node:14.16.1
       # docker_layer_caching: true # DISABLED BECAUSE USE 200 credits for each job using it. So the job should by itself have a duration > 20minutes without the DLC to have an economy of credits... (you have an economy of time, but if it's not suffisent, the cost of credits is not profitable)
-    resource_class: medium
     # parallelism: 2
     steps:
+      - browser-tools/install-chrome
+      - browser-tools/install-chromedriver
       - checkout
 
       - restore_cache: # special step to restore the dependency cache if `composer.lock` does not change
@@ -60,16 +61,17 @@ jobs:
             # fallback to using the latest cache if no exact match is found (See https://circleci.com/docs/2.0/caching/)
             - cache-node-v1-
 
-      - aws-ecr/ecr-login
+      # - aws-ecr/ecr-login
 
       - run: npm install
       - run:
-          name: "build and launch test unit" # TODO put it in orb
+          name: "launch test coverage"
           command: |
             grunt test:coverage
 
       - store_artifacts:
-          path: ~/coverage/
+          path: ~/coverage_html/report-summary-coverage/index.html
+          destination: coverage-report.html
 
       - save_cache: # special step to save the dependency cache with the `composer.lock` cache key template
           key: cache-node-v1-{{ checksum "package-lock.json" }}
@@ -80,7 +82,6 @@ jobs:
     machine:
       image: cimg/node:14.16.1
       # docker_layer_caching: true # DISABLED BECAUSE USE 200 credits for each job using it. So the job should by itself have a duration > 20minutes without the DLC to have an economy of credits... (you have an economy of time, but if it's not suffisent, the cost of credits is not profitable)
-    resource_class: medium
     docker:
     steps:
       - checkout
@@ -91,12 +92,12 @@ jobs:
             # fallback to using the latest cache if no exact match is found (See https://circleci.com/docs/2.0/caching/)
             - cache-node-v1-
 
-      - aws-ecr/ecr-login
+      # - aws-ecr/ecr-login
 
+      - run: npm install
       - run:
           name: "build and launch acceptance tests" # TODO put it in orb
           command: |
-            npm install
             grunt test:e2e
 
       - store_test_results:
@@ -107,13 +108,72 @@ jobs:
           paths:
             - node_modules
 
+  test-validation:
+    docker:
+      - image: cimg/node:14.16.1
+      # docker_layer_caching: true # DISABLED BECAUSE USE 200 credits for each job using it. So the job should by itself have a duration > 20minutes without the DLC to have an economy of credits... (you have an economy of time, but if it's not suffisent, the cost of credits is not profitable)
+    # parallelism: 2
+    steps:
+      - checkout
+
+      - restore_cache: # special step to restore the dependency cache if `composer.lock` does not change
+          keys:
+            - cache-node-v1-{{ checksum "package-lock.json" }}
+            # fallback to using the latest cache if no exact match is found (See https://circleci.com/docs/2.0/caching/)
+            - cache-node-v1-
+
+      - run: npm install
+      - run:
+          name: "Launch lint"
+          command: |
+            grunt lint
+
+      - save_cache: # special step to save the dependency cache with the `composer.lock` cache key template
+          key: cache-node-v1-{{ checksum "package-lock.json" }}
+          paths:
+            - node_modules
+
+  auto-gitag:
+    docker:
+      - image: cimg/ruby:3.1.2
+      # docker_layer_caching: true # DISABLED BECAUSE USE 200 credits for each job using it. So the job should by itself have a duration > 20minutes without the DLC to have an economy of credits... (you have an economy of time, but if it's not suffisent, the cost of credits is not profitable)
+    # parallelism: 2
+    steps:
+      - checkout
+
+      - run:
+          name: "autotag"
+          command: |
+            GGV=$(ruby -e 'print /"version": "(.*)",/.match(File.read("package.json"))[1]')
+            echo $GGV
+            git tag $GGV
+            git push origin master --tags
+
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:
   tests-workflow:
     jobs:
-      - test-unit:
-          context: "AWS credential access for docker"
+      - test-unit
+      - test-coverage:
+          filters:
+              branches:
+                  only: "master"
+          requires:
+              - test-unit
+      - test-validation:
+          filters:
+              branches:
+                  only: "master"
+          requires:
+              - test-unit
+      - auto-gitag:
+          filters:
+              branches:
+                  only: "master"
+          requires:
+              - test-coverage
+              - test-validation
       # - test-accept:
       #     context: "AWS credential access for docker"

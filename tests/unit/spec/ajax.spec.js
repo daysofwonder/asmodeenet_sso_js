@@ -162,7 +162,7 @@ describe('Ajax included minitools', function () {
         expect(onFailureArgs[1]).toBeString();
         expect(onFailureArgs[1]).toEqual('error');
         expect(onFailureArgs[2]).toBeObject();
-        expect(onFailureArgs[2]).toEqual({error: 'invalid'});
+        expect(onFailureArgs[2]).toEqual({ error: 'invalid' });
 
         window.AsmodeeNet.ajax('http://fake.url/tr', {
             success: onSuccess,
@@ -227,7 +227,7 @@ describe('Ajax included minitools', function () {
         var onSuccessArgs = onSuccess.calls.mostRecent().args;
         expect(onSuccessArgs.length).toBe(3);
         expect(onSuccessArgs[0]).toBeObject();
-        expect(onSuccessArgs[0]).toEqual({result: ['BOB']});
+        expect(onSuccessArgs[0]).toEqual({ result: ['BOB'] });
         expect(onSuccessArgs[1]).toBeString();
         expect(onSuccessArgs[1]).toEqual('success');
         expect(onSuccessArgs[2]).toBeObject();
@@ -309,7 +309,7 @@ describe('Ajax included minitools', function () {
         var onSuccessArgs = onSuccess.calls.mostRecent().args;
         expect(onSuccessArgs.length).toBe(3);
         expect(onSuccessArgs[0]).toBeObject();
-        expect(onSuccessArgs[0]).toEqual({result: 'BB'});
+        expect(onSuccessArgs[0]).toEqual({ result: 'BB' });
         expect(onSuccessArgs[1]).toBeString();
         expect(onSuccessArgs[1]).toEqual('success');
         expect(onSuccessArgs[2]).toBeObject();

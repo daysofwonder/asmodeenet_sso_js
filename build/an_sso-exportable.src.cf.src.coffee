@@ -1,3 +1,99 @@
+ajaxCl = (url, settings) ->
+    args = arguments
+    settings = if args.length == 1 then args[0] else args[1]
+
+    emptyFunction = () ->
+        null
+
+    defaultSettings =
+        url: if args.length == 2 && (typeof url == 'string') then url else '.'
+        cache: true
+        data: {}
+        headers: {}
+        context: null
+        type: 'GET'
+        success: emptyFunction
+        error: emptyFunction
+        complete: emptyFunction
+
+    settings = this.extend(defaultSettings, settings || {})
+
+    mimeTypes =
+        'application/json': 'json'
+        'text/html': 'html'
+        'text/plain': 'text'
+
+    if !settings.cache
+        settings.url = settings.url +
+                        (if settings.url.indexOf('?') then '&' else '?') +
+                        'noCache=' +
+                        Math.floor(Math.random() * 9e9)
+
+    success = (data, xhr, settings) ->
+        status = 'success'
+        settings.success.call(settings.context, data, status, xhr)
+        complete(status, xhr, settings)
+
+    error   = (error, type, xhr, settings) ->
+        settings.error.call(settings.context, xhr, type, error)
+        complete(type, xhr, settings)
+
+    complete = (status, xhr, settings) ->
+        settings.complete.call(settings.context, xhr, status)
+
+    xhr = new XMLHttpRequest()
+
+    readyStateChange = () ->
+        if xhr.readyState == 4
+            result = null
+            mime = xhr.getResponseHeader('content-type')
+            dataType = mimeTypes[mime] || 'text'
+
+            if (xhr.status >= 200 && xhr.status < 300) || xhr.status == 304
+                result = xhr.responseText
+
+                try
+                    if dataType == 'json'
+                        result = JSON.parse(result)
+                catch e
+                    error(e.message, 'parsererror', xhr, settings)
+                    return
+                success(result, xhr, settings)
+                return
+            else
+                result = xhr.responseText
+                try
+                    if dataType == 'json'
+                        result = JSON.parse(result)
+                    error(result, 'error', xhr, settings)
+                    return
+                catch e
+                    error(e.message, 'parsererror', xhr, settings)
+                    return
+
+            error(result, 'error', xhr, settings)
+
+    if xhr.addEventListener
+        xhr.addEventListener('readystatechange', readyStateChange, false)
+    else if xhr.attachEvent
+        xhr.attachEvent('onreadystatechange', readyStateChange)
+
+
+    xhr.open(settings.type, settings.url)
+
+    if settings.type == 'POST'
+        settings.headers = this.extend {
+            'Content-type': 'application/x-www-form-urlencoded'
+        }, settings.headers, {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+
+    for key of settings.headers
+        xhr.setRequestHeader(key, settings.headers[key])
+    xhr.send(settings.data)
+
+    return this
+
 
 AsmodeeNet = (->
 
@@ -62,7 +158,7 @@ AsmodeeNet = (->
         access_token = id_token = access_hash = identity_obj = code = null
         if callback
             callback()
-            window.AsmodeeNet.signIn iFrame.saveOptions if settings.display == 'iframe'
+            AsmodeeNet.signIn iFrame.saveOptions if settings.display == 'iframe'
         else
             window.location.reload()
 
@@ -139,8 +235,8 @@ AsmodeeNet = (->
     checkTokens = (nonce, hash) ->
         if hash.access_token
             try
-                at_dec = window.AsmodeeNet.jwt_decode(hash.access_token)
-                at_head = window.AsmodeeNet.jwt_decode(hash.access_token, { header: true })
+                at_dec = jwt_decode(hash.access_token)
+                at_head = jwt_decode(hash.access_token, { header: true })
             catch errdecode
                 checkErrors.push "access_token decode error : "+errdecode
                 return false
@@ -148,8 +244,8 @@ AsmodeeNet = (->
             if typeof hash.id_token == undefined
                 return false
             try
-                it_dec = window.AsmodeeNet.jwt_decode(hash.id_token)
-                it_head = window.AsmodeeNet.jwt_decode(hash.id_token, { header: true })
+                it_dec = jwt_decode(hash.id_token)
+                it_head = jwt_decode(hash.id_token, { header: true })
             catch errdecode
                 checkErrors.push "id_token decode error : "+errdecode
                 return false
@@ -217,7 +313,7 @@ AsmodeeNet = (->
         options = options || {}
         locale = if options.locale then '/' + options.locale else ''
         locale = 'en' if (locale != '' && acceptableLocales.indexOf(locale) == -1)
-        iFrame.saveOptions = window.AsmodeeNet.extend {}, options if settings.display == 'iframe'
+        iFrame.saveOptions = AsmodeeNet.extend {}, options if settings.display == 'iframe'
         state = getCryptoValue()
         nonce = getCryptoValue()
         setItem('state', state, if settings.display == 'iframe' then 1440 else 20)
@@ -232,8 +328,6 @@ AsmodeeNet = (->
             '&state=' + state +
             '&client_id=' + settings.client_id +
             '&scope=' + settings.scope
-        if typeof options.gatrack != 'undefined'
-            options.path += '&_ga=' + options.gatrack
         if settings.redirect_uri
             ruri = settings.redirect_uri
             ruri += options.redirect_extra if options.redirect_extra
@@ -270,7 +364,7 @@ AsmodeeNet = (->
                     if hash.state
                         if hash.state == state
                             hash.scope = hash.scope.split('+')
-                            hash.expires = window.AsmodeeNet.jwt_decode(hash.access_token)['exp']
+                            hash.expires = jwt_decode(hash.access_token)['exp']
                             checkErrors = []
                             if checkTokens(nonce, hash)
                                 removeItem('state')
@@ -302,7 +396,7 @@ AsmodeeNet = (->
             if tmpopts
                 for opt, val of settings.display_options
                     delete settings.display_options[opt] unless opt in Object.keys(tmpopts)
-        settings.display_options = window.AsmodeeNet.extend tmpopts, settings.display_options
+        settings.display_options = AsmodeeNet.extend tmpopts, settings.display_options
         delete settings.display_options.cookies if 'cookies' in Object.keys(settings.display_options) && settings.display_options.cookies == true
         if settings.display == 'touch'
             settings.cancel_uri = settings.redirect_uri if !settings.cancel_uri
@@ -362,7 +456,7 @@ AsmodeeNet = (->
     verifyBHash: (b_hash) -> b_hash # internal use for tests
 
     init: (options) ->
-        settings = window.AsmodeeNet.extend(default_settings, options)
+        settings = this.extend(default_settings, options)
         checkUrlOptions()
         checkDisplayOptions()
         checkLogoutRedirect()
@@ -386,7 +480,7 @@ AsmodeeNet = (->
     getConfiguredScope: () -> settings.scope
     getConfiguredAPI: () -> settings.base_url
     getClientId: () -> settings.client_id
-    getSettings: () -> window.AsmodeeNet.extend({}, settings)
+    getSettings: () -> this.extend({}, settings)
     getIdentity: () -> identity_obj
 
     getScopes: () ->
@@ -413,11 +507,11 @@ AsmodeeNet = (->
         options ?= {}
         base_url = options.base_url || settings.base_url || default_settings.base_url
         delete options.base_url
-        sets = window.AsmodeeNet.extend(options, this.baseSettings(), {type: type})
+        sets = this.extend(options, this.baseSettings(), {type: type})
         if options.auth != undefined && options.auth == false
             delete sets.headers.Authorization if sets.headers.Authorization
             delete sets.auth
-        window.AsmodeeNet.ajax(base_url + url, sets)
+        this.ajax(base_url + url, sets)
     get: (url, options) ->
         return this.ajaxq('GET', url, options)
     post: (url, options) ->
@@ -492,14 +586,14 @@ AsmodeeNet = (->
 
         if this.isConnected() && identity_obj
             iFrame.element.src = '' if settings.display == 'iframe'
-            options.success(identity_obj, window.AsmodeeNet.getCode()) if options && options.success
+            options.success(identity_obj, AsmodeeNet.getCode()) if options && options.success
         else
             this.get '',
                 base_url: this.ident_endpoint()
                 success: (data) ->
                     identity_obj = data
                     iFrame.element.src = '' if settings.display == 'iframe'
-                    options.success(identity_obj, window.AsmodeeNet.getCode()) if options && options.success
+                    options.success(identity_obj, AsmodeeNet.getCode()) if options && options.success
                 error: (context, xhr, type, error) ->
                     if options && options.error
                         options.error(context, xhr, type, error)
@@ -515,7 +609,7 @@ AsmodeeNet = (->
             hash = {access_token: saved_access_token, id_token: saved_id_token}
             if (this.isJwksDone())
                 if (checkTokens(null, hash))
-                    decoded = window.AsmodeeNet.jwt_decode(saved_access_token)
+                    decoded = jwt_decode(saved_access_token)
                     hash.scope = decoded['scope'].split(' ')
                     hash.expires = decoded['exp']
                     hash.token_type = decoded['token_type']
@@ -533,7 +627,7 @@ AsmodeeNet = (->
                     if checkErrors[0] == 'Invalid expiration date' && clear_before_refresh && !already_try_refresh
                         console.log 'try refresh token'
                         setItem(try_refresh_name, true)
-                        clear_before_refresh() && window.AsmodeeNet.signIn({success: cbdone})
+                        clear_before_refresh() && AsmodeeNet.signIn({success: cbdone})
                     else
                         if cbdone
                             cbdone(false, checkErrors)
@@ -541,7 +635,7 @@ AsmodeeNet = (->
                             return false
             else
                 setTimeout( () ->
-                    window.AsmodeeNet.restoreTokens(saved_access_token, saved_id_token, call_identity, cbdone, clear_before_refresh, saved_identity)
+                    AsmodeeNet.restoreTokens(saved_access_token, saved_id_token, call_identity, cbdone, clear_before_refresh, saved_identity)
                 , 200)
 
         return null
@@ -596,3 +690,21 @@ AsmodeeNet = (->
         return (window.self == window.top)
 
 )
+
+AsmodeeNet.ajax = ajaxCl
+AsmodeeNet.extend = () ->
+    ret = {}
+    for obj in arguments
+        for key of obj
+            ret[key] = obj[key] if Object::hasOwnProperty.call(obj,key)
+    return ret
+
+AsmodeeNet.limit_exp_time = () -> return (Date.now()/1000).toPrecision(10)
+
+AsmodeeNet.jwt_decode = (token, options) ->
+    deco = KJUR.jws.JWS.parse(token)
+    return deco.headerObj if options && options.header != "undefined" && options.header == true
+    return deco.payloadObj
+
+module.exports
+    AsmodeeNet: AsmodeeNet

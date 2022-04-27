@@ -7,7 +7,7 @@ describe('AsmodeeNet Main Object', function () {
         window.store = {
             set: function () {
                 expect(arguments.length).toEqual(3);
-                tstore[arguments[0]] = {val: arguments[1], limit: arguments[2]};
+                tstore[arguments[0]] = { val: arguments[1], limit: arguments[2] };
             },
             get: function () {
                 expect(arguments.length).toEqual(1);
@@ -70,7 +70,7 @@ describe('AsmodeeNet Main Object', function () {
 
         [
             [
-                '/tr', 'get', null, 'GET', {'status': 200, 'contentType': 'text/plain', 'responseText': 'BOB'}, {
+                '/tr', 'get', null, 'GET', { 'status': 200, 'contentType': 'text/plain', 'responseText': 'BOB' }, {
                     complete: {
                         call: 1,
                         args: {
@@ -96,7 +96,7 @@ describe('AsmodeeNet Main Object', function () {
                 }
             ],
             [
-                '/trpost', 'post', {name: 'BOBBY', count: 3}, 'POST', {'status': 200, 'contentType': 'application/json', 'responseText': '{"entry": "BOB"}'}, {
+                '/trpost', 'post', { name: 'BOBBY', count: 3 }, 'POST', { 'status': 200, 'contentType': 'application/json', 'responseText': '{"entry": "BOB"}' }, {
                     complete: {
                         call: 1,
                         args: {
@@ -112,7 +112,7 @@ describe('AsmodeeNet Main Object', function () {
                         args: {
                             count: 3,
                             res: [
-                                ['object', {entry: 'BOB'}],
+                                ['object', { entry: 'BOB' }],
                                 ['string', 'success'],
                                 ['object', 'FakeXMLHttpRequest']
                             ]
@@ -122,7 +122,7 @@ describe('AsmodeeNet Main Object', function () {
                 }
             ],
             [
-                '/trdelete', 'delete', null, 'DELETE', {'status': 204, 'contentType': 'text/plain', 'responseText': ''}, {
+                '/trdelete', 'delete', null, 'DELETE', { 'status': 204, 'contentType': 'text/plain', 'responseText': '' }, {
                     complete: {
                         call: 1,
                         args: {
@@ -148,7 +148,7 @@ describe('AsmodeeNet Main Object', function () {
                 }
             ],
             [
-                '/trdelete', 'update', {id: 100, col: 'BOB'}, 'PUT', {'status': 200, 'contentType': 'text/plain', 'responseText': 'Updated'}, {
+                '/trdelete', 'update', { id: 100, col: 'BOB' }, 'PUT', { 'status': 200, 'contentType': 'text/plain', 'responseText': 'Updated' }, {
                     complete: {
                         call: 1,
                         args: {
@@ -174,7 +174,7 @@ describe('AsmodeeNet Main Object', function () {
                 }
             ],
             [
-                '/ntf', 'get', null, 'GET', {'status': 404, 'contentType': 'text/plain', 'responseText': 'not found ntf'}, {
+                '/ntf', 'get', null, 'GET', { 'status': 404, 'contentType': 'text/plain', 'responseText': 'not found ntf' }, {
                     complete: {
                         call: 1,
                         args: {
@@ -200,7 +200,7 @@ describe('AsmodeeNet Main Object', function () {
                 }
             ],
             [
-                '/ntf', 'post', {id: 4546, name: 'BB'}, 'POST', {'status': 406, 'contentType': 'application/json', 'responseText': '{"error": "API006", "error_details": "BLOBB"}'}, {
+                '/ntf', 'post', { id: 4546, name: 'BB' }, 'POST', { 'status': 406, 'contentType': 'application/json', 'responseText': '{"error": "API006", "error_details": "BLOBB"}' }, {
                     complete: {
                         call: 1,
                         args: {
@@ -218,7 +218,7 @@ describe('AsmodeeNet Main Object', function () {
                             res: [
                                 ['object', 'FakeXMLHttpRequest'],
                                 ['string', 'error'],
-                                ['object', {error: 'API006', error_details: 'BLOBB'}]
+                                ['object', { error: 'API006', error_details: 'BLOBB' }]
                             ]
                         }
                     },
@@ -226,7 +226,7 @@ describe('AsmodeeNet Main Object', function () {
                 }
             ],
             [
-                '/ntf/9', 'delete', null, 'DELETE', {'status': 403, 'contentType': 'application/json', 'responseText': '{"error": "API018", "error_details": "BLOBB"}'}, {
+                '/ntf/9', 'delete', null, 'DELETE', { 'status': 403, 'contentType': 'application/json', 'responseText': '{"error": "API018", "error_details": "BLOBB"}' }, {
                     complete: {
                         call: 1,
                         args: {
@@ -244,7 +244,7 @@ describe('AsmodeeNet Main Object', function () {
                             res: [
                                 ['object', 'FakeXMLHttpRequest'],
                                 ['string', 'error'],
-                                ['object', {error: 'API018', error_details: 'BLOBB'}]
+                                ['object', { error: 'API018', error_details: 'BLOBB' }]
                             ]
                         }
                     },
@@ -252,7 +252,7 @@ describe('AsmodeeNet Main Object', function () {
                 }
             ],
             [
-                '/ntf/9', 'update', {blob: 'OIO'}, 'PUT', {'status': 401, 'contentType': 'text/plain', 'responseText': 'Not auth'}, {
+                '/ntf/9', 'update', { blob: 'OIO' }, 'PUT', { 'status': 401, 'contentType': 'text/plain', 'responseText': 'Not auth' }, {
                     complete: {
                         call: 1,
                         args: {
@@ -376,7 +376,7 @@ describe('AsmodeeNet Main Object', function () {
             expect(settings.callback_signin_success).toBeFunction();
             expect(settings.callback_signin_error).toBeFunction();
             expect(settings.callback_post_logout_redirect).toEqual(null);
-            expect(settings.display_options).toEqual({noheader: false, nofooter: false, lnk2bt: false, leglnk: true});
+            expect(settings.display_options).toEqual({ noheader: false, nofooter: false, lnk2bt: false, leglnk: true });
         });
 
         it('should have default init with page and callback', function () {
@@ -393,7 +393,7 @@ describe('AsmodeeNet Main Object', function () {
                 callback_signin_success: cbSuccess,
                 callback_signin_error: cbError,
                 callback_post_logout_redirect: cbLogout,
-                display_options: {lnk2bt: true}
+                display_options: { lnk2bt: true }
             });
 
             expect(window.AsmodeeNet.getClientId()).toEqual('cli_id');
@@ -410,7 +410,7 @@ describe('AsmodeeNet Main Object', function () {
             expect(settings.callback_signin_success).toEqual(cbSuccess);
             expect(settings.callback_signin_error).toEqual(cbError);
             expect(settings.callback_post_logout_redirect).toEqual(cbLogout);
-            expect(settings.display_options).toEqual({lnk2bt: true});
+            expect(settings.display_options).toEqual({ lnk2bt: true });
         });
 
         it('should have default init with touch without callback', function () {
@@ -433,7 +433,7 @@ describe('AsmodeeNet Main Object', function () {
             expect(settings.callback_signin_success).toBeFunction();
             expect(settings.callback_signin_error).toBeFunction();
             expect(settings.callback_post_logout_redirect).toEqual(null);
-            expect(settings.display_options).toEqual({noheader: true, nofooter: true, lnk2bt: true, leglnk: false});
+            expect(settings.display_options).toEqual({ noheader: true, nofooter: true, lnk2bt: true, leglnk: false });
         });
 
         it('should have default init with iframe with callback', function () {
@@ -463,7 +463,7 @@ describe('AsmodeeNet Main Object', function () {
             expect(settings.callback_signin_success).toEqual(cbSuccess);
             expect(settings.callback_signin_error).toEqual(cbError);
             expect(settings.callback_post_logout_redirect).toEqual(cbLogout);
-            expect(settings.display_options).toEqual({noheader: true, nofooter: true, lnk2bt: true, leglnk: false});
+            expect(settings.display_options).toEqual({ noheader: true, nofooter: true, lnk2bt: true, leglnk: false });
         });
     });
 
@@ -480,7 +480,7 @@ describe('AsmodeeNet Main Object', function () {
             contentType: 'application/json',
             responseText: '{"keys":[{"kty":"RSA", "alg": "RS256", "use": "sig", "kid": "dow","n":"sJlN4dMPOB580WK3h5mWqtoV-o7xgDGDh2bfc9ctF5gM0lzXvZbiMi_6LS0Mkl4yF1-vSXVPABMu1I9XdLkmrFOR6jyrSvEFxFWyoVkFZFrNvwCfLXky3MtyWV1KqHP_WK0afhqhf4Nb1vFvx3X6ZnPjacrZtH1Ogw6ZDZ1JYi66fc8JIrDpYxBs08ikibkHDP8_xtXXrv072fH5VJN0z-U2zyFz-U7HBB7AjL92kFhruCohNxMbhARSZNIfO4MYALyqOHNTZAytK8ieuk_TF7znpBLrzJjaFLezxG2wlX3VTVyUyhr0RUC7arssrGYzk8fqQTDT7L1hRJCUzs_Dkw","e":"AQAB"}]}'
         };
-        var openidConfiguration = {issuer: 'http://localhost:8009', authorization_endpoint: 'http://localhost:8009/main/v2/oauth/authorize', token_endpoint: 'http://localhost:8009/main/v2/oauth/token', userinfo_endpoint: 'http://localhost:8009/main/v2/oauth/identity', end_session_endpoint: 'http://localhost:8009/main/v2/oauth/logout', jwks_uri: 'http://localhost:8009/jwks.json', token_endpoint_auth_signing_alg_values_supported: ['RS256', 'HS256'], scopes_supported: ['openid', 'profile', 'email', 'address'], response_types_supported: ['token', 'code', 'code id_token', 'id_token', 'id_token token'], response_modes_supported: ['query', 'fragment'], grant_types_supported: ['authorization_code', 'implicit'], subject_types_supported: ['public'], id_token_signing_alg_values_supported: ['RS256', 'RS384', 'RS512'], token_endpoint_auth_methods_supported: ['client_secret_post', 'client_secret_basic', 'client_secret_jwt', 'private_key_jwt', 'none'], claim_types_supported: ['normal'], claims_supported: ['sub', 'iss', 'auth_time', 'acr', 'name', 'nickname', 'preferred_username', 'profile', 'gender', 'locale', 'picture', 'birthdate', 'email', 'email_verified', 'locale', 'zoneinfo', 'country', 'postal_code'], claims_parameter_supported: false, request_parameter_supported: false, request_uri_parameter_supported: false, service_documentation: 'https://apidoc.asmodee.net', 'ui_locales_supported': ['en-US', 'fr-FR', 'de-DE']};
+        var openidConfiguration = { issuer: 'http://localhost:8009', authorization_endpoint: 'http://localhost:8009/main/v2/oauth/authorize', token_endpoint: 'http://localhost:8009/main/v2/oauth/token', userinfo_endpoint: 'http://localhost:8009/main/v2/oauth/identity', end_session_endpoint: 'http://localhost:8009/main/v2/oauth/logout', jwks_uri: 'http://localhost:8009/jwks.json', token_endpoint_auth_signing_alg_values_supported: ['RS256', 'HS256'], scopes_supported: ['openid', 'profile', 'email', 'address'], response_types_supported: ['token', 'code', 'code id_token', 'id_token', 'id_token token'], response_modes_supported: ['query', 'fragment'], grant_types_supported: ['authorization_code', 'implicit'], subject_types_supported: ['public'], id_token_signing_alg_values_supported: ['RS256', 'RS384', 'RS512'], token_endpoint_auth_methods_supported: ['client_secret_post', 'client_secret_basic', 'client_secret_jwt', 'private_key_jwt', 'none'], claim_types_supported: ['normal'], claims_supported: ['sub', 'iss', 'auth_time', 'acr', 'name', 'nickname', 'preferred_username', 'profile', 'gender', 'locale', 'picture', 'birthdate', 'email', 'email_verified', 'locale', 'zoneinfo', 'country', 'postal_code'], claims_parameter_supported: false, request_parameter_supported: false, request_uri_parameter_supported: false, service_documentation: 'https://apidoc.asmodee.net', 'ui_locales_supported': ['en-US', 'fr-FR', 'de-DE'] };
 
         beforeEach(function () {
             jasmine.Ajax.install();
@@ -689,13 +689,13 @@ describe('AsmodeeNet Main Object', function () {
 
             request = jasmine.Ajax.requests.mostRecent();
             expect(request.url).toBe('http://localhost:8009/main/v2/oauth/identity');
-            expect(request.requestHeaders).toEqual({Authorization: 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpZCI6IjNkY2M4OGIzNzkxNjBjNzljMGQ4MjFlNWRhOTdlMzYwYmQ2Mjc3ZjMiLCJqdGkiOiIzZGNjODhiMzc5MTYwYzc5YzBkODIxZTVkYTk3ZTM2MGJkNjI3N2YzIiwiaXNzIjoiaHR0cDpcL1wvbG9jYWxob3N0OjgwMDlcLyIsImF1ZCI6InRlc3RfZGlyZWN0Iiwic3ViIjo1LCJleHAiOjE1MDg4NzI5ODIsImlhdCI6MTUwNjI4MDk4MiwidG9rZW5fdHlwZSI6ImJlYXJlciIsInNjb3BlIjoib3BlbmlkIGVtYWlsIHByb2ZpbGUifQ.Sm0YA6Kxy8nru5-fxQRhnaAGRXaWLA65CyBH0166cONqpNGuvszOCKia5-ihMXIkBU477ZLtvLvEvpisXXXmaSerEyo2aV_tSMcpCXO6ANwTuj9qjanCrtTSAGr-I4kNI-REV6Tmc-IS4uR8htex8BMdg6tELNqKFNIz3B2m7mG6ICh_PuM04u3hzaPJdkuhs7z2PhvRpIzSyHHWo2NDNf5Pj9e0rURUUE6wWERAH32Hxr0GFtRAlpMP1tHn0tkNnSLPJN4T2g8LxqKQ3jnSz0acSnYzy1ham2fZhQ7SJkwJOc0RiMrt_oH6-gHvxL9Gh4busOiKvcNzLDpTRa4UiA', Accept: 'application/json'});
+            expect(request.requestHeaders).toEqual({ Authorization: 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpZCI6IjNkY2M4OGIzNzkxNjBjNzljMGQ4MjFlNWRhOTdlMzYwYmQ2Mjc3ZjMiLCJqdGkiOiIzZGNjODhiMzc5MTYwYzc5YzBkODIxZTVkYTk3ZTM2MGJkNjI3N2YzIiwiaXNzIjoiaHR0cDpcL1wvbG9jYWxob3N0OjgwMDlcLyIsImF1ZCI6InRlc3RfZGlyZWN0Iiwic3ViIjo1LCJleHAiOjE1MDg4NzI5ODIsImlhdCI6MTUwNjI4MDk4MiwidG9rZW5fdHlwZSI6ImJlYXJlciIsInNjb3BlIjoib3BlbmlkIGVtYWlsIHByb2ZpbGUifQ.Sm0YA6Kxy8nru5-fxQRhnaAGRXaWLA65CyBH0166cONqpNGuvszOCKia5-ihMXIkBU477ZLtvLvEvpisXXXmaSerEyo2aV_tSMcpCXO6ANwTuj9qjanCrtTSAGr-I4kNI-REV6Tmc-IS4uR8htex8BMdg6tELNqKFNIz3B2m7mG6ICh_PuM04u3hzaPJdkuhs7z2PhvRpIzSyHHWo2NDNf5Pj9e0rURUUE6wWERAH32Hxr0GFtRAlpMP1tHn0tkNnSLPJN4T2g8LxqKQ3jnSz0acSnYzy1ham2fZhQ7SJkwJOc0RiMrt_oH6-gHvxL9Gh4busOiKvcNzLDpTRa4UiA', Accept: 'application/json' });
 
-            request.respondWith({status: 200, contentType: 'application/json', responseText: '{"sub": 5, "nickname": "Bob"}'});
+            request.respondWith({ status: 200, contentType: 'application/json', responseText: '{"sub": 5, "nickname": "Bob"}' });
 
             expect(onFailure).not.toHaveBeenCalled();
             expect(onSuccess).toHaveBeenCalled();
-            expect(window.AsmodeeNet.getIdentity()).toEqual({sub: 5, nickname: 'Bob'});
+            expect(window.AsmodeeNet.getIdentity()).toEqual({ sub: 5, nickname: 'Bob' });
         });
 
         it('should call logout without callback', function () {
@@ -784,7 +784,7 @@ describe('AsmodeeNet Main Object', function () {
             var iframeEventLoad = null;
             var iframe = {
                 focus: function () { return true; },
-                removeEventListener: function () {},
+                removeEventListener: function () { },
                 addEventListener: function (type, cb, dat) {
                     expect(type).toEqual('load');
                     expect(cb).toBeFunction();
@@ -836,7 +836,7 @@ describe('AsmodeeNet Main Object', function () {
             var sta = tstore.state.val;
             delete tstore.nonce;
 
-            tstore.gd_connect_hash = {val: '#code=31870263e587560cc6802807862709f6effa27db&state=' + sta + '&id_token=eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJodHRwOlwvXC9sb2NhbGhvc3Q6ODAwOVwvIiwic3ViIjo1LCJhdWQiOiJ0ZXN0X2RpcmVjdCIsImlhdCI6MTUwNjI4MDk4MiwiZXhwIjoxNTA4ODcyOTgyLCJhdXRoX3RpbWUiOjE1MDYyODA5ODIsIm5vbmNlIjoiMmwxdTU4NXE3MDM0azIzaSIsImF0X2hhc2giOiJNRFF3WWpNNU9UZ3paakZtWTJaaVlqZGhZekk0WVdKak1qUXhOVFUxWmpjIiwiY19oYXNoIjoiWlRjM1ptVmlOemc1TnpCaE56VTNObVF3TUdNMVlUZzVNelkyWlRNMk9UUSJ9.g1PJHgxeNl6vzrJQl-AvMlxt6CMjLTMDNYr3AzTo1SqlUMGUFwUf4GE4WKeOL_ePt0FwhRyksk_Il_VYcZTYW7AUODfwDEAzfJA7fPGSy7KHn6FESFGYKKHoOiMaPnYvGOZ0dA-EVXW6Vevcpv7P4-czdocniqvni2ZrzJZvlAL-7Bhe5bVR8rWiVkpbn5tn_ZV4KDFQlwOl6gi_iz1XvTgLSOhQmEji9cZ76RQJawARqQPGyOM-u0xlDugiI_F2HOGtBvjwyHJ1YcJ6PHLsxJVuBmnVFG7qfsCNC-7ouw3B7BuEOXm2aI0R1VQLKfyWc9haAT9w0dIBUQKLZUEbZw&access_token=eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpZCI6IjNkY2M4OGIzNzkxNjBjNzljMGQ4MjFlNWRhOTdlMzYwYmQ2Mjc3ZjMiLCJqdGkiOiIzZGNjODhiMzc5MTYwYzc5YzBkODIxZTVkYTk3ZTM2MGJkNjI3N2YzIiwiaXNzIjoiaHR0cDpcL1wvbG9jYWxob3N0OjgwMDlcLyIsImF1ZCI6InRlc3RfZGlyZWN0Iiwic3ViIjo1LCJleHAiOjE1MDg4NzI5ODIsImlhdCI6MTUwNjI4MDk4MiwidG9rZW5fdHlwZSI6ImJlYXJlciIsInNjb3BlIjoib3BlbmlkIGVtYWlsIHByb2ZpbGUifQ.Sm0YA6Kxy8nru5-fxQRhnaAGRXaWLA65CyBH0166cONqpNGuvszOCKia5-ihMXIkBU477ZLtvLvEvpisXXXmaSerEyo2aV_tSMcpCXO6ANwTuj9qjanCrtTSAGr-I4kNI-REV6Tmc-IS4uR8htex8BMdg6tELNqKFNIz3B2m7mG6ICh_PuM04u3hzaPJdkuhs7z2PhvRpIzSyHHWo2NDNf5Pj9e0rURUUE6wWERAH32Hxr0GFtRAlpMP1tHn0tkNnSLPJN4T2g8LxqKQ3jnSz0acSnYzy1ham2fZhQ7SJkwJOc0RiMrt_oH6-gHvxL9Gh4busOiKvcNzLDpTRa4UiA&expires_in=2592000&token_type=bearer&scope=openid+email+profile', limit: (new Date()).getTime() + 10000};
+            tstore.gd_connect_hash = { val: '#code=31870263e587560cc6802807862709f6effa27db&state=' + sta + '&id_token=eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJodHRwOlwvXC9sb2NhbGhvc3Q6ODAwOVwvIiwic3ViIjo1LCJhdWQiOiJ0ZXN0X2RpcmVjdCIsImlhdCI6MTUwNjI4MDk4MiwiZXhwIjoxNTA4ODcyOTgyLCJhdXRoX3RpbWUiOjE1MDYyODA5ODIsIm5vbmNlIjoiMmwxdTU4NXE3MDM0azIzaSIsImF0X2hhc2giOiJNRFF3WWpNNU9UZ3paakZtWTJaaVlqZGhZekk0WVdKak1qUXhOVFUxWmpjIiwiY19oYXNoIjoiWlRjM1ptVmlOemc1TnpCaE56VTNObVF3TUdNMVlUZzVNelkyWlRNMk9UUSJ9.g1PJHgxeNl6vzrJQl-AvMlxt6CMjLTMDNYr3AzTo1SqlUMGUFwUf4GE4WKeOL_ePt0FwhRyksk_Il_VYcZTYW7AUODfwDEAzfJA7fPGSy7KHn6FESFGYKKHoOiMaPnYvGOZ0dA-EVXW6Vevcpv7P4-czdocniqvni2ZrzJZvlAL-7Bhe5bVR8rWiVkpbn5tn_ZV4KDFQlwOl6gi_iz1XvTgLSOhQmEji9cZ76RQJawARqQPGyOM-u0xlDugiI_F2HOGtBvjwyHJ1YcJ6PHLsxJVuBmnVFG7qfsCNC-7ouw3B7BuEOXm2aI0R1VQLKfyWc9haAT9w0dIBUQKLZUEbZw&access_token=eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpZCI6IjNkY2M4OGIzNzkxNjBjNzljMGQ4MjFlNWRhOTdlMzYwYmQ2Mjc3ZjMiLCJqdGkiOiIzZGNjODhiMzc5MTYwYzc5YzBkODIxZTVkYTk3ZTM2MGJkNjI3N2YzIiwiaXNzIjoiaHR0cDpcL1wvbG9jYWxob3N0OjgwMDlcLyIsImF1ZCI6InRlc3RfZGlyZWN0Iiwic3ViIjo1LCJleHAiOjE1MDg4NzI5ODIsImlhdCI6MTUwNjI4MDk4MiwidG9rZW5fdHlwZSI6ImJlYXJlciIsInNjb3BlIjoib3BlbmlkIGVtYWlsIHByb2ZpbGUifQ.Sm0YA6Kxy8nru5-fxQRhnaAGRXaWLA65CyBH0166cONqpNGuvszOCKia5-ihMXIkBU477ZLtvLvEvpisXXXmaSerEyo2aV_tSMcpCXO6ANwTuj9qjanCrtTSAGr-I4kNI-REV6Tmc-IS4uR8htex8BMdg6tELNqKFNIz3B2m7mG6ICh_PuM04u3hzaPJdkuhs7z2PhvRpIzSyHHWo2NDNf5Pj9e0rURUUE6wWERAH32Hxr0GFtRAlpMP1tHn0tkNnSLPJN4T2g8LxqKQ3jnSz0acSnYzy1ham2fZhQ7SJkwJOc0RiMrt_oH6-gHvxL9Gh4busOiKvcNzLDpTRa4UiA&expires_in=2592000&token_type=bearer&scope=openid+email+profile', limit: (new Date()).getTime() + 10000 };
 
             expect(onFailure).not.toHaveBeenCalled();
 
@@ -855,7 +855,7 @@ describe('AsmodeeNet Main Object', function () {
             });
             var onVerify = spyOn(window.KJUR.jws.JWS, 'verify').and.returnValue(true);
 
-            iframeEventLoad({currentTarget: iframe, contentWindow: {}});
+            iframeEventLoad({ currentTarget: iframe, contentWindow: {} });
 
             expect(getLimitExp).toHaveBeenCalled();
             expect(onStoreGet).toHaveBeenCalledWith('gd_connect_hash');
@@ -868,14 +868,14 @@ describe('AsmodeeNet Main Object', function () {
 
             request = jasmine.Ajax.requests.mostRecent();
             expect(request.url).toBe('http://localhost:8009/main/v2/oauth/identity');
-            expect(request.requestHeaders).toEqual({Authorization: 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpZCI6IjNkY2M4OGIzNzkxNjBjNzljMGQ4MjFlNWRhOTdlMzYwYmQ2Mjc3ZjMiLCJqdGkiOiIzZGNjODhiMzc5MTYwYzc5YzBkODIxZTVkYTk3ZTM2MGJkNjI3N2YzIiwiaXNzIjoiaHR0cDpcL1wvbG9jYWxob3N0OjgwMDlcLyIsImF1ZCI6InRlc3RfZGlyZWN0Iiwic3ViIjo1LCJleHAiOjE1MDg4NzI5ODIsImlhdCI6MTUwNjI4MDk4MiwidG9rZW5fdHlwZSI6ImJlYXJlciIsInNjb3BlIjoib3BlbmlkIGVtYWlsIHByb2ZpbGUifQ.Sm0YA6Kxy8nru5-fxQRhnaAGRXaWLA65CyBH0166cONqpNGuvszOCKia5-ihMXIkBU477ZLtvLvEvpisXXXmaSerEyo2aV_tSMcpCXO6ANwTuj9qjanCrtTSAGr-I4kNI-REV6Tmc-IS4uR8htex8BMdg6tELNqKFNIz3B2m7mG6ICh_PuM04u3hzaPJdkuhs7z2PhvRpIzSyHHWo2NDNf5Pj9e0rURUUE6wWERAH32Hxr0GFtRAlpMP1tHn0tkNnSLPJN4T2g8LxqKQ3jnSz0acSnYzy1ham2fZhQ7SJkwJOc0RiMrt_oH6-gHvxL9Gh4busOiKvcNzLDpTRa4UiA', Accept: 'application/json'});
+            expect(request.requestHeaders).toEqual({ Authorization: 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpZCI6IjNkY2M4OGIzNzkxNjBjNzljMGQ4MjFlNWRhOTdlMzYwYmQ2Mjc3ZjMiLCJqdGkiOiIzZGNjODhiMzc5MTYwYzc5YzBkODIxZTVkYTk3ZTM2MGJkNjI3N2YzIiwiaXNzIjoiaHR0cDpcL1wvbG9jYWxob3N0OjgwMDlcLyIsImF1ZCI6InRlc3RfZGlyZWN0Iiwic3ViIjo1LCJleHAiOjE1MDg4NzI5ODIsImlhdCI6MTUwNjI4MDk4MiwidG9rZW5fdHlwZSI6ImJlYXJlciIsInNjb3BlIjoib3BlbmlkIGVtYWlsIHByb2ZpbGUifQ.Sm0YA6Kxy8nru5-fxQRhnaAGRXaWLA65CyBH0166cONqpNGuvszOCKia5-ihMXIkBU477ZLtvLvEvpisXXXmaSerEyo2aV_tSMcpCXO6ANwTuj9qjanCrtTSAGr-I4kNI-REV6Tmc-IS4uR8htex8BMdg6tELNqKFNIz3B2m7mG6ICh_PuM04u3hzaPJdkuhs7z2PhvRpIzSyHHWo2NDNf5Pj9e0rURUUE6wWERAH32Hxr0GFtRAlpMP1tHn0tkNnSLPJN4T2g8LxqKQ3jnSz0acSnYzy1ham2fZhQ7SJkwJOc0RiMrt_oH6-gHvxL9Gh4busOiKvcNzLDpTRa4UiA', Accept: 'application/json' });
 
-            request.respondWith({status: 200, contentType: 'application/json', responseText: '{"sub": 5, "nickname": "Bob"}'});
+            request.respondWith({ status: 200, contentType: 'application/json', responseText: '{"sub": 5, "nickname": "Bob"}' });
 
             expect(onFailure).not.toHaveBeenCalled();
-            expect(onSuccess).toHaveBeenCalledWith({sub: 5, nickname: 'Bob'}, window.AsmodeeNet.getCode());
+            expect(onSuccess).toHaveBeenCalledWith({ sub: 5, nickname: 'Bob' }, window.AsmodeeNet.getCode());
             expect(iframe.src).toEqual('');
-            expect(window.AsmodeeNet.getIdentity()).toEqual({sub: 5, nickname: 'Bob'});
+            expect(window.AsmodeeNet.getIdentity()).toEqual({ sub: 5, nickname: 'Bob' });
         });
 
         it('should call logout by iframe and with callback', function () {
@@ -897,7 +897,7 @@ describe('AsmodeeNet Main Object', function () {
 
             var onSignOutCb = jasmine.createSpy('onSignOutCb');
 
-            window.AsmodeeNet.signOut({success: onSignOutCb});
+            window.AsmodeeNet.signOut({ success: onSignOutCb });
 
             expect(onStoreClear).toHaveBeenCalled();
             expect(onSignOutCb).toHaveBeenCalled();

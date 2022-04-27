@@ -1,4 +1,4 @@
-window.AsmodeeNet.ajax = (url, settings) ->
+ajaxCl = (url, settings) ->
     args = arguments
     settings = if args.length == 1 then args[0] else args[1]
 
@@ -16,7 +16,7 @@ window.AsmodeeNet.ajax = (url, settings) ->
         error: emptyFunction
         complete: emptyFunction
 
-    settings = this.extend(defaultSettings, settings || {})
+    settings = window.AsmodeeNet.extend(defaultSettings, settings || {})
 
     mimeTypes =
         'application/json': 'json'
@@ -82,7 +82,7 @@ window.AsmodeeNet.ajax = (url, settings) ->
     xhr.open(settings.type, settings.url)
 
     if settings.type == 'POST'
-        settings.headers = this.extend {
+        settings.headers = window.AsmodeeNet.extend {
             'Content-type': 'application/x-www-form-urlencoded'
         }, settings.headers, {
             'X-Requested-With': 'XMLHttpRequest'

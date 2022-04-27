@@ -321,7 +321,7 @@ module.exports = function (grunt) {
             coverage: {
                 configFile: 'tests/unit/karma.conf.js',
                 singleRun: true,
-                reporters: ['spec', 'coverage']
+                reporters: ['spec', 'coverage', 'html']
             }
         },
         nightwatch: {

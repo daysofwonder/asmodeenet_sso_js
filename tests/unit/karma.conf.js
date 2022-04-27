@@ -45,6 +45,12 @@ module.exports = function (config) {
                 { type: 'clover', subdir: 'reports', file: 'coverage.xml' },
                 { type: 'lcov', subdir: 'coverage' }
             ]
+        },
+        htmlReporter: {
+            outputDir: 'coverage_html', // where to put the reports
+            focusOnFailures: true, // reports show failures on start
+            namedFiles: false, // name files instead of creating sub-directories
+            reportName: 'report-summary-coverage' // report summary filename; browser info by default
         }
     });
 };

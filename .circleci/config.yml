@@ -29,6 +29,7 @@ jobs:
       - aws-ecr/ecr-login
 
       - run: npm install
+      - run: npm install -g grunt
       - run:
           name: "launch test unit"
           command: |

@@ -133,6 +133,22 @@ jobs:
           paths:
             - node_modules
 
+  auto-gitag:
+    docker:
+      - image: cimg/ruby:3.1.2
+      # docker_layer_caching: true # DISABLED BECAUSE USE 200 credits for each job using it. So the job should by itself have a duration > 20minutes without the DLC to have an economy of credits... (you have an economy of time, but if it's not suffisent, the cost of credits is not profitable)
+    # parallelism: 2
+    steps:
+      - checkout
+
+      - run:
+          name: "autotag"
+          command: |
+            GGV=$(ruby -e 'print /"version": "(.*)",/.match(File.read("package.json"))[1]')
+            echo $GGV
+            git tag $GGV
+            git push origin master --tags
+
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
@@ -152,5 +168,12 @@ workflows:
                   only: "master"
           requires:
               - test-unit
+      - auto-gitag:
+          filters:
+              branches:
+                  only: "master"
+          requires:
+              - test-coverage
+              - test-validation
       # - test-accept:
       #     context: "AWS credential access for docker"

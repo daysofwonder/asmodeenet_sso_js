@@ -14,7 +14,7 @@ notify:
 jobs:
   test-unit:
     docker:
-      image: cimg/node:14.16.1
+      - image: cimg/node:14.16.1
       # docker_layer_caching: true # DISABLED BECAUSE USE 200 credits for each job using it. So the job should by itself have a duration > 20minutes without the DLC to have an economy of credits... (you have an economy of time, but if it's not suffisent, the cost of credits is not profitable)
     # parallelism: 2
     steps:
@@ -44,7 +44,7 @@ jobs:
 
   test-coverage:
     docker:
-      image: cimg/node:14.16.1
+      - image: cimg/node:14.16.1
       # docker_layer_caching: true # DISABLED BECAUSE USE 200 credits for each job using it. So the job should by itself have a duration > 20minutes without the DLC to have an economy of credits... (you have an economy of time, but if it's not suffisent, the cost of credits is not profitable)
     resource_class: medium
     # parallelism: 2

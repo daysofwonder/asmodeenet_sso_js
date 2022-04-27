@@ -3,7 +3,7 @@ AsmodeeNet-SSO JS
 
 An OpenID Connect library that connects to the **Asmodee.net** Identity Server (aka **IS**) to allow a Web site to authenticate Asmodee users.
 
-[![Maintainability](https://api.codeclimate.com/v1/badges/59c53cfaa1fae802c219/maintainability)](https://codeclimate.com/github/daysofwonder/asmodeenet_sso_js/maintainability) [![Test Coverage](https://api.codeclimate.com/v1/badges/59c53cfaa1fae802c219/test_coverage)](https://codeclimate.com/github/daysofwonder/asmodeenet_sso_js/test_coverage)
+[![CircleCI](https://circleci.com/gh/daysofwonder/asmodeenet_sso_js/tree/master.svg?style=svg)](https://circleci.com/gh/daysofwonder/asmodeenet_sso_js/tree/master) [![Maintainability](https://api.codeclimate.com/v1/badges/59c53cfaa1fae802c219/maintainability)](https://codeclimate.com/github/daysofwonder/asmodeenet_sso_js/maintainability) [![Test Coverage](https://api.codeclimate.com/v1/badges/59c53cfaa1fae802c219/test_coverage)](https://codeclimate.com/github/daysofwonder/asmodeenet_sso_js/test_coverage)
 
 **Table of contents**
 

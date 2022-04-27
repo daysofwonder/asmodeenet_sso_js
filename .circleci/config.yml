@@ -6,10 +6,6 @@ orbs:
 #  aws-ecr: circleci/aws-ecr@7.2.0 # https://circleci.com/developer/orbs/orb/circleci/aws-ecr
   browser-tools: circleci/browser-tools@1.1.0 # https://circleci.com/developer/orbs/orb/circleci/browser-tools
 
-notify:
-    webhooks:
-        - url: https://asmodee1.webhook.office.com/webhookb2/2d077b5f-76c8-48a4-a677-e0c2429232cf@651fdf05-dca5-4790-9715-787a75209569/CircleCI/ed3c1213d7494982afdb25535eafe88a/14af9c8f-3875-492f-81de-0772e22dcb56
-
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/2.0/configuration-reference/#jobs
 jobs:
@@ -168,12 +164,12 @@ workflows:
                   only: "master"
           requires:
               - test-unit
-      - auto-gitag:
-          filters:
-              branches:
-                  only: "master"
-          requires:
-              - test-coverage
-              - test-validation
+      # - auto-gitag:
+      #     filters:
+      #         branches:
+      #             only: "master"
+      #     requires:
+      #         - test-coverage
+      #         - test-validation
       # - test-accept:
       #     context: "AWS credential access for docker"

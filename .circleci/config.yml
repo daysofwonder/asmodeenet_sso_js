@@ -2,25 +2,116 @@
 # See: https://circleci.com/docs/2.0/configuration-reference
 version: 2.1
 
+orbs:
+  aws-ecr: circleci/aws-ecr@7.2.0
+
+notify:
+    webhooks:
+        - url: https://asmodee1.webhook.office.com/webhookb2/2d077b5f-76c8-48a4-a677-e0c2429232cf@651fdf05-dca5-4790-9715-787a75209569/CircleCI/ed3c1213d7494982afdb25535eafe88a/14af9c8f-3875-492f-81de-0772e22dcb56
+
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/2.0/configuration-reference/#jobs
 jobs:
-  say-hello:
-    # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
-    # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
-    docker:
-      - image: cimg/base:stable
-    # Add steps to the job
-    # See: https://circleci.com/docs/2.0/configuration-reference/#steps
+  test-unit:
+    machine:
+      image: cimg/node:14.16.1
+      # docker_layer_caching: true # DISABLED BECAUSE USE 200 credits for each job using it. So the job should by itself have a duration > 20minutes without the DLC to have an economy of credits... (you have an economy of time, but if it's not suffisent, the cost of credits is not profitable)
+    resource_class: medium
+    # parallelism: 2
     steps:
       - checkout
+
+      - restore_cache: # special step to restore the dependency cache if `composer.lock` does not change
+          keys:
+            - cache-node-v1-{{ checksum "package-lock.json" }}
+            # fallback to using the latest cache if no exact match is found (See https://circleci.com/docs/2.0/caching/)
+            - cache-node-v1-
+
+      - aws-ecr/ecr-login
+
+      - run: npm install
       - run:
-          name: "Say hello"
-          command: "echo Hello, World!"
+          name: "launch test unit"
+          command: |
+            grunt test:unit
+
+      - store_test_results:
+          path: ~/tests/unit/*.xml
+
+      - save_cache: # special step to save the dependency cache with the `composer.lock` cache key template
+          key: cache-node-v1-{{ checksum "package-lock.json" }}
+          paths:
+            - node_modules
+
+  test-coverage:
+    machine:
+      image: cimg/node:14.16.1
+      # docker_layer_caching: true # DISABLED BECAUSE USE 200 credits for each job using it. So the job should by itself have a duration > 20minutes without the DLC to have an economy of credits... (you have an economy of time, but if it's not suffisent, the cost of credits is not profitable)
+    resource_class: medium
+    # parallelism: 2
+    steps:
+      - checkout
+
+      - restore_cache: # special step to restore the dependency cache if `composer.lock` does not change
+          keys:
+            - cache-node-v1-{{ checksum "package-lock.json" }}
+            # fallback to using the latest cache if no exact match is found (See https://circleci.com/docs/2.0/caching/)
+            - cache-node-v1-
+
+      - aws-ecr/ecr-login
+
+      - run: npm install
+      - run:
+          name: "build and launch test unit" # TODO put it in orb
+          command: |
+            grunt test:coverage
+
+      - store_artifacts:
+          path: ~/coverage/
+
+      - save_cache: # special step to save the dependency cache with the `composer.lock` cache key template
+          key: cache-node-v1-{{ checksum "package-lock.json" }}
+          paths:
+            - node_modules
+
+  test-accept:
+    machine:
+      image: cimg/node:14.16.1
+      # docker_layer_caching: true # DISABLED BECAUSE USE 200 credits for each job using it. So the job should by itself have a duration > 20minutes without the DLC to have an economy of credits... (you have an economy of time, but if it's not suffisent, the cost of credits is not profitable)
+    resource_class: medium
+    docker:
+    steps:
+      - checkout
+
+      - restore_cache: # special step to restore the dependency cache if `composer.lock` does not change
+          keys:
+            - cache-node-v1-{{ checksum "package-lock.json" }}
+            # fallback to using the latest cache if no exact match is found (See https://circleci.com/docs/2.0/caching/)
+            - cache-node-v1-
+
+      - aws-ecr/ecr-login
+
+      - run:
+          name: "build and launch acceptance tests" # TODO put it in orb
+          command: |
+            npm install
+            grunt test:e2e
+
+      - store_test_results:
+          path: reports
+
+      - save_cache: # special step to save the dependency cache with the `composer.lock` cache key template
+          key: cache-node-v1-{{ checksum "package-lock.json" }}
+          paths:
+            - node_modules
+
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:
-  say-hello-workflow:
+  tests-workflow:
     jobs:
-      - say-hello
+      - test-unit:
+          context: "AWS credential access for docker"
+      # - test-accept:
+      #     context: "AWS credential access for docker"

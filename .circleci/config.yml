@@ -67,7 +67,7 @@ jobs:
       - run:
           name: "launch test coverage"
           command: |
-            grunt test:coverage
+            ./node_modules/.bin/grunt test:coverage
 
       - store_artifacts:
           path: ~/coverage_html/report-summary-coverage/index.html
@@ -98,7 +98,7 @@ jobs:
       - run:
           name: "build and launch acceptance tests" # TODO put it in orb
           command: |
-            grunt test:e2e
+            ./node_modules/.bin/grunt test:e2e
 
       - store_test_results:
           path: reports
@@ -126,7 +126,7 @@ jobs:
       - run:
           name: "Launch lint"
           command: |
-            grunt lint
+            ./node_modules/.bin/grunt lint
 
       - save_cache: # special step to save the dependency cache with the `composer.lock` cache key template
           key: cache-node-v1-{{ checksum "package-lock.json" }}

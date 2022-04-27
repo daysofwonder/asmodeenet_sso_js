@@ -69,6 +69,7 @@ module.exports = function (grunt) {
             dist: {
                 files: {
                     'build/an_sso.src.cf.js': 'build/an_sso.src.cf.js',
+                    // 'build/an_sso-export.src.cf.js': 'build/an_sso-export.src.cf.js',
                     'tests/unit/build/an_sso.test.cf.js': 'tests/unit/build/an_sso.test.cf.js',
                     'tests/unit/build/ajax.test.cf.js': 'tests/unit/build/ajax.test.cf.js',
                     'tests/unit/build/utils.test.cf.js': 'tests/unit/build/utils.test.cf.js'
@@ -135,18 +136,19 @@ module.exports = function (grunt) {
                     join: true
                 },
                 files: {
-                    'build/an_sso.src.cf.js': ['src/an_sso.coffee', 'src/ajax.coffee', 'src/utils.coffee']
+                    'build/an_sso.src.cf.js': ['src/ajax.coffee', 'src/an_sso.coffee', 'src/direct.coffee'],
+                    'build/an_sso-export.src.cf.js': ['src/ajax.coffee', 'src/an_sso.coffee', 'src/export.coffee']
                 }
             },
             compileForTest: {
                 options: {
-                    join: false,
+                    join: true,
                     expand: true
                 },
                 files: {
-                    'tests/unit/build/an_sso.test.cf.js': ['src/an_sso.coffee'],
-                    'tests/unit/build/ajax.test.cf.js': ['src/ajax.coffee'],
-                    'tests/unit/build/utils.test.cf.js': ['src/utils.coffee']
+                    'tests/unit/build/an_sso.test.cf.js': ['src/ajax.coffee', 'src/an_sso.coffee', 'src/direct.coffee']
+                    // 'tests/unit/build/ajax.test.cf.js': ['src/ajax.coffee'],
+                    // 'tests/unit/build/utils.test.cf.js': ['src/utils.coffee']
                 }
             }
         },
@@ -168,6 +170,7 @@ module.exports = function (grunt) {
                 // },
                 files: {
                     'build/an_sso.built.min.js': ['build/an_sso.src.cf.js']
+                    // 'build/an_sso-export.built.min.js': ['build/an_sso-export.src.cf.js']
                 }
             },
             built_ext: {
@@ -192,6 +195,13 @@ module.exports = function (grunt) {
                     sourceMap: true
                 }
             },
+            exportable: {
+                src: ['node_modules/es5-shim/es5-shim.min.js', 'ext/base64-min.js', 'ext/jsbn-min.js', 'ext/json-sans-eval-min.js', 'ext/cryptojs-312-core-fix-min.js', 'ext/hmac-sha256.js', 'node_modules/store/dist/store.legacy.min.js', 'build/an_sso.ext.min.js', 'build/an_sso-export.src.cf.js'],
+                dest: 'build/an_sso-export.js',
+                options: {
+                    sourceMap: true
+                }
+            },
             shim: {
                 src: 'node_modules/es5-shim/es5-shim.min.js',
                 dest: 'dist/es5-shim.min.js'
@@ -204,25 +214,42 @@ module.exports = function (grunt) {
                 src: 'build/an_sso.min.js.map',
                 dest: 'dist/an_sso.min.js.map'
             },
+            mapext: {
+                src: 'build/an_sso-export.min.js.map',
+                dest: 'dist/an_sso-export.min.js.map'
+            },
             cpbuild: {
                 src: 'build/an_sso.min.js',
                 dest: 'dist/an_sso.min.js'
+            },
+            cpextbuild: {
+                src: 'build/an_sso-export.min.js',
+                dest: 'dist/an_sso-export.min.js'
             },
             cp: {
                 src: 'build/an_sso.min.js',
                 dest: 'dist/an_sso.min.js.cp'
             },
+            cpext: {
+                src: 'build/an_sso-export.min.js',
+                dest: 'dist/an_sso-export.min.js.cp'
+            },
             cpback: {
                 src: 'dist/an_sso.min.js.cp',
                 dest: 'dist/an_sso.min.js'
+            },
+            cpextback: {
+                src: 'dist/an_sso-export.min.js.cp',
+                dest: 'dist/an_sso-export.min.js'
             }
         },
         clean: {
-            build: ['dist/an_sso.min.js.cp'],
+            build: ['dist/an_sso.min.js.cp', 'dist/an_sso-export.min.js.cp'],
             all: ['build/*.js', 'build/*.js.map', 'build/*.coffee', '!build/an_sso.min.js*']
         },
         revPackage: {
-            'ana': 'dist/an_sso.min.js'
+            'ana': 'dist/an_sso.min.js',
+            'ana-export': 'dist/an_sso-export.min.js'
         },
         watch: {
             all: {
@@ -325,7 +352,8 @@ module.exports = function (grunt) {
         'concat:ext',
         'babel',
         'uglify',
-        'concat:jwt'
+        'concat:jwt',
+        'concat:exportable'
     ]);
 
     grunt.registerTask('dist', [
@@ -333,10 +361,14 @@ module.exports = function (grunt) {
         // 'merge-source-maps:jwt',
         // 'sorcery',
         'concat:map',
+        'concat:mapext',
         'concat:cp',
+        'concat:cpext',
         'concat:cpbuild',
+        'concat:cpextbuild',
         'revPackage',
         'concat:cpback',
+        'concat:cpextback',
         'clean:build'
     ]);
 

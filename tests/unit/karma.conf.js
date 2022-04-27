@@ -22,8 +22,7 @@ module.exports = function (config) {
 
             // src
             'build/an_sso.test.cf.js',
-            'build/utils.test.cf.js',
-            'build/ajax.test.cf.js',
+            // 'build/ajax.test.cf.js',
 
             // helpers
             'helpers/*helper.js',

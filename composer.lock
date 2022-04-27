@@ -13,14 +13,15 @@
             "source": {
                 "type": "git",
                 "url": "git@github.com:daysofwonder/local-backends.git",
-                "reference": "dd74733045f724af1924b8436f0ad02e5c8e5167"
+                "reference": "123cc711c835dbfe7731208b873c61285a9a6728"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/daysofwonder/local-backends/zipball/dd74733045f724af1924b8436f0ad02e5c8e5167",
-                "reference": "dd74733045f724af1924b8436f0ad02e5c8e5167",
+                "url": "https://api.github.com/repos/daysofwonder/local-backends/zipball/123cc711c835dbfe7731208b873c61285a9a6728",
+                "reference": "123cc711c835dbfe7731208b873c61285a9a6728",
                 "shasum": ""
             },
+            "default-branch": true,
             "type": "project",
             "authors": [
                 {
@@ -33,7 +34,7 @@
                 "source": "https://github.com/daysofwonder/local-backends/tree/master",
                 "issues": "https://github.com/daysofwonder/local-backends/issues"
             },
-            "time": "2019-04-12T15:51:02+00:00"
+            "time": "2022-04-19T13:48:27+00:00"
         }
     ],
     "aliases": [],
@@ -44,5 +45,6 @@
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": [],
-    "platform-dev": []
+    "platform-dev": [],
+    "plugin-api-version": "2.3.0"
 }

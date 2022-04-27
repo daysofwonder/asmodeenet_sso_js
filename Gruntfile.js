@@ -402,6 +402,8 @@ module.exports = function (grunt) {
 
     grunt.registerTask('test:coverage', [
         'lint',
+        'coffee:compileWithMaps',
+        'concat:ext',
         'coffee:compileForTest',
         'concat:ext',
         'babel',

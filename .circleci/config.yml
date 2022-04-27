@@ -4,10 +4,7 @@ version: 2.1
 
 orbs:
   aws-ecr: circleci/aws-ecr@7.2.0
-<<<<<<< HEAD
   browser-tools: circleci/browser-tools@1.1.0
-=======
->>>>>>> 44236ba (Add CCI Config)
 
 notify:
     webhooks:
@@ -17,7 +14,6 @@ notify:
 # See: https://circleci.com/docs/2.0/configuration-reference/#jobs
 jobs:
   test-unit:
-<<<<<<< HEAD
     docker:
       - image: cimg/node:14.16.1-browsers
       # docker_layer_caching: true # DISABLED BECAUSE USE 200 credits for each job using it. So the job should by itself have a duration > 20minutes without the DLC to have an economy of credits... (you have an economy of time, but if it's not suffisent, the cost of credits is not profitable)
@@ -52,10 +48,6 @@ jobs:
   test-coverage:
     docker:
       - image: cimg/node:14.16.1
-=======
-    machine:
-      image: cimg/node:14.16.1
->>>>>>> 44236ba (Add CCI Config)
       # docker_layer_caching: true # DISABLED BECAUSE USE 200 credits for each job using it. So the job should by itself have a duration > 20minutes without the DLC to have an economy of credits... (you have an economy of time, but if it's not suffisent, the cost of credits is not profitable)
     resource_class: medium
     # parallelism: 2
@@ -70,7 +62,6 @@ jobs:
 
       - aws-ecr/ecr-login
 
-<<<<<<< HEAD
       - run: npm install
       - run:
           name: "build and launch test unit" # TODO put it in orb
@@ -79,16 +70,6 @@ jobs:
 
       - store_artifacts:
           path: ~/coverage/
-=======
-      - run:
-          name: "build and launch test unit" # TODO put it in orb
-          command: |
-            npm install
-            grunt test:unit
-
-      - store_test_results:
-          path: ~/tests/unit/*.xml
->>>>>>> 44236ba (Add CCI Config)
 
       - save_cache: # special step to save the dependency cache with the `composer.lock` cache key template
           key: cache-node-v1-{{ checksum "package-lock.json" }}

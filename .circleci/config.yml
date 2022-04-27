@@ -33,7 +33,7 @@ jobs:
       - run:
           name: "launch test unit"
           command: |
-            grunt test:unit
+            ./node_modules/.bin/grunt test:unit
 
       - store_test_results:
           path: ~/tests/unit/*.xml

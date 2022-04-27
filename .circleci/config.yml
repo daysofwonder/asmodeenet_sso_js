@@ -38,7 +38,7 @@ jobs:
             ./node_modules/.bin/grunt test:unit
 
       - store_test_results:
-          path: tests/unit/*.xml
+          path: tests/unit/junit/*.xml
 
       - save_cache: # special step to save the dependency cache with the `composer.lock` cache key template
           key: cache-node-v1-{{ checksum "package-lock.json" }}

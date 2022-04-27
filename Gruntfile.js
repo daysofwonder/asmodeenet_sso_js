@@ -77,9 +77,9 @@ module.exports = function (grunt) {
                 files: {
                     'build/an_sso.src.cf.js': 'build/an_sso.src.cf.js',
                     // 'build/an_sso-export.src.cf.js': 'build/an_sso-export.src.cf.js',
-                    'tests/unit/build/an_sso.test.cf.js': 'tests/unit/build/an_sso.test.cf.js',
-                    'tests/unit/build/ajax.test.cf.js': 'tests/unit/build/ajax.test.cf.js',
-                    'tests/unit/build/utils.test.cf.js': 'tests/unit/build/utils.test.cf.js'
+                    'tests/unit/build/an_sso.test.cf.js': 'tests/unit/build/an_sso.test.cf.js'
+                    // 'tests/unit/build/ajax.test.cf.js': 'tests/unit/build/ajax.test.cf.js',
+                    // 'tests/unit/build/utils.test.cf.js': 'tests/unit/build/utils.test.cf.js'
                 }
             }
         },

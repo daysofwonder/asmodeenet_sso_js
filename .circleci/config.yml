@@ -3,8 +3,8 @@
 version: 2.1
 
 orbs:
-  aws-ecr: circleci/aws-ecr@7.2.0
-  browser-tools: circleci/browser-tools@1.1.0
+  aws-ecr: circleci/aws-ecr@8.1.0 # https://circleci.com/developer/orbs/orb/circleci/aws-ecr
+  browser-tools: circleci/browser-tools@1.1.0 # https://circleci.com/developer/orbs/orb/circleci/browser-tools
 
 notify:
     webhooks:
@@ -19,7 +19,7 @@ jobs:
       # docker_layer_caching: true # DISABLED BECAUSE USE 200 credits for each job using it. So the job should by itself have a duration > 20minutes without the DLC to have an economy of credits... (you have an economy of time, but if it's not suffisent, the cost of credits is not profitable)
     # parallelism: 2
     steps:
-      - browser-tools/install-browser-tools
+      - browser-tools/install-chromedriver
       - checkout
 
       - restore_cache: # special step to restore the dependency cache if `composer.lock` does not change

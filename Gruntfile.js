@@ -64,7 +64,7 @@ module.exports = function (grunt) {
     grunt.initConfig({
         exec: {
             ls_files: {
-                command: 'ls -l build/',
+                command: 'ls -l build/ && ls -l tests/unit/build/',
                 stdout: true
             }
         },

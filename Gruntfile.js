@@ -25,6 +25,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-karma');
     grunt.loadNpmTasks('grunt-nightwatch');
     grunt.loadNpmTasks('grunt-shell-spawn');
+    grunt.loadNpmTasks('grunt-exec');
 
     var sorcery = require('sorcery');
     // var httpProxy = require('http-proxy');
@@ -61,6 +62,12 @@ module.exports = function (grunt) {
 
     // Define the configuration for all the tasks
     grunt.initConfig({
+        exec: {
+            ls_files: {
+                command: 'ls -l build/',
+                stdout: true
+            }
+        },
         babel: {
             options: {
                 sourceMap: true,
@@ -388,6 +395,7 @@ module.exports = function (grunt) {
         'concat:ext',
         'coffee:compileForTest',
         'concat:ext',
+        'exec:ls_files',
         'babel',
         'karma:unit'
     ]);

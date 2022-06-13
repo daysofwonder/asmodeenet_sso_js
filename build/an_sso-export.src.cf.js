@@ -939,6 +939,7 @@
       },
       signOut: function(options) {
         var id_token_hint, logout_ep, redirect_uri, successCallback;
+        options = options || {};
         successCallback = options && typeof options.success !== 'undefined' ? options.success : null;
         if (this.isConnected() || options.force) {
           if (settings.logout_redirect_uri) {
@@ -946,7 +947,7 @@
             id_token_hint = id_token;
             setItem('logout_state', state, 5);
             logout_ep = settings.logout_endpoint + '?post_logout_redirect_uri=' + encodeURI(settings.logout_redirect_uri) + '&state=' + state + '&id_token_hint=' + id_token_hint;
-            if (typeof options.gatrack !== 'undefined') {
+            if (options && typeof options.gatrack !== 'undefined') {
               logout_ep += '&_ga=' + options.gatrack;
             }
             if (settings.display === 'iframe') {

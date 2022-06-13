@@ -70,9 +70,9 @@
             });
         });
         findMe('disconnect_bt').addEventListener('click', function() {
-            AsmodeeNet.signOut({
+            AsmodeeNet.signOut(); /*{
                 success: unsigned // this callback will be never used in page/touch mode
-            });
+            });*/
         });
         findMe('my_identity').addEventListener('click', function() {
             AsmodeeNet.identity({
@@ -88,7 +88,7 @@
             redirect_uri: 'http://localhost:8085/', // 'https://login.salesforce.com/services/authcallback/00D2000000099GxEAI/asmoclub', // 'https://community-dev.fantasyflightgames.com/oauth/callback',
             cancel_uri: 'http://localhost:8085/?cancel=1', // only used by the touch mode on IS
             // Example of optional parameters
-            base_is_host: 'https://is.dev.asmodee.net/', // 'https://account.asmodee.net/', // 'https://account.asmodee.net', //'https://is.dev.internal.asmodee.net:8443/', //'https://account.asmodee.net', // 'https://is.dev.internal.asmodee.net:8443/', // 'https://account.asmodee.net'
+            base_is_host: 'https://account.asmodee.net/', //'https://is.dev.asmodee.net/', //  'https://account.asmodee.net', //'https://is.dev.internal.asmodee.net:8443/', //'https://account.asmodee.net', // 'https://is.dev.internal.asmodee.net:8443/', // 'https://account.asmodee.net'
             scope: 'openid+public+profile+email',
             response_type: 'code id_token token',
             display: 'page', // display type: 'page' 'touch' 'popup' 'iframe' (page by default)

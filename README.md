@@ -5,6 +5,10 @@ An OpenID Connect library that connects to the **Asmodee.net** Identity Server (
 
 [![CircleCI](https://circleci.com/gh/daysofwonder/asmodeenet_sso_js/tree/master.svg?style=svg)](https://circleci.com/gh/daysofwonder/asmodeenet_sso_js/tree/master) [![Maintainability](https://api.codeclimate.com/v1/badges/59c53cfaa1fae802c219/maintainability)](https://codeclimate.com/github/daysofwonder/asmodeenet_sso_js/maintainability) [![Test Coverage](https://api.codeclimate.com/v1/badges/59c53cfaa1fae802c219/test_coverage)](https://codeclimate.com/github/daysofwonder/asmodeenet_sso_js/test_coverage)
 
+Register to release notifications :
+<iframe src="https://cdn.forms-content.sg-form.com/a54ab18f-fba0-11ec-822b-428fbc716531"/>
+
+
 **Table of contents**
 
 * [Description](#description)

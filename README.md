@@ -7,7 +7,9 @@ An OpenID Connect library that connects to the **Asmodee.net** Identity Server (
 
 Register to release notifications :
 
-<iframe src="https://cdn.forms-content.sg-form.com/a54ab18f-fba0-11ec-822b-428fbc716531"></iframe>
+<iframe src="https://cdn.forms-content.sg-form.com/a54ab18f-fba0-11ec-822b-428fbc716531">
+
+</iframe>
 
 
 

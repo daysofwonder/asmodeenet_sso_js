@@ -1,15 +1,27 @@
 name: E-Mail Release Notification
 on:
     release:
-        types: [released]
+        types: [prereleased, released]
 jobs:
-    notify:
+    notify-prerelease:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Notify about a new PRE-release
+              if: github.event.action == 'prereleased'
+              uses: daysofwonder/sendgrid-notification-action@v1.7
+              env:
+                  SENDGRID_API_TOKEN: ${{ secrets.SENDGRID_API_TOKEN }}
+                  SENDER_EMAIL_TEAM: ${{ secrets.SENDER_EMAIL_TEAM }}
+                  SENDER_EMAIL: ${{ secrets.SENDER_EMAIL }}
+                  DISTRIBUTION_LISTS: ${{ secrets.PRERELASE_LIST }}
+    notify-release:
         runs-on: ubuntu-latest
         steps:
             - name: Notify about a new release
-              uses: daysofwonder/sendgrid-notification-action@v1.6
+              if: github.event.action == 'released'
+              uses: daysofwonder/sendgrid-notification-action@v1.7
               env:
                   SENDGRID_API_TOKEN: ${{ secrets.SENDGRID_API_TOKEN }}
-                  RECIPIENTS_URL: ${{ secrets.RECIPIENTS_URL }}
+                  SENDER_EMAIL_TEAM: ${{ secrets.SENDER_EMAIL_TEAM }}
                   SENDER_EMAIL: ${{ secrets.SENDER_EMAIL }}
                   DISTRIBUTION_LISTS: ${{ secrets.DISTRIBUTION_LISTS }}

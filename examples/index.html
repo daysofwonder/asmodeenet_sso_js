@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
     <head>
         <script>document.write('<script src="an_sso.min.js?dev=' + Date.now() + '+' + Math.floor(Math.random() * 100) + '"\><\/script>');</script>
@@ -84,11 +85,11 @@
 
         AsmodeeNet.init({
             // Required parameters
-            client_id: 'openid-dow', // 'navbar-sso-dev', //'openid-dow', //'test_direct', //'openid-ffg', //'test_direct', //'openid-dow', 'asmoclub', // 'asnet-api', // 'xwing-web-portal'
-            redirect_uri: 'http://localhost:8085/', // 'https://login.salesforce.com/services/authcallback/00D2000000099GxEAI/asmoclub', // 'https://community-dev.fantasyflightgames.com/oauth/callback',
-            cancel_uri: 'http://localhost:8085/?cancel=1', // only used by the touch mode on IS
+            client_id: 'optool-front-dev', // 'navbar-sso-dev', //'test_direct', // 'asnet-api', // 'xwing-web-portal'
+            redirect_uri: 'http://localhost:3000',
+            cancel_uri: 'http://localhost:3000/?cancel=1', // only used by the touch mode on IS
             // Example of optional parameters
-            base_is_host: 'https://account.asmodee.net/', //'https://is.dev.asmodee.net/', //  'https://account.asmodee.net', //'https://is.dev.internal.asmodee.net:8443/', //'https://account.asmodee.net', // 'https://is.dev.internal.asmodee.net:8443/', // 'https://account.asmodee.net'
+            base_is_host: 'https://account.asmodee.net/', //'https://is.dev.asmodee.net/',
             scope: 'openid+public+profile+email',
             response_type: 'code id_token token',
             display: 'page', // display type: 'page' 'touch' 'popup' 'iframe' (page by default)
@@ -99,7 +100,7 @@
                 // nofooter: true,
                 // leglnk: false
             },
-            logout_redirect_uri: 'http://localhost:8085/?logout_redirect=1',
+            logout_redirect_uri: 'http://localhost:3000/?logout_redirect=1',
             // if next callback for RP logout openid's feature is not provided, the AsmodeeNet SSO lib, redirect the user to the root ('/') of the current host
             callback_post_logout_redirect: function() {
                 alert('Disconnected');

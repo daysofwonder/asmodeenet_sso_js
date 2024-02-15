@@ -10,23 +10,29 @@ Register to release notifications : [*Click here*](https://cdn.forms-content.sg-
 
 **Table of contents**
 
-* [Description](#description)
-    * [Cryptography and Tokens](#cryptography-and-tokens)
-    * [OpenID Connect](#openid-connect)
-    * [Initialization](#initialization)
-    * [Discover](#discover)
-    * [Sign-in](#sign-in)
-    * [trackCb](#trackcb)
-    * [Sign-out](#sign-out)
-        * [RP Logout](#rp-logout)
-        * [Simple Logout](#simple-logout)
-    * [Restore](#restore-tokens)
-    * [Other methods](#other-methods)
-    * [Backend dialog](#backend-dialog)
-* [Examples](#example)
-* [Tests](#tests)
-    * [Unit tests](#unit-tests)
-    * [Acceptance tests](#acceptance-tests)
+- [AsmodeeNet-SSO JS](#asmodeenet-sso-js)
+- [Installation](#installation)
+- [Description](#description)
+  - [Cryptography and Tokens](#cryptography-and-tokens)
+  - [OpenID Connect](#openid-connect)
+  - [Various user workflow and display modes](#various-user-workflow-and-display-modes)
+  - [Initialization](#initialization)
+  - [Discover](#discover)
+  - [Sign-in](#sign-in)
+  - [Sign-Up](#sign-up)
+  - [Reset my Password](#reset-my-password)
+  - [trackCb](#trackcb)
+  - [Sign-out](#sign-out)
+    - [RP Logout](#rp-logout)
+    - [Simple Logout](#simple-logout)
+  - [Restore tokens](#restore-tokens)
+  - [Other methods](#other-methods)
+  - [Backend dialog](#backend-dialog)
+- [Example](#example)
+- [Tests](#tests)
+  - [Unit tests](#unit-tests)
+  - [Acceptance tests](#acceptance-tests)
+- [TODO (not ordered, not closed)](#todo-not-ordered-not-closed)
 
 ## Installation
 
@@ -115,8 +121,9 @@ Parameters:
 * **callback_post_logout_redirect** *callback* Optional. This callback function will be called after a logout.
 * **response_type** *string* Optional, default is `'token id_token'`. Values can be: `code`, `token`, `id_token` or any space-separated combination. We strongly recommend that you use the default combination value.
 * **scope** *string* Optional, default is `'openid+profile'`. Value could be a list of `+` separated words: `openid`, `profile`, `email`, `address`, `public`, and `private`. The `openid` scope is mandatory if you use the `id_token` response_type. Use the `private` scope if you intend to access the user's private data using the REST API later on.
-* **base_is_host** *string* Optional, URL of the AN Identity Server. By default, it's https://account.asmodee.net but you can set it to https://account.staging.asmodee.net if you perform tests on our staging server. We still recommend that you test on our production server: it does not cost anything to create a test account at https://account.asmodee.net and you will be sure that what you do actually works in production.
+* **base_is_host** *string* Optional, URL of the AN Identity Server. By default, it's https://account.asmodee.net but you can set it to https://account-staging.asmodee.net if you perform tests on our staging server. We still recommend that you test on our production server: it does not cost anything to create a test account at https://account.asmodee.net and you will be sure that what you do actually works in production.
 * **base_is_path** *string* Optional. May be used in the future to use another version of the IS OAuth API. Default is `/main/v2/oauth`.
+* **base_url** *string* Optional. Base path for API URL, could be updated for staging (https://api-staging.asmodee.net/main/v1). Default is `https://api.asmodee.net/main/v1`.
 * **display** *string* Optional. Defines the way the user workflow should be handled. Possible values are `popup`, `touch`, `iframe`and `page`:
     * `popup` (default) opens a popup window which dimensions can be set up with the `signIn()` method (see below);
     * `iframe` keeps the user in the same window or tab and provides an iframe to integrate in your client side page, to display the Identity Server account page. The iframe itself will be initialized only after the call to the `signIn()` method, so you can chain the call directly after the call to the `discover()` method;

@@ -147,7 +147,7 @@ var KJUR,utf8tob64u,b64utoutf8;function Base64x(){}function stoBA(t){for(var e=n
   };
 
   AsmodeeNet = (function() {
-    var _oauthWindow, acceptableLocales, access_hash, access_token, authorized, baseLinkAction, catHashCheck, checkDisplayOptions, checkErrors, checkLogoutRedirect, checkTokens, checkUrlOptions, clearCookies, clearItems, code, defaultErrorCallback, defaultSuccessCallback, default_settings, deleteCookie, disconnect, discovery_obj, getCookie, getCryptoValue, getItem, getLocation, getPopup, iFrame, id_token, identity_obj, jwks, localStorageIsOk, nonce, oauth, oauthiframe, oauthpopup, popupIframeWindowName, removeItem, setCookie, setItem, settings, signinCallback, state, try_refresh_name;
+    var _oauthWindow, acceptableLocales, access_hash, access_token, authorized, baseLinkAction, catHashCheck, checkDisplayOptions, checkErrors, checkLogoutRedirect, checkTokens, checkUrlOptions, clearCookies, clearItems, code, defaultErrorCallback, defaultSuccessCallback, default_settings, deleteCookie, disconnect, discovery_obj, getCookie, getCryptoValue, getItem, getLocation, getPopup, iFrame, id_token, identityEvent, identity_obj, jwks, localStorageIsOk, nonce, notConnectedEvent, oauth, oauthiframe, oauthpopup, popupIframeWindowName, removeItem, sendEvent, setCookie, setItem, settings, signinCallback, state, try_refresh_name;
     defaultSuccessCallback = function() {
       return console.log(arguments);
     };
@@ -234,6 +234,32 @@ var KJUR,utf8tob64u,b64utoutf8;function Base64x(){}function stoBA(t){for(var e=n
       } else {
         return window.location.assign(options.path);
       }
+    };
+    sendEvent = function(type, detailEvent) {
+      var event;
+      event = null;
+      if (CustomEvent) {
+        event = new CustomEvent(type, {
+          bubbles: true,
+          detail: detailEvent
+        });
+      } else if (document.createEvent) {
+        event = document.createEvent('Event');
+        event.initEvent(type, true, true);
+        event.eventName = type;
+        if (detailEvent) {
+          event.detail = detailEvent;
+        }
+      } else {
+        return;
+      }
+      return document.dispatchEvent(event);
+    };
+    identityEvent = function(iobj) {
+      return sendEvent('AsmodeeNetIdentity', iobj);
+    };
+    notConnectedEvent = function() {
+      return sendEvent('AsmodeeNetNotConnected', null);
     };
     getPopup = function(options) {
       if (options.width == null) {
@@ -509,8 +535,9 @@ var KJUR,utf8tob64u,b64utoutf8;function Base64x(){}function stoBA(t){for(var e=n
       item = getItem('gd_connect_hash');
       if (!item) {
         if (settings.display === 'popup') {
-          return settings.callback_signin_error("popup closed without signin");
+          settings.callback_signin_error("popup closed without signin");
         }
+        return notConnectedEvent();
       } else {
         removeItem('gd_connect_hash');
         hash = {};
@@ -539,9 +566,11 @@ var KJUR,utf8tob64u,b64utoutf8;function Base64x(){}function stoBA(t){for(var e=n
                     error: settings.callback_signin_error
                   });
                 } else {
+                  notConnectedEvent();
                   return settings.callback_signin_error('Tokens validation issue : ', checkErrors);
                 }
               } else {
+                notConnectedEvent();
                 return settings.callback_signin_error('Tokens validation issue : ', 'Invalid state');
               }
             }
@@ -556,7 +585,8 @@ var KJUR,utf8tob64u,b64utoutf8;function Base64x(){}function stoBA(t){for(var e=n
           state = getItem('state');
           removeItem('state');
           if (hash.state && hash.state === state) {
-            return settings.callback_signin_error(parseInt(hash.status), hash.error, hash.error_description.replace(/\+/g, ' '));
+            settings.callback_signin_error(parseInt(hash.status), hash.error, hash.error_description.replace(/\+/g, ' '));
+            return notConnectedEvent();
           }
         }
       }
@@ -893,6 +923,7 @@ var KJUR,utf8tob64u,b64utoutf8;function Base64x(){}function stoBA(t){for(var e=n
           if (settings.display === 'iframe') {
             iFrame.element.src = '';
           }
+          identityEvent(identity_obj);
           if (options && options.success) {
             return options.success(identity_obj, window.AsmodeeNet.getCode());
           }
@@ -904,6 +935,7 @@ var KJUR,utf8tob64u,b64utoutf8;function Base64x(){}function stoBA(t){for(var e=n
               if (settings.display === 'iframe') {
                 iFrame.element.src = '';
               }
+              identityEvent(identity_obj);
               if (options && options.success) {
                 return options.success(identity_obj, window.AsmodeeNet.getCode());
               }
@@ -963,6 +995,7 @@ var KJUR,utf8tob64u,b64utoutf8;function Base64x(){}function stoBA(t){for(var e=n
                   success: cbdone
                 });
               } else {
+                notConnectedEvent();
                 if (cbdone) {
                   cbdone(false, checkErrors);
                 } else {

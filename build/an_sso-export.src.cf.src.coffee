@@ -170,6 +170,26 @@ AsmodeeNet = (->
         else
             window.location.assign(options.path)
 
+    sendEvent = (type, detailEvent) ->
+        event = null
+        if CustomEvent
+            event = new CustomEvent(type, {bubbles: true, detail: detailEvent})
+        else if document.createEvent
+            event = document.createEvent('Event')
+            event.initEvent(type, true, true)
+            event.eventName = type
+            if detailEvent
+                event.detail = detailEvent
+        else
+            return
+        document.dispatchEvent(event)
+
+    identityEvent = (iobj) ->
+        sendEvent('AsmodeeNetIdentity', iobj)
+
+    notConnectedEvent = () ->
+        sendEvent('AsmodeeNetNotConnected', null)
+
     getPopup = (options) ->
         options.width ?= 475
         options.height ?= 500
@@ -351,6 +371,7 @@ AsmodeeNet = (->
         item = getItem('gd_connect_hash')
         if !item
             settings.callback_signin_error("popup closed without signin") if settings.display == 'popup'
+            notConnectedEvent()
         else
             removeItem('gd_connect_hash')
             hash = {}
@@ -374,8 +395,10 @@ AsmodeeNet = (->
                                 authorized(hash)
                                 gameThis.identity {success: settings.callback_signin_success, error: settings.callback_signin_error}
                             else
+                                notConnectedEvent()
                                 settings.callback_signin_error('Tokens validation issue : ', checkErrors)
                         else
+                            notConnectedEvent()
                             settings.callback_signin_error('Tokens validation issue : ', 'Invalid state')
 
             else if item.search(/^\?/) == 0
@@ -387,6 +410,7 @@ AsmodeeNet = (->
                 removeItem('state')
                 if hash.state && hash.state == state
                     settings.callback_signin_error(parseInt(hash.status), hash.error, hash.error_description.replace(/\+/g, ' '))
+                    notConnectedEvent()
 
     checkDisplayOptions = () ->
         tmpopts = null
@@ -588,6 +612,7 @@ AsmodeeNet = (->
 
         if this.isConnected() && identity_obj
             iFrame.element.src = '' if settings.display == 'iframe'
+            identityEvent(identity_obj)
             options.success(identity_obj, window.AsmodeeNet.getCode()) if options && options.success
         else
             this.get '',
@@ -595,6 +620,7 @@ AsmodeeNet = (->
                 success: (data) ->
                     identity_obj = data
                     iFrame.element.src = '' if settings.display == 'iframe'
+                    identityEvent(identity_obj)
                     options.success(identity_obj, window.AsmodeeNet.getCode()) if options && options.success
                 error: (context, xhr, type, error) ->
                     if options && options.error
@@ -631,6 +657,7 @@ AsmodeeNet = (->
                         setItem(try_refresh_name, true)
                         clear_before_refresh() && window.AsmodeeNet.signIn({success: cbdone})
                     else
+                        notConnectedEvent()
                         if cbdone
                             cbdone(false, checkErrors)
                         else

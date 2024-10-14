@@ -5,6 +5,7 @@
     </head>
     <body>
         <script>AsmodeeNet.trackCb(false);</script>
+        <iframe id="iframe_asnet_ssoID" class="iframe_asnet_sso"  style="display:none;"></iframe>
         <button id="connect_bt">Sign In</button>
         <button id="signup_bt">Sign Up</button>
         <button id="reset_bt">Reset my password</button>
@@ -17,6 +18,12 @@
 
         </div>
         <script>
+        document.addEventListener('AsmodeeNetIdentity', function (ev) {
+            console.log('Identity Event', ev, ev.detail);
+        });
+        document.addEventListener('AsmodeeNetNotConnected', function (ev) {
+            console.log('NotConnected event', ev);
+        });
         function echo() {
             var output = '';
             for(var i = 0; i < arguments.length; i++) {
@@ -85,14 +92,15 @@
 
         AsmodeeNet.init({
             // Required parameters
-            client_id: 'optool-front-dev', // 'navbar-sso-dev', //'test_direct', // 'asnet-api', // 'xwing-web-portal'
-            redirect_uri: 'http://localhost:3000',
-            cancel_uri: 'http://localhost:3000/?cancel=1', // only used by the touch mode on IS
+            client_id: 'openid-dow',  //'hobby-next-dev', // 'sed2-dev', //'navbar-sso-dev', ////'test_direct', //'openid-ffg', //'test_direct', //'openid-dow', 'asmoclub', // 'asnet-api', // 'xwing-web-portal'
+            redirect_uri: 'http://localhost:8080/', // 'https://login.salesforce.com/services/authcallback/00D2000000099GxEAI/asmoclub', // 'https://community-dev.fantasyflightgames.com/oauth/callback',
+            cancel_uri: 'http://localhost:8080/?cancel=1', // only used by the touch mode on IS
             // Example of optional parameters
-            base_is_host: 'https://account.asmodee.net/', //'https://is.dev.asmodee.net/',
-            scope: 'openid+public+profile+email',
+            base_is_host:  'https://account-staging.asmodee.net/', //'https://is.dev.internal.asmodee.net:8443/', //'https://account.asmodee.net', // 'https://is.dev.internal.asmodee.net:8443/', // 'https://account.asmodee.net'
+            scope: 'openid+public+profile+email+address+private',
             response_type: 'code id_token token',
             display: 'page', // display type: 'page' 'touch' 'popup' 'iframe' (page by default)
+            iframe_css: 'iframe_asnet_sso',
 
             display_options: {
                 // noheader: true,
@@ -100,7 +108,7 @@
                 // nofooter: true,
                 // leglnk: false
             },
-            logout_redirect_uri: 'http://localhost:3000/?logout_redirect=1',
+            logout_redirect_uri: 'http://localhost:8080/?logout_redirect=1',
             // if next callback for RP logout openid's feature is not provided, the AsmodeeNet SSO lib, redirect the user to the root ('/') of the current host
             callback_post_logout_redirect: function() {
                 alert('Disconnected');

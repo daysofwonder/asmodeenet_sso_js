@@ -27,6 +27,7 @@ Register to release notifications : [*Click here*](https://cdn.forms-content.sg-
     - [Simple Logout](#simple-logout)
   - [Restore tokens](#restore-tokens)
   - [Other methods](#other-methods)
+  - [AsmoConnect Events](#asmoconnect-events)
   - [Backend dialog](#backend-dialog)
 - [Example](#example)
 - [Tests](#tests)
@@ -372,7 +373,7 @@ Parameters of the method `restoreTokens`:
 * **saved_access_token**: The **access token** as string, you stocked in your side (as cookie or local storage)
 * **saved_id_token**: The **id token** as string, you stocked in your side (as cookie or local storage)
 * **call_identity**: *optional* you can pass a third parameter, boolean, true by default. If it's true, after it validates the tokens, call the identity() method with the callback configured in the init method for signin callback (callback_signin_success and callback_signin_error)
-* **cbdone**: *optional* A callback if resotre is a success. If a callback is passed, it will be call with one parameter (a boolean worth true). In default situation, `restoreTokens` return itself true
+* **cbdone**: *optional* A callback if restoration is a success or a failure. The first parameter is a boolean (true if restore is OK, false if not). If the restoration is a failure, you will find an array of error as 2nd parameter. If you don't give a callback, the default situation, `restoreTokens` return itself true
 * **clear_before_refresh**: *optional* A callback for refresh tokens. If you have stocked the token as a cookie or in local storage in your code, and call `restoreTokens` with this tokens, and if tokens are expired, the `restoreTokens` method could try to refresh them (only once). To do it, it call first this *clear_before_refresh* callback, and you **must** remove your cookie/local storage for this tokens and return a boolean, if it's *true*, the `signIn` will be call to try to refresh the tokens, if it's false *nothing* is done.
 * **saved_identity**: *optional* If you saved the identity, instead of call identity on IS Server with the identity() method, fill the identity object with object value given.
 
@@ -390,6 +391,24 @@ The object `AsmodeeNet` provides the following additional methods:
 * **getScopes**: get the OpenID Connect scopes returned by the Identity Server for the current user. It's an array of string.
 * **getExpires**: get The expires date time of the current token, in unix timestamp format.
 * **getExpiresDate**: get The expires date time of the current token, Javascript Date object.
+
+### AsmoConnect Events
+
+The AsmoConnect library could send events:
+
+* **AsmodeeNetIdentity**: This event is sent when the user is connected and the identity is retreived. You can access to the identity by the field `detail` of the event
+* **AsmodeeNetNotConnected**: This event is sent when the user is not connected.
+
+Usage examples:
+
+```javascript
+document.addEventListener('AsmodeeNetIdentity', function (ev) {
+    console.log('Identity Event', ev.detail);
+});
+document.addEventListener('AsmodeeNetNotConnected', function () {
+    console.log('NotConnected event'v);
+});
+```
 
 ### Backend dialog
 

@@ -209,6 +209,7 @@ After you are done with initialization and discovery, you can sign-in with the `
  * `width` of the popup or of the iframe. Optional, default: 475px. Only makes sense for popup and iframe modes.
  * `height` of the popup or of the iframe. Optional, default: 500px. Only makes sense for popup and iframe modes.
  * `locale` Redirect to this specific locale on the Asmodee.net server. (Authorized locales are `de`, `en`, `es`, `fr` and `it`. The default if you give an other locale is `en`)
+ * `extraparam` Add extra parameter, not linked to OpenIDConnect to be send to the AsmoConnect server for special usage
 
  All these parameters are optional.
 
@@ -243,6 +244,7 @@ After you are done with initialization and discovery, you can sign-up with the `
  * `error` callback. Optional, default: `callback_signin_error`, see above.
  * `width` of the popup or of the iframe. Optional, default: 475px. Only makes sense for popup and iframe modes.
  * `height` of the popup or of the iframe. Optional, default: 500px. Only makes sense for popup and iframe modes.
+ * `extraparam` Add extra parameter, not linked to OpenIDConnect to be send to the AsmoConnect server for special usage
 
  All these configuration entries for this second paramters are optional.
 

@@ -523,6 +523,9 @@ var KJUR,utf8tob64u,b64utoutf8;function Base64x(){}function stoBA(t){for(var e=n
       if (settings.cancel_uri) {
         options.path += '&cancel_uri=' + encodeURI(settings.cancel_uri);
       }
+      if (options.extraparam) {
+        options.path += '&extraparam=' + encodeURI(options.extraparam);
+      }
       gameThis = that;
       options.callback = function() {
         removeItem(try_refresh_name);

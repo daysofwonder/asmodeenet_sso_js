@@ -359,6 +359,7 @@ AsmodeeNet = (->
             for k,v of settings.display_options
                 options.path += '&display_opts['+k+']='+ if v then '1' else '0'
         options.path += '&cancel_uri=' + encodeURI(settings.cancel_uri) if settings.cancel_uri
+        options.path += '&extraparam=' + encodeURI(options.extraparam) if options.extraparam
 
         gameThis = that
         options.callback = () ->

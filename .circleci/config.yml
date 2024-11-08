@@ -4,14 +4,14 @@ version: 2.1
 
 orbs:
 #  aws-ecr: circleci/aws-ecr@7.2.0 # https://circleci.com/developer/orbs/orb/circleci/aws-ecr
-  browser-tools: circleci/browser-tools@1.1.0 # https://circleci.com/developer/orbs/orb/circleci/browser-tools
+  browser-tools: circleci/browser-tools@1.4.8 # https://circleci.com/developer/orbs/orb/circleci/browser-tools
 
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/2.0/configuration-reference/#jobs
 jobs:
   test-unit:
     docker:
-      - image: cimg/node:14.16.1-browsers
+      - image: cimg/node:18.11.0-browsers
       # docker_layer_caching: true # DISABLED BECAUSE USE 200 credits for each job using it. So the job should by itself have a duration > 20minutes without the DLC to have an economy of credits... (you have an economy of time, but if it's not suffisent, the cost of credits is not profitable)
     # parallelism: 2
     steps:
@@ -43,7 +43,7 @@ jobs:
 
   test-coverage:
     docker:
-      - image: cimg/node:14.16.1
+      - image: cimg/node:18.11.0
       # docker_layer_caching: true # DISABLED BECAUSE USE 200 credits for each job using it. So the job should by itself have a duration > 20minutes without the DLC to have an economy of credits... (you have an economy of time, but if it's not suffisent, the cost of credits is not profitable)
     # parallelism: 2
     steps:
@@ -76,7 +76,7 @@ jobs:
 
   test-accept:
     machine:
-      image: cimg/node:14.16.1
+      image: cimg/node:18.11.0
       # docker_layer_caching: true # DISABLED BECAUSE USE 200 credits for each job using it. So the job should by itself have a duration > 20minutes without the DLC to have an economy of credits... (you have an economy of time, but if it's not suffisent, the cost of credits is not profitable)
     docker:
     steps:
@@ -106,7 +106,7 @@ jobs:
 
   test-validation:
     docker:
-      - image: cimg/node:14.16.1
+      - image: cimg/node:18.11.0
       # docker_layer_caching: true # DISABLED BECAUSE USE 200 credits for each job using it. So the job should by itself have a duration > 20minutes without the DLC to have an economy of credits... (you have an economy of time, but if it's not suffisent, the cost of credits is not profitable)
     # parallelism: 2
     steps:

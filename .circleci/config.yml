@@ -31,6 +31,7 @@ jobs:
       - run:
           name: "launch test unit"
           command: |
+            export OPENSSL_CONF=/dev/null
             ./node_modules/.bin/grunt test:unit
 
       - store_test_results:
@@ -63,6 +64,7 @@ jobs:
       - run:
           name: "launch test coverage"
           command: |
+            export OPENSSL_CONF=/dev/null
             ./node_modules/.bin/grunt test:coverage
 
       - store_artifacts:
@@ -94,6 +96,7 @@ jobs:
       - run:
           name: "build and launch acceptance tests" # TODO put it in orb
           command: |
+            export OPENSSL_CONF=/dev/null
             ./node_modules/.bin/grunt test:e2e
 
       - store_test_results:
@@ -122,6 +125,7 @@ jobs:
       - run:
           name: "Launch lint"
           command: |
+            export OPENSSL_CONF=/dev/null
             ./node_modules/.bin/grunt lint
 
       - save_cache: # special step to save the dependency cache with the `composer.lock` cache key template

@@ -10,6 +10,7 @@ module.exports = {
         browser: true,
         jasmine: true
     },
+    files: ["**/*.js", "**/*.html"],
     // https://github.com/standard/standard/blob/master/docs/RULES-en.md
     extends: 'standard',
     // add your custom rules here

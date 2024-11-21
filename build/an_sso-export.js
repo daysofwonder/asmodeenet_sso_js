@@ -172,7 +172,8 @@ var KJUR,utf8tob64u,b64utoutf8;function Base64x(){}function stoBA(t){for(var e=n
       display_options: {},
       iframe_css: null, // only used un 'iframe' display mode
       callback_signin_success: defaultSuccessCallback, // the only one solution for callback success in 'page' or 'touch' display mode
-      callback_signin_error: defaultErrorCallback // the only one solution for callback error in 'page' or 'touch' display mode
+      callback_signin_error: defaultErrorCallback, // the only one solution for callback error in 'page' or 'touch' display mode
+      extraparam: null
     };
     settings = {};
     state = nonce = null;
@@ -525,6 +526,9 @@ var KJUR,utf8tob64u,b64utoutf8;function Base64x(){}function stoBA(t){for(var e=n
       }
       if (options.extraparam) {
         options.path += '&extraparam=' + encodeURI(options.extraparam);
+      }
+      if (!options.extraparam && settings.extraparam) {
+        options.path += '&extraparam=' + encodeURI(settings.extraparam);
       }
       gameThis = that;
       options.callback = function() {

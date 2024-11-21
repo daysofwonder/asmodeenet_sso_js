@@ -120,6 +120,7 @@ AsmodeeNet = (->
         iframe_css: null # only used un 'iframe' display mode
         callback_signin_success: defaultSuccessCallback # the only one solution for callback success in 'page' or 'touch' display mode
         callback_signin_error: defaultErrorCallback # the only one solution for callback error in 'page' or 'touch' display mode
+        extraparam: null
 
     settings = {}
     state = nonce = null
@@ -360,6 +361,7 @@ AsmodeeNet = (->
                 options.path += '&display_opts['+k+']='+ if v then '1' else '0'
         options.path += '&cancel_uri=' + encodeURI(settings.cancel_uri) if settings.cancel_uri
         options.path += '&extraparam=' + encodeURI(options.extraparam) if options.extraparam
+        options.path += '&extraparam=' + encodeURI(settings.extraparam) if !options.extraparam && settings.extraparam
 
         gameThis = that
         options.callback = () ->

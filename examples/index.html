@@ -55,7 +55,7 @@
                 error: function() {
                     echo("SIGNIN ERROR", arguments);
                 },
-                extraparam: 'loyalty'
+                // extraparam: 'loyalty'
             });
         });
         findMe('signup_bt').addEventListener('click', function() {
@@ -66,7 +66,7 @@
                 error: function() {
                     echo("SIGNIN ERROR", arguments);
                 },
-                extraparam: 'loyalty'
+                // extraparam: 'loyalty'
             });
         });
         findMe('reset_bt').addEventListener('click', function() {
@@ -94,15 +94,16 @@
 
         AsmodeeNet.init({
             // Required parameters
-            client_id: 'hobby-next-dev', // 'openid-dow',  //'sed2-dev', //'navbar-sso-dev', ////'test_direct', //'openid-ffg', //'test_direct', //'openid-dow', 'asmoclub', // 'asnet-api', // 'xwing-web-portal'
+            client_id: 'optool-front-dev', //'hobby-next-dev', // 'openid-dow',  //'sed2-dev', //'navbar-sso-dev', ////'test_direct', //'openid-ffg', //'test_direct', //'openid-dow', 'asmoclub', // 'asnet-api', // 'xwing-web-portal'
             redirect_uri: 'http://localhost:8080/', // 'https://login.salesforce.com/services/authcallback/00D2000000099GxEAI/asmoclub', // 'https://community-dev.fantasyflightgames.com/oauth/callback',
             cancel_uri: 'http://localhost:8080/?cancel=1', // only used by the touch mode on IS
             // Example of optional parameters
-            base_is_host:  'https://is.dev.internal.asmodee.net/', //'https://is.dev.internal.asmodee.net:8443/', //'https://account.asmodee.net', // 'https://is.dev.internal.asmodee.net:8443/', // 'https://account.asmodee.net'
+            base_is_host:  'https://is.dev.asmodee.net/', //'https://is.dev.internal.asmodee.net:8443/', //'https://account.asmodee.net', // 'https://is.dev.internal.asmodee.net:8443/', // 'https://account.asmodee.net'
             scope: 'openid+public+profile+email+address+private',
             response_type: 'code id_token token',
             display: 'page', // display type: 'page' 'touch' 'popup' 'iframe' (page by default)
             iframe_css: 'iframe_asnet_sso',
+            extraparam: 'loyalty',
 
             display_options: {
                 // noheader: true,

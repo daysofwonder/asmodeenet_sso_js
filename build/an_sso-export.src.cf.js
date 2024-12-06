@@ -464,6 +464,7 @@
         }
         options.path += '&redirect_uri=' + encodeURI(ruri);
       }
+      console.log(settings);
       if (settings.response_type.search('id_token') >= 0) {
         options.path += '&nonce=' + nonce;
       }
@@ -726,6 +727,22 @@
       },
       getIdentity: function() {
         return identity_obj;
+      },
+      updateConfigs: function(newConf) {
+        if (newConf == null) {
+          newConf = {};
+        }
+        if (newConf.extraparam !== void 0) {
+          if (newConf.extraparam) {
+            settings.extraparam = newConf.extraparam;
+          } else {
+            delete settings.extraparam;
+          }
+        }
+        if (newConf.redirect_uri) {
+          settings.redirect_uri = newConf.redirect_uri;
+        }
+        return void 0;
       },
       getScopes: function() {
         if (!this.isConnected()) {

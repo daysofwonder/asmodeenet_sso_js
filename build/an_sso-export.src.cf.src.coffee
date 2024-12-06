@@ -355,6 +355,7 @@ AsmodeeNet = (->
             ruri = settings.redirect_uri
             ruri += options.redirect_extra if options.redirect_extra
             options.path += '&redirect_uri=' + encodeURI(ruri)
+        console.log(settings)
         options.path += '&nonce='+nonce if settings.response_type.search('id_token') >= 0
         if Object.keys(settings.display_options).length > 0
             for k,v of settings.display_options
@@ -511,6 +512,16 @@ AsmodeeNet = (->
     getClientId: () -> settings.client_id
     getSettings: () -> window.AsmodeeNet.extend({}, settings)
     getIdentity: () -> identity_obj
+
+    updateConfigs: (newConf) ->
+        newConf ?= {}
+        if newConf.extraparam != undefined
+            if newConf.extraparam
+                settings.extraparam = newConf.extraparam
+            else
+                delete settings.extraparam
+        settings.redirect_uri = newConf.redirect_uri if newConf.redirect_uri
+        undefined
 
     getScopes: () ->
         return null if !this.isConnected()
